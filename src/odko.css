@@ -1,0 +1,64 @@
+/* sans-serif font */
+
+@font-face {
+	font-family: Roboto;
+	src: url(font/Roboto-Regular.ttf);
+}
+
+@font-face {
+	font-family: Roboto;
+	src: url(font/Roboto-Italic.ttf);
+	font-style: italic;
+}
+
+/* monospace font */
+
+@font-face {
+	font-family: "Courier Prime";
+	src: url(font/CourierPrime-Regular.ttf);
+}
+
+@font-face {
+	font-family: "Courier Prime";
+	src: url(font/CourierPrime-Bold.ttf);
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Courier Prime";
+	src: url(font/CourierPrime-Italic.ttf);
+	font-style: italic;
+}
+
+body {
+	margin: 0;
+	background: #000000;
+	color: #dddddd;
+	font-family: Roboto, sans-serif;
+	-webkit-user-select: none;
+}
+
+.titlebar {
+	padding: 1em;
+	display: flex;
+	align-items: center;
+}
+
+.name {
+	flex: 1;
+	-webkit-app-region: drag;
+}
+
+.close {
+	width: 0.5em;
+	height: 0.5em;
+	margin: 0 0.3em;
+	border: 1px solid white;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: background 0.2s ease-in-out;
+}
+
+.close:hover {
+	background: white;
+}

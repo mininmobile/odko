@@ -11,7 +11,7 @@ function createWindow() {
 		minHeight: 400,
 		resizable: true,
 		title: "odko",
-		backgroundColor: "#212121",
+		backgroundColor: "#000000",
 		frame: false,
 		webPreferences: {
 			nodeIntegration: true,
