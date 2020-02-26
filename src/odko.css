@@ -30,6 +30,8 @@
 	font-style: italic;
 }
 
+/* wrappers */
+
 body {
 	margin: 0;
 	background: #000000;
@@ -37,6 +39,15 @@ body {
 	font-family: Roboto, sans-serif;
 	-webkit-user-select: none;
 }
+
+.wrapper {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+/* titlebar */
 
 .titlebar {
 	padding: 1em;
@@ -61,4 +72,46 @@ body {
 
 .close:hover {
 	background: white;
+}
+
+/* toolbar */
+
+.toolbar {
+	margin: 1em 0;
+	display: flex;
+	justify-content: space-between;
+}
+
+.toolbar .left,
+.toolbar .right {
+	display: flex;
+}
+
+.toolbar .button {
+	width:  2em;
+	height: 2em;
+	background-size: contain;
+	background-position: center;
+	cursor: pointer;
+	transition: opacity 0.2s;
+}
+
+.toolbar .left .button { margin-left: 1em; }
+.toolbar .right .button { margin-right: 1em; }
+
+.toolbar .button#add     { background-image: url("img/add.svg"); }
+.toolbar .button#remove  { background-image: url("img/remove.svg"); }
+.toolbar .button#edit    { background-image: url("img/edit.svg"); }
+.toolbar .button#connect { background-image: url("img/connect.svg"); }
+.toolbar .button#run     { background-image: url("img/run.svg"); }
+.toolbar .button#import  { background-image: url("img/import.svg"); }
+.toolbar .button#export  { background-image: url("img/export.svg"); }
+
+.toolbar:hover .button { opacity: 0.5; }
+.toolbar:hover .button:hover {opacity: 1;}
+
+/* content */
+
+.content {
+	flex: 1;
 }
