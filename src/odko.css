@@ -93,7 +93,7 @@ body {
 	background-size: contain;
 	background-position: center;
 	cursor: pointer;
-	transition: opacity 0.2s;
+	transition: opacity 0.1s;
 }
 
 .toolbar .left .button { margin-left: 1em; }
