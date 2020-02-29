@@ -1,3 +1,22 @@
+/* scrollbars */
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+	border-left: 1px solid white;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+	border-top: 1px solid white;
+}
+
 /* fonts */
 
 @font-face {
@@ -93,5 +112,52 @@ body {
 /* content */
 
 .content {
+	padding: 0 1em;
 	flex: 1;
+	display: grid;
+	grid-template-columns: repeat(9999, 10em);
+	overflow: auto;
+	font-family: "Courier Prime", monospace;
+}
+
+.column {
+	padding: 0 0.5em;
+	width: 10em;
+}
+
+.column.focus {
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.block, .column.new::before {
+	margin: 1rem 0.5rem;
+	padding: 1.5rem 1rem;
+	background: black;
+	border: 1px solid #999;
+	box-sizing: border-box;
+}
+
+.block.focus {
+	outline: 2px solid white;
+}
+
+.column.new {
+	padding: 0 0.5em;
+	width: 10em;
+	cursor: pointer;
+}
+
+.column.new::before {
+	content: "+";
+	padding: 1rem;
+	border: 1px dashed #999;
+	display: block;
+	font-family: "Roboto", sans-serif;
+	text-align: center;
+	font-size: 1.75em;
+}
+
+.column.new:hover::before {
+	border: 1px solid transparent;
+	outline: 2px dashed white;
 }
