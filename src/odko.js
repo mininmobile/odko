@@ -10,7 +10,7 @@ let ui = {
 
 // stores all of the data of the current project
 let project = {
-	columns: [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 2], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1]],
+	columns: [],
 }
 
 // updates dom of content container to reflect the
@@ -45,6 +45,11 @@ function update() {
 	let newColumn = document.createElement("div");
 		newColumn.classList.add("column", "new");
 		ui.content.appendChild(newColumn);
+
+	newColumn.addEventListener("click", () => {
+		project.columns.push([]);
+		update();
+	});
 }
 
 // assign actions
