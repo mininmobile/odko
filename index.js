@@ -6,7 +6,7 @@ let win;
 
 function createWindow() {
 	win = new BrowserWindow({
-		//icon: path.join(__dirname, "src/img/"),
+		icon: path.join(__dirname, "logo/odko128.png"),
 		minWidth: 400,
 		minHeight: 400,
 		resizable: true,
