@@ -16,9 +16,11 @@ let project = {
 // updates dom of content container to reflect the
 // project variable and allow it to be modified.
 function update() {
+	ui.fcol = ui.fblock = null;
+	ui.flock = false;
 	ui.content.innerHTML = "";
 
-	project.columns.length > 0 &&
+	if (project.columns.length > 0)
 		project.columns.forEach((column, x) => {
 			let c = document.createElement("div");
 				c.classList.add("column");
@@ -28,6 +30,22 @@ function update() {
 					ui.fcol = { col: x, elem: c }; c.classList.add("focus") }});
 			c.addEventListener("mouseleave", () => { if (!ui.flock) {
 					ui.fcol = null; c.classList.remove("focus") }});
+
+			c.addEventListener("mousedown", (e) => {
+				if (e.target == c) {
+					switch (e.button) {
+						case 0: {
+							project.columns[x].push("");
+							update();
+						} break;
+
+						case 2: {
+							project.columns = project.columns.filter((_c, i) => i != x);
+							update();
+						} break;
+					}
+				}
+			});
 
 			column.forEach((row, y) => {
 				let b = document.createElement("div");
@@ -39,6 +57,19 @@ function update() {
 					ui.fblock = { col: x, row: y, elem: b }; b.classList.add("focus") }});
 				b.addEventListener("mouseleave", () => { if (!ui.flock) {
 					ui.fblock = null; b.classList.remove("focus") }});
+
+				b.addEventListener("mousedown", (e) => {
+					switch (e.button) {
+						case 0: {
+							ui.flock = true;
+						} break;
+
+						case 2: {
+							project.columns[x] = project.columns[x].filter((_c, i) => i != y);
+							update();
+						} break;
+					}
+				});
 			});
 		});
 
@@ -52,11 +83,30 @@ function update() {
 	});
 }
 
-// assign actions
+// add keybindings
+document.addEventListener("keydown", (e) => {
+	switch (e.key) {
+		case "Escape": {
+			//ui.flock = false; // update performs this automatically, for now
+			update();
+		} break;
+	}
+});
 
+// add universal mouse actions
+document.addEventListener("mousedown", (e) => {
+	if (ui.fblock) {
+		if (e.target != ui.fblock.elem) {
+			e.preventDefault();
+			//ui.flock = false; // update performs this automatically, for now
+			update();
+		}
+	}
+});
+
+// assign actions
 document.getElementById("close").addEventListener("click", () =>
 	window.close());
 
 // initialize
-
 update();
