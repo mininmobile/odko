@@ -32,7 +32,7 @@ function update() {
 					ui.fcol = null; c.classList.remove("focus") }});
 
 			c.addEventListener("mousedown", (e) => {
-				if (e.target == c) {
+				if (!ui.fblock) {
 					switch (e.button) {
 						case 0: {
 							project.columns[x].push("");
@@ -89,6 +89,23 @@ document.addEventListener("keydown", (e) => {
 		case "Escape": {
 			//ui.flock = false; // update performs this automatically, for now
 			update();
+		} break;
+
+		case "Backspace": {
+			let f = ui.fblock;
+			if (f) {
+				let t = project.columns[f.col][f.row];
+				project.columns[f.col][f.row] = project.columns[f.col][f.row].substring(0, t.length - 1);
+				f.elem.innerText = project.columns[f.col][f.row];
+			}
+		} break;
+
+		default: {
+			let f = ui.fblock;
+			if (f && "qwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*(){}[]:;\"'<>,.?/|\\`~ ".includes(e.key.toLowerCase())) {
+				project.columns[f.col][f.row] += e.key;
+				f.elem.innerText = project.columns[f.col][f.row];
+			}
 		} break;
 	}
 });
