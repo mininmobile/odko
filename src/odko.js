@@ -9,6 +9,9 @@ let ui = {
 	// tool actions
 	connect: null, // connect tool active
 
+	// mouse position
+	mouse: { x: 0, y: 0 },
+
 	// ui
 	content: document.getElementById("content"),
 	lines: document.getElementById("lines"),
@@ -17,14 +20,22 @@ let ui = {
 // stores all of the data of the current project
 let project = {
 	columns: [],
+	connections: [],
 }
 
 // updates dom of content container to reflect the
 // project variable and allow it to be modified.
 function update() {
+	// deselect
 	ui.fcol = ui.fblock = null;
+	ui.connect = null;
+	// unlock
 	ui.flock = false;
+	// clear
 	ui.content.innerHTML = "";
+
+	// render connections
+	connect();
 
 	if (project.columns.length > 0)
 		project.columns.forEach((column, x) => {
@@ -93,7 +104,38 @@ function update() {
 // update affects if connect should only update
 // for the currently connecting line
 function connect(update = false) {
-	ui.lines.innerHTML = "";
+	if (!update) {
+		ui.lines.setAttribute("width", ui.content.clientWidth);
+		ui.lines.setAttribute("height", ui.content.clientHeight);
+		ui.lines.innerHTML = "";
+	}
+
+	if (ui.connect) {
+		let c;
+
+		let from = ui.connect.from.elem;
+
+		if (ui.lines.children[0]) {
+			c = ui.lines.children[0];
+		} else {
+			c = document.createElementNS("http://www.w3.org/2000/svg", "line");
+				c.setAttribute("x1", from.offsetLeft + from.clientWidth);
+				c.setAttribute("y1", from.offsetTop + from.clientHeight / 2);
+				ui.lines.appendChild(c);
+		}
+
+		if (ui.connect.to.elem) {
+			// code
+		} else {
+			c.setAttribute("x2", ui.connect.to.x);
+			c.setAttribute("y2", ui.connect.to.y);
+		}
+	}
+
+	if (!update)
+		project.connections.forEach((c) => {
+			// code
+		});
 }
 
 // add keybindings
@@ -120,10 +162,10 @@ document.addEventListener("keydown", (e) => {
 		case "c": if (e.altKey) {
 			ui.connect = {
 				from: ui.fblock,
-				to: null,
+				to: { x: ui.mouse.x, y: ui.mouse.y },
 			}
 
-
+			connect();
 			break;
 		}
 
@@ -146,6 +188,17 @@ document.addEventListener("mousedown", (e) => {
 			//ui.flock = false; // update performs this automatically, for now
 			update();
 		}
+	}
+});
+
+// mouse movement
+document.addEventListener("mousemove", (e) => {
+	ui.mouse.x = e.clientX;
+	ui.mouse.y = e.clientY;
+
+	if (ui.connect) {
+		ui.connect.to = { x: ui.mouse.x, y: ui.mouse.y };
+		connect(true);
 	}
 });
 
