@@ -78,30 +78,19 @@ body {
 .toolbar {
 	margin: 1em 0;
 	display: flex;
-	justify-content: space-between;
-}
-
-.toolbar .left,
-.toolbar .right {
-	display: flex;
+	justify-content: flex-end;
 }
 
 .toolbar .button {
 	width:  2em;
 	height: 2em;
+	margin-right: 1em;
 	background-size: contain;
 	background-position: center;
 	cursor: pointer;
 	transition: opacity 0.1s;
 }
 
-.toolbar .left .button { margin-left: 1em; }
-.toolbar .right .button { margin-right: 1em; }
-
-.toolbar .button#add     { background-image: url("img/add.svg"); }
-.toolbar .button#remove  { background-image: url("img/remove.svg"); }
-.toolbar .button#edit    { background-image: url("img/edit.svg"); }
-.toolbar .button#connect { background-image: url("img/connect.svg"); }
 .toolbar .button#run     { background-image: url("img/run.svg"); }
 .toolbar .button#import  { background-image: url("img/import.svg"); }
 .toolbar .button#export  { background-image: url("img/export.svg"); }
@@ -111,13 +100,31 @@ body {
 
 /* content */
 
-.content {
-	padding: 0 1em;
+.container {
 	flex: 1;
+	position: relative;
+	overflow: hidden;
+}
+
+.content {
+	width: 100%;
+	height: 100%;
+	padding: 0 1em;
 	display: grid;
 	grid-template-columns: repeat(9999, 10em);
 	overflow: auto;
+	position: absolute;
+	left: 0;
+	top: 0;
 	font-family: "Courier Prime", monospace;
+}
+
+.lines {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 
 .column {

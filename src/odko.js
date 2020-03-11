@@ -1,11 +1,17 @@
 // stores references to predefined dom elements
 // and focused elements
 let ui = {
+	// focus
 	fcol: null,   // focused column
 	fblock: null, // focused block
 	flock: false, // lock focus
 
+	// tool actions
+	connect: null, // connect tool active
+
+	// ui
 	content: document.getElementById("content"),
+	lines: document.getElementById("lines"),
 }
 
 // stores all of the data of the current project
@@ -83,14 +89,24 @@ function update() {
 	});
 }
 
+// lines renderer
+// update affects if connect should only update
+// for the currently connecting line
+function connect(update = false) {
+	ui.lines.innerHTML = "";
+}
+
 // add keybindings
 document.addEventListener("keydown", (e) => {
 	switch (e.key) {
+		// deselect
 		case "Escape": {
 			//ui.flock = false; // update performs this automatically, for now
+			ui.connect = null;
 			update();
 		} break;
 
+		// remove/remove char
 		case "Backspace": {
 			let f = ui.fblock;
 			if (f) {
@@ -100,6 +116,18 @@ document.addEventListener("keydown", (e) => {
 			}
 		} break;
 
+		// connect
+		case "c": if (e.altKey) {
+			ui.connect = {
+				from: ui.fblock,
+				to: null,
+			}
+
+
+			break;
+		}
+
+		// normal typing
 		default: {
 			let f = ui.fblock;
 			if (f && "qwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*(){}[]:;\"'<>,.?/|\\`~ ".includes(e.key.toLowerCase())) {
