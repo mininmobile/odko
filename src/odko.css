@@ -133,7 +133,7 @@ body {
 }
 
 .column.focus {
-	background: rgba(255, 255, 255, 0.05);
+	outline: 1px dotted #aaa;
 }
 
 .block, .column.new::before {

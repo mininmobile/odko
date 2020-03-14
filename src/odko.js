@@ -13,6 +13,7 @@ let ui = {
 	mouse: { x: 0, y: 0 },
 
 	// ui
+	titlebar: document.getElementById("titlebar"),
 	content: document.getElementById("content"),
 	lines: document.getElementById("lines"),
 }
@@ -82,6 +83,7 @@ function update() {
 						} break;
 
 						case 2: {
+							e.stopPropagation();
 							project.columns[x] = project.columns[x].filter((_c, i) => i != y);
 							update();
 						} break;
@@ -124,11 +126,13 @@ function connect(update = false) {
 				ui.lines.appendChild(c);
 		}
 
-		if (ui.connect.to.elem) {
-			// code
+		if (ui.connect.to) {
+			let to = ui.connect.to.elem;
+			c.setAttribute("x2", to.offsetLeft);
+			c.setAttribute("y2", to.offsetTop + to.clientHeight / 2);
 		} else {
-			c.setAttribute("x2", ui.connect.to.x);
-			c.setAttribute("y2", ui.connect.to.y);
+			c.setAttribute("x2", ui.mouse.x);
+			c.setAttribute("y2", ui.mouse.y);
 		}
 	}
 
@@ -162,7 +166,7 @@ document.addEventListener("keydown", (e) => {
 		case "c": if (e.altKey) {
 			ui.connect = {
 				from: ui.fblock,
-				to: { x: ui.mouse.x, y: ui.mouse.y },
+				to: null,
 			}
 
 			connect();
@@ -184,9 +188,6 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("mousedown", (e) => {
 	if (ui.fblock) {
 		if (e.target != ui.fblock.elem) {
-			e.preventDefault();
-			//ui.flock = false; // update performs this automatically, for now
-			update();
 		}
 	}
 });
@@ -194,10 +195,40 @@ document.addEventListener("mousedown", (e) => {
 // mouse movement
 document.addEventListener("mousemove", (e) => {
 	ui.mouse.x = e.clientX;
-	ui.mouse.y = e.clientY;
+	ui.mouse.y = e.clientY - ui.titlebar.clientHeight;
 
 	if (ui.connect) {
-		ui.connect.to = { x: ui.mouse.x, y: ui.mouse.y };
+		ui.connect.to = null;
+
+		let from = ui.connect.from.elem;
+
+		if (!from.parentElement.nextElementSibling.classList.contains("new")) {
+			let c = from.parentElement.nextElementSibling.children;
+
+			if (c.length > 0) {
+				let ce = null;
+				let cd = 0;
+
+				for (let i = 0; i < c.length; i++) {
+					let e = c[i];
+					let d = dist(ui.mouse.x, ui.mouse.y, e.offsetLeft, e.offsetTop);
+					e.classList.remove("focus");
+
+					if (cd > d || i == 0) {
+						ce = e;
+						cd = d;
+					}
+				}
+
+				ui.connect.to = {
+					col: 0,
+					row: 0,
+					elem: ce,
+				}
+				ce.classList.add("focus");
+			}
+		}
+
 		connect(true);
 	}
 });
@@ -208,3 +239,13 @@ document.getElementById("close").addEventListener("click", () =>
 
 // initialize
 update();
+
+// helper functions
+// functions that abstract things that are specific to odko
+
+
+// util functions
+// functions that abstract things that aren't specific to odko
+function dist(x1, y1, x2, y2) {
+	return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
