@@ -184,7 +184,7 @@ document.addEventListener("keydown", (e) => {
 		// normal typing
 		default: {
 			let f = ui.fblock;
-			if (f && "qwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*(){}[]:;\"'<>,.?/|\\`~ ".includes(e.key.toLowerCase())) {
+			if (f && "qwertyuiopasdfghjklzxcvbnm1234567890_-+='!@#$%^&*(){}[]:;\"'<>,.?/|\\`~ ".includes(e.key.toLowerCase())) {
 				project.columns[f.col][f.row] += e.key;
 				f.elem.innerText = project.columns[f.col][f.row];
 			}
