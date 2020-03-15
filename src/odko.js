@@ -35,10 +35,8 @@ function update() {
 	// clear
 	ui.content.innerHTML = "";
 
-	// render connections
-	connect();
-
-	if (project.columns.length > 0)
+	// add blocks
+	if (project.columns.length > 0) // optimization check for columns at all
 		project.columns.forEach((column, x) => {
 			let c = document.createElement("div");
 				c.classList.add("column");
@@ -58,6 +56,8 @@ function update() {
 						} break;
 
 						case 2: {
+							// FIXME remove connections to/from blocks in column when deleted
+
 							project.columns = project.columns.filter((_c, i) => i != x);
 							update();
 						} break;
@@ -83,6 +83,8 @@ function update() {
 						} break;
 
 						case 2: {
+							// FIXME remove connections to/from block when deleted
+
 							e.stopPropagation();
 							project.columns[x] = project.columns[x].filter((_c, i) => i != y);
 							update();
@@ -113,32 +115,42 @@ function connect(update = false) {
 	}
 
 	if (ui.connect) {
-		let c;
+		let l;
 
 		let from = ui.connect.from.elem;
 
 		if (ui.lines.children[0]) {
-			c = ui.lines.children[0];
+			l = ui.lines.children[0];
 		} else {
-			c = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				c.setAttribute("x1", from.offsetLeft + from.clientWidth);
-				c.setAttribute("y1", from.offsetTop + from.clientHeight / 2);
-				ui.lines.appendChild(c);
+			l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+				l.setAttribute("x1", from.offsetLeft + from.clientWidth);
+				l.setAttribute("y1", from.offsetTop + from.clientHeight / 2);
+				ui.lines.appendChild(l);
 		}
 
 		if (ui.connect.to) {
 			let to = ui.connect.to.elem;
-			c.setAttribute("x2", to.offsetLeft);
-			c.setAttribute("y2", to.offsetTop + to.clientHeight / 2);
+			l.setAttribute("x2", to.offsetLeft);
+			l.setAttribute("y2", to.offsetTop + to.clientHeight / 2);
 		} else {
-			c.setAttribute("x2", ui.mouse.x);
-			c.setAttribute("y2", ui.mouse.y);
+			l.setAttribute("x2", ui.mouse.x);
+			l.setAttribute("y2", ui.mouse.y);
 		}
 	}
 
 	if (!update)
-		project.connections.forEach((c) => {
-			// code
+		project.connections.forEach((c, i) => {
+			// TODO ignore and delete connection if block/col doesn't exist
+			let from = ui.content.children[c.x1].children[c.y1];
+			let to = ui.content.children[c.x2].children[c.y2];
+
+			let l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+				ui.lines.appendChild(l);
+
+			l.setAttribute("x1", from.offsetLeft + from.clientWidth);
+			l.setAttribute("y1", from.offsetTop + from.clientHeight / 2);
+			l.setAttribute("x2", to.offsetLeft);
+			l.setAttribute("y2", to.offsetTop + to.clientHeight / 2);
 		});
 }
 
@@ -146,11 +158,7 @@ function connect(update = false) {
 document.addEventListener("keydown", (e) => {
 	switch (e.key) {
 		// deselect
-		case "Escape": {
-			//ui.flock = false; // update performs this automatically, for now
-			ui.connect = null;
-			update();
-		} break;
+		case "Escape": deselect(); break;
 
 		// remove/remove char
 		case "Backspace": {
@@ -187,7 +195,18 @@ document.addEventListener("keydown", (e) => {
 // add universal mouse actions
 document.addEventListener("mousedown", (e) => {
 	if (ui.fblock) {
-		if (e.target != ui.fblock.elem) {
+		if (ui.connect) {
+			if (e.target != ui.fblock.elem) project.connections.push({
+				x1: ui.connect.from.col,
+				y1: ui.connect.from.row,
+				x2: ui.connect.to.col,
+				y2: ui.connect.to.row,
+			});
+
+			deselect();
+			connect();
+		} else if (e.target != ui.fblock.elem) {
+			deselect();
 		}
 	}
 });
@@ -221,8 +240,8 @@ document.addEventListener("mousemove", (e) => {
 				}
 
 				ui.connect.to = {
-					col: 0,
-					row: 0,
+					col: myindex(ce.parentElement),
+					row: myindex(ce),
 					elem: ce,
 				}
 				ce.classList.add("focus");
@@ -242,10 +261,25 @@ update();
 
 // helper functions
 // functions that abstract things that are specific to odko
-
+function deselect() {
+	// update performs these automatically, for now
+	//ui.flock = false;
+	//ui.connect = null;
+	update();
+}
 
 // util functions
 // functions that abstract things that aren't specific to odko
 function dist(x1, y1, x2, y2) {
 	return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
+function myindex(elem) {
+	let e = elem;
+	let i = 0;
+
+	while ((e = e.previousSibling) != null)
+		i++;
+
+	return i;
 }
