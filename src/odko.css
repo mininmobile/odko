@@ -12,3 +12,7 @@ body {
 	font-family: "Space Mono", monospace;
 	-webkit-user-select: none;
 }
+
+.columns {
+	display: flex;
+}
