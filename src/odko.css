@@ -16,3 +16,12 @@ body {
 .columns {
 	display: flex;
 }
+
+.column {
+	width: 3ch;
+}
+
+.focus {
+	background: #dddddd;
+	color: #000000;
+}

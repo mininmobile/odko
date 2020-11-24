@@ -2,41 +2,64 @@ const elements = {
 	columns: document.getElementById("columns"),
 }
 
-let table = []
 let selected = { x: 0, y: 0 }
+let mode = 0;
+/**
+ * @type {Array.<Array.<string>>}
+ */
+let table = []
 
 addEventListener("keydown", (e) => {
-	console.log(e.key);
-	switch (e.key) {
-		case "a": { // add block
-			if (table.length == 0) {
-				table[0] = [];
-				selected.x = selected.y = 0;
-			}
+	if (mode == 0) { // editing mode
+		// hide old cursor position
+		if (getFocusedElement())
+			getFocusedElement().classList.remove("focus");
 
-			table[selected.x].push("nil");
-			update();
-		} break;
+		switch (e.key) {
+			case "a": { // add block
+				if (table.length == 0) {
+					table[0] = [];
+					selected.x = selected.y = 0;
+				}
 
-		case "A": { // add column
-			table.push([]);
-			selected.x = table.length - 1;
-			selected.y = 0;
-		} break;
+				table[selected.x].push("nil");
+				update();
+			} break;
 
-		case "ArrowLeft": {
-			selected.x--;
+			case "A": { // add column
+				table.splice(selected.x + 1, 0, []);
+				selected.x++;
+				selected.y = 0;
+				update();
+			} break;
 
-			if (selected.x < 0)
-				selected.x = 0;
-		} break;
+			case "x": { // delete block
+				if (table.length == 0) break;
+				if (table[selected.x].length == 0) break;
 
-		case "ArrowRight": {
-			selected.x++;
+				table[selected.x].splice(selected.y, 1);
+				update();
+			} break;
 
-			if (selected.x >= table.length)
-				selected.x = table.length > 0 ? table.length - 1 : 0;
-		} break;
+			case "Delete": { // delete column
+				if (table.length == 0) break;
+
+				table.splice(selected.x, 1);
+				update();
+			} break;
+
+			// movement
+			case "ArrowLeft": selected.x--; break;
+			case "ArrowRight": selected.x++; break;
+			case "ArrowUp": selected.y--; break;
+			case "ArrowDown": selected.y++; break;
+		}
+
+		// make sure cursor is in safe position
+		saveCursorPosition();
+		// show new cursor position
+		if (getFocusedElement())
+			getFocusedElement().classList.add("focus");
 	}
 });
 
@@ -55,4 +78,29 @@ function update() {
 				col.appendChild(row);
 		});
 	});
+}
+
+// make the cursor position safe
+function saveCursorPosition() {
+	if (selected.x < 0)
+		selected.x = 0;
+
+	if (selected.x >= table.length)
+		selected.x = table.length > 0 ? table.length - 1 : 0;
+
+	if (selected.y < 0)
+		selected.y = 0;
+
+	if (selected.y >= table[selected.x].length)
+		selected.y = table[selected.x].length > 0 ? table[selected.x].length - 1 : 0;
+}
+
+function getFocusedElement() {
+	if (columns.children[selected.x]) {
+		if (columns.children[selected.x].children[selected.y]) {
+			return columns.children[selected.x].children[selected.y];
+		}
+	}
+
+	return false;
 }
