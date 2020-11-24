@@ -10,8 +10,17 @@ let editCursor = 0;
  * @type {Array.<Array.<string>>}
  */
 let table = []
+/**
+ * @type {Array.<Array.<number>>}
+ */
+let connections = []
 
 addEventListener("keydown", (e) => {
+	e.preventDefault();
+
+	if (e.key == "r" && e.ctrlKey)
+		location.reload();
+
 	if (mode == 0) { // editing mode
 		// hide old cursor position
 		if (getFocusedElement())
@@ -73,8 +82,11 @@ addEventListener("keydown", (e) => {
 		// show new cursor position
 		if (getFocusedElement())
 			getFocusedElement().classList.add("focus");
-		if (getFocusedColumn())
-			getFocusedColumn().classList.add("focus");
+		let c;
+		if (c = getFocusedColumn()) {
+			c.classList.add("focus");
+			scroll(c.offsetLeft - c.clientWidth * 2.5, 0);
+		}
 	} else if (mode == 1) { // edit mode
 		switch (e.key) {
 			case "Escape": case "Enter":
@@ -187,6 +199,9 @@ function getFocused() {
 }
 
 // get focused block element
+/**
+ * @returns {HTMLDivElement}
+ */
 function getFocusedElement() {
 	if (columns.children[selected.x])
 		if (columns.children[selected.x].children[selected.y])
@@ -196,6 +211,9 @@ function getFocusedElement() {
 }
 
 // get focused column element
+/**
+ * @returns {HTMLDivElement}
+ */
 function getFocusedColumn() {
 	if (columns.children[selected.x])
 		return columns.children[selected.x];
