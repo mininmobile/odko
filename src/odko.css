@@ -22,17 +22,22 @@ body {
 /* column */
 
 .column {
-	width: calc(4rem + 3ch + 2px);
+	width: calc(4rem + 7ch + 2px);
+}
+
+.column:empty::before {
+	content: "X";
+	margin: 1.5rem;
+	padding: 0.5rem;
+	color: #777777;
+	border: 1px solid currentColor;
+	text-align: center;
+	display: block;
 }
 
 .column.focus:empty::before {
-	content: "nil";
-	margin: 1.5rem;
-	padding: 0.5rem;
-	background: rgba(255, 255, 255, 0.1);
-	color: transparent;
-	border: 1px solid currentColor;
-	display: block;
+	content: "+";
+	color: #dddddd;
 }
 
 /* row */
@@ -41,6 +46,7 @@ body {
 	margin: 1.5rem;
 	padding: 0.5rem;
 	border: 1px solid currentColor;
+	white-space: nowrap;
 }
 
 .row.focus {
@@ -53,4 +59,17 @@ body {
 	color: #dddddd;
 	border: 1px solid #000000;
 	border-bottom: 1px solid currentColor;
+}
+
+/* edit cursor */
+
+.cursor {
+	width: 1ch;
+	height: 1em;
+	backdrop-filter: invert(100%);
+	position: absolute;
+}
+
+.hidden {
+	display: none;
 }

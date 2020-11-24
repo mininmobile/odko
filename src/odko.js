@@ -1,5 +1,6 @@
 const elements = {
 	columns: document.getElementById("columns"),
+	cursor: document.getElementById("cursor"),
 }
 
 let selected = { x: 0, y: 0 }
@@ -51,11 +52,14 @@ addEventListener("keydown", (e) => {
 				update();
 			} break;
 
-			case "e": if (getFocusedElement()) { // edit mode
-				mode = 1;
-				editCursor = table[selected.x][selected.y].length;
-				getFocusedElement().classList.add("editing");
-			} break;
+			case "e": case "Enter": case "F2":
+				if (getFocusedElement()) { // edit mode
+					mode = 1;
+					editCursor = table[selected.x][selected.y].length;
+					getFocusedElement().classList.add("editing");
+					updateEditCursor();
+				}
+			break;
 
 			// movement
 			case "ArrowLeft": selected.x--; break;
@@ -73,10 +77,12 @@ addEventListener("keydown", (e) => {
 			getFocusedColumn().classList.add("focus");
 	} else if (mode == 1) { // edit mode
 		switch (e.key) {
-			case "Escape": { // exit edit mode
-				mode = 0;
-				getFocusedElement().classList.remove("editing");
-			} break;
+			case "Escape": case "Enter":
+				{ // exit edit mode
+					mode = 0;
+					getFocusedElement().classList.remove("editing");
+				}
+			break;
 
 			case "ArrowLeft": { // move cursor left
 				editCursor--;
@@ -107,17 +113,21 @@ addEventListener("keydown", (e) => {
 						remove(getFocused(), editCursor);
 			} break;
 
-			default: {
-				if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
-					// append char at cursor
-					getFocusedElement().innerText =
-						table[selected.x][selected.y] =
-							insert(getFocused(), e.key, editCursor);
+			default: // normal typing
+				if (getFocused().length < 7) { // limit block size
+					// check for valid character
+					if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
+						// append char at cursor
+						getFocusedElement().innerText =
+							table[selected.x][selected.y] =
+								insert(getFocused(), e.key, editCursor);
 
-					editCursor++;
+						editCursor++;
+					}
 				}
-			}
 		}
+
+		updateEditCursor();
 	}
 	console.log(e.key)
 });
@@ -139,6 +149,17 @@ function update() {
 	});
 }
 
+function updateEditCursor() {
+	if (mode == 1) {
+		elements.cursor.classList.remove("hidden");
+
+		elements.cursor.style.left = `calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 1px)`;
+		elements.cursor.style.top = `calc((4rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
+	} else {
+		elements.cursor.classList.add("hidden");
+	}
+}
+
 // make the cursor position safe
 function saveCursorPosition() {
 	if (selected.x < 0)
@@ -156,6 +177,7 @@ function saveCursorPosition() {
 	}
 }
 
+// get focused block
 function getFocused() {
 	if (table[selected.x] !== undefined)
 		if (table[selected.x][selected.y] !== undefined)
@@ -164,6 +186,7 @@ function getFocused() {
 	return false;
 }
 
+// get focused block element
 function getFocusedElement() {
 	if (columns.children[selected.x])
 		if (columns.children[selected.x].children[selected.y])
@@ -172,6 +195,7 @@ function getFocusedElement() {
 	return false;
 }
 
+// get focused column element
 function getFocusedColumn() {
 	if (columns.children[selected.x])
 		return columns.children[selected.x];
@@ -179,10 +203,12 @@ function getFocusedColumn() {
 	return false;
 }
 
+// insert into string
 function insert(string, text, index) {
 	return string.substring(0, index) + text + string.substring(index);
 }
 
+// remove from string
 function remove(string, index, amount = 1) {
 	return string.substring(0, index) + string.substring(index + amount);
 }
