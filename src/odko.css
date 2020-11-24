@@ -10,6 +10,8 @@ body {
 	background: #000000;
 	color: #dddddd;
 	font-family: "Space Mono", monospace;
+	        user-select: none;
+	   -moz-user-select: none;
 	-webkit-user-select: none;
 }
 
@@ -17,17 +19,38 @@ body {
 	display: flex;
 }
 
+/* column */
+
 .column {
-	width: 3ch;
+	width: calc(4rem + 3ch + 2px);
 }
 
 .column.focus:empty::before {
 	content: "nil";
+	margin: 1.5rem;
+	padding: 0.5rem;
 	background: rgba(255, 255, 255, 0.1);
 	color: transparent;
+	border: 1px solid currentColor;
+	display: block;
+}
+
+/* row */
+
+.row {
+	margin: 1.5rem;
+	padding: 0.5rem;
+	border: 1px solid currentColor;
 }
 
 .row.focus {
 	background: #dddddd;
 	color: #000000;
+}
+
+.row.editing  {
+	background: #000000;
+	color: #dddddd;
+	border: 1px solid #000000;
+	border-bottom: 1px solid currentColor;
 }

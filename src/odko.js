@@ -4,6 +4,7 @@ const elements = {
 
 let selected = { x: 0, y: 0 }
 let mode = 0;
+let editCursor = 0;
 /**
  * @type {Array.<Array.<string>>}
  */
@@ -50,6 +51,12 @@ addEventListener("keydown", (e) => {
 				update();
 			} break;
 
+			case "e": if (getFocusedElement()) { // edit mode
+				mode = 1;
+				editCursor = table[selected.x][selected.y].length;
+				getFocusedElement().classList.add("editing");
+			} break;
+
 			// movement
 			case "ArrowLeft": selected.x--; break;
 			case "ArrowRight": selected.x++; break;
@@ -64,7 +71,26 @@ addEventListener("keydown", (e) => {
 			getFocusedElement().classList.add("focus");
 		if (getFocusedColumn())
 			getFocusedColumn().classList.add("focus");
+	} else if (mode == 1) { // edit mode
+		switch (e.key) {
+			case "Escape": { // exit edit mode
+				mode = 0;
+				getFocusedElement().classList.remove("editing");
+			} break;
+
+			default: {
+				if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
+					// append char at cursor
+					getFocusedElement().innerText =
+						table[selected.x][selected.y] =
+							insert(getFocused(), e.key, editCursor);
+
+					editCursor++;
+				}
+			}
+		}
 	}
+	console.log(e.key)
 });
 
 function update() {
@@ -95,8 +121,18 @@ function saveCursorPosition() {
 	if (selected.y < 0)
 		selected.y = 0;
 
-	if (selected.y >= table[selected.x].length)
-		selected.y = table[selected.x].length > 0 ? table[selected.x].length - 1 : 0;
+	if (table[selected.x]) {
+		if (selected.y >= table[selected.x].length)
+			selected.y = table[selected.x].length > 0 ? table[selected.x].length - 1 : 0;
+	}
+}
+
+function getFocused() {
+	if (table[selected.x] !== undefined)
+		if (table[selected.x][selected.y] !== undefined)
+			return table[selected.x][selected.y];
+
+	return false;
 }
 
 function getFocusedElement() {
@@ -112,4 +148,12 @@ function getFocusedColumn() {
 		return columns.children[selected.x];
 
 	return false;
+}
+
+function insert(string, text, index) {
+	return string.substring(0, index) + text + string.substring(index);
+}
+
+function remove(string, index, amount = 1) {
+	return string.substring(0, index) + string.substring(index + amount);
 }
