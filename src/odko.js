@@ -9,7 +9,7 @@ let editCursor = 0;
 /**
  * @type {Array.<Array.<string>>}
  */
-let table = []
+let table = JSON.parse(`[["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],["nil","nil","nil","nil"],["nil"],[],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],[],[],[],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"]]`)
 /**
  * @type {Array.<Array.<number>>}
  */
@@ -19,14 +19,17 @@ addEventListener("keydown", (e) => {
 	e.preventDefault();
 
 	if (e.key == "r" && e.ctrlKey)
-		location.reload();
+	location.reload();
 
 	if (mode == 0) { // editing mode
+		let _e;
+		let _c;
 		// hide old cursor position
-		if (getFocusedElement())
-			getFocusedElement().classList.remove("focus");
-		if (getFocusedColumn())
-			getFocusedColumn().classList.remove("focus");
+		if (_c = columns.children[selected.x]) {
+			_c.classList.remove("focus");
+			if (_e = _c.children[selected.y])
+				_e.classList.remove("focus");
+		}
 
 		switch (e.key) {
 			case "a": { // add block
@@ -80,12 +83,16 @@ addEventListener("keydown", (e) => {
 		// make sure cursor is in safe position
 		saveCursorPosition();
 		// show new cursor position
-		if (getFocusedElement())
-			getFocusedElement().classList.add("focus");
-		let c;
-		if (c = getFocusedColumn()) {
-			c.classList.add("focus");
-			scroll(c.offsetLeft - c.clientWidth * 2.5, 0);
+		if (_c = columns.children[selected.x]) {
+			_c.classList.add("focus");
+			scroll(_c.offsetLeft - _c.clientWidth * 3.5, scrollY);
+
+			if (_e = _c.children[selected.y]) {
+				_e.classList.add("focus");
+				scroll(scrollX, _e.offsetTop - _e.clientHeight * 3.5);
+			} else {
+				scroll(scrollX, 0);
+			}
 		}
 	} else if (mode == 1) { // edit mode
 		switch (e.key) {
@@ -183,10 +190,9 @@ function saveCursorPosition() {
 	if (selected.y < 0)
 		selected.y = 0;
 
-	if (table[selected.x]) {
+	if (table[selected.x])
 		if (selected.y >= table[selected.x].length)
 			selected.y = table[selected.x].length > 0 ? table[selected.x].length - 1 : 0;
-	}
 }
 
 // get focused block
