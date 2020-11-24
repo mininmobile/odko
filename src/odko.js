@@ -78,6 +78,18 @@ addEventListener("keydown", (e) => {
 				getFocusedElement().classList.remove("editing");
 			} break;
 
+			case "ArrowLeft": { // move cursor left
+				editCursor--;
+				if (editCursor < 0)
+					editCursor = 0;
+			} break;
+
+			case "ArrowRight": { // move cursor right
+				editCursor++;
+				if (editCursor > getFocused().length - 1)
+					editCursor = getFocused().length;
+			} break;
+
 			default: {
 				if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
 					// append char at cursor
