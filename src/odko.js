@@ -90,6 +90,23 @@ addEventListener("keydown", (e) => {
 					editCursor = getFocused().length;
 			} break;
 
+			case "Backspace": { // delete char behind cursor
+				getFocusedElement().innerText =
+					table[selected.x][selected.y] =
+						remove(getFocused(), editCursor - 1);
+
+				editCursor--;
+
+				if (editCursor < 0)
+					editCursor = 0;
+			} break;
+
+			case "Delete": { // delete char in front of cursor
+				getFocusedElement().innerText =
+					table[selected.x][selected.y] =
+						remove(getFocused(), editCursor);
+			} break;
+
 			default: {
 				if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
 					// append char at cursor
