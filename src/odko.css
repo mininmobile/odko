@@ -21,7 +21,13 @@ body {
 	width: 3ch;
 }
 
-.focus {
+.column.focus:empty::before {
+	content: "nil";
+	background: rgba(255, 255, 255, 0.1);
+	color: transparent;
+}
+
+.row.focus {
 	background: #dddddd;
 	color: #000000;
 }

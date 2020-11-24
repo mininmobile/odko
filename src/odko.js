@@ -14,6 +14,8 @@ addEventListener("keydown", (e) => {
 		// hide old cursor position
 		if (getFocusedElement())
 			getFocusedElement().classList.remove("focus");
+		if (getFocusedColumn())
+			getFocusedColumn().classList.remove("focus");
 
 		switch (e.key) {
 			case "a": { // add block
@@ -60,6 +62,8 @@ addEventListener("keydown", (e) => {
 		// show new cursor position
 		if (getFocusedElement())
 			getFocusedElement().classList.add("focus");
+		if (getFocusedColumn())
+			getFocusedColumn().classList.add("focus");
 	}
 });
 
@@ -96,11 +100,16 @@ function saveCursorPosition() {
 }
 
 function getFocusedElement() {
-	if (columns.children[selected.x]) {
-		if (columns.children[selected.x].children[selected.y]) {
+	if (columns.children[selected.x])
+		if (columns.children[selected.x].children[selected.y])
 			return columns.children[selected.x].children[selected.y];
-		}
-	}
+
+	return false;
+}
+
+function getFocusedColumn() {
+	if (columns.children[selected.x])
+		return columns.children[selected.x];
 
 	return false;
 }
