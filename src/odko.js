@@ -6,14 +6,17 @@ const elements = {
 let selected = { x: 0, y: 0 }
 let mode = 0;
 let editCursor = 0;
+let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<string>>}
  */
-let table = JSON.parse(`[["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],["nil","nil","nil","nil"],["nil"],[],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],[],[],[],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"],["nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil","nil"]]`)
+let table = [["nil","nil","nil"],["nil","nil","nil","nil","nil"],["nil","nil","nil","nil"],["nil","nil"]]
 /**
  * @type {Array.<Array.<number>>}
  */
 let connections = []
+
+update();
 
 addEventListener("keydown", (e) => {
 	e.preventDefault();
@@ -64,12 +67,20 @@ addEventListener("keydown", (e) => {
 				update();
 			} break;
 
-			case "e": case "Enter": case "F2":
-				if (getFocusedElement()) { // edit mode
+			case "e": case "Enter": case "F2": // edit mode
+				if (getFocused()) {
 					mode = 1;
 					editCursor = table[selected.x][selected.y].length;
 					getFocusedElement().classList.add("editing");
 					updateEditCursor();
+				}
+			break;
+
+			case "c": // connect mode
+				if (selected.x > 0 && getFocused()) {
+					mode = 2;
+					connectCursor = { y: selected.y, right: false }
+					updateConnectCursor();
 				}
 			break;
 
@@ -147,6 +158,23 @@ addEventListener("keydown", (e) => {
 		}
 
 		updateEditCursor();
+	} else if (mode == 2) { // connecting mode
+		elements.columns.children[connectCursor.x].children[connectCursor.y].classList.remove("focus");
+
+		switch (e.key) {
+			case "Escape": { // exit connect mode and cancel connection
+				mode = 0;
+			} break;
+
+			case "Enter": { // exit connect mode and confirm connection
+				mode = 0;
+			} break;
+
+			case "ArrowUp": connectCursor.y--; break;
+			case "ArrowDown": connectCursor.y++; break;
+		}
+
+		updateConnectCursor();
 	}
 	console.log(e.key)
 });
@@ -176,6 +204,33 @@ function updateEditCursor() {
 		elements.cursor.style.top = `calc((4rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
 	} else {
 		elements.cursor.classList.add("hidden");
+	}
+}
+
+function updateConnectCursor() {
+	let c = elements.columns; // sanity
+
+	if (mode == 2) {
+		connectCursor.x = selected.x + (connectCursor.right ? 1 : -1);
+
+		if (connectCursor.y < 0)
+			connectCursor.y = 0;
+
+		if (connectCursor.y >= table[connectCursor.x].length)
+			connectCursor.y = table[connectCursor.x].length > 0 ? table[connectCursor.x].length - 1 : 0;
+
+		c.children[connectCursor.x].children[connectCursor.y].classList.add("focus");
+
+		if (!c.classList.contains("selecting")) {
+			elements.columns.classList.add("selecting");
+			c.children[connectCursor.x].classList.add("selecting");
+		}
+	} else {
+		if (c.classList.contains("selecting")) {
+			c.classList.remove("selecting");
+			c.children[connectCursor.x].classList.remove("selecting");
+			c.children[connectCursor.x].children[connectCursor.y].classList.remove("focus");
+		}
 	}
 }
 

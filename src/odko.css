@@ -45,13 +45,18 @@ body {
 .row {
 	margin: 1.5rem;
 	padding: 0.5rem;
+	height: 1.5rem;
 	border: 1px solid currentColor;
-	white-space: nowrap;
+	white-space: pre;
 }
 
 .row.focus {
 	background: #dddddd;
 	color: #000000;
+}
+
+.columns.selecting .row.focus {
+	background: #777777;
 }
 
 .row.editing  {
@@ -72,4 +77,19 @@ body {
 
 .hidden {
 	display: none;
+}
+
+/* selecting */
+
+.columns.selecting {
+	color: #777777;
+}
+
+.columns.selecting .column.selecting {
+	color: #dddddd;
+}
+
+.columns.selecting .column.selecting .row.focus {
+	background: #dddddd;
+	color: #000000;
 }
