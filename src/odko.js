@@ -77,10 +77,23 @@ addEventListener("keydown", (e) => {
 			break;
 
 			case "c": // connect mode
-				if (selected.x > 0 && getFocused()) {
-					mode = 2;
-					connectCursor = { y: selected.y, right: false }
-					updateConnectCursor();
+				// if it can connect left or right
+				let l = (table[selected.x - 1] || []).length > 0;
+				let r = (table[selected.x + 1] || []).length > 0;
+				if (l || r) {
+					if (getFocused()) {
+						// connect mode
+						mode = 2;
+
+						connectCursor = {
+							// try to remain on same row as connecting to
+							y: selected.y,
+							// if it can't connect left, connect right
+							right: l ? false : true,
+						}
+
+						updateConnectCursor();
+					}
 				}
 			break;
 
@@ -170,6 +183,23 @@ addEventListener("keydown", (e) => {
 				mode = 0;
 			} break;
 
+			// swap to connecting rightwards
+			case "ArrowRight": if ((table[selected.x + 1] || []).length > 0)
+				if (!connectCursor.right) {
+					elements.columns.children[connectCursor.x].classList.remove("selecting");
+					connectCursor.right = true;
+				}
+			break;
+
+			// swap to connecting leftwards
+			case "ArrowLeft": if ((table[selected.x - 1] || []).length > 0)
+				if (connectCursor.right) {
+					elements.columns.children[connectCursor.x].classList.remove("selecting");
+					connectCursor.right = false;
+				}
+			break;
+
+			// normal navigation
 			case "ArrowUp": connectCursor.y--; break;
 			case "ArrowDown": connectCursor.y++; break;
 		}
@@ -221,10 +251,11 @@ function updateConnectCursor() {
 
 		c.children[connectCursor.x].children[connectCursor.y].classList.add("focus");
 
-		if (!c.classList.contains("selecting")) {
+		if (!c.classList.contains("selecting"))
 			elements.columns.classList.add("selecting");
+
+		if (!c.children[connectCursor.x].classList.contains("selecting"))
 			c.children[connectCursor.x].classList.add("selecting");
-		}
 	} else {
 		if (c.classList.contains("selecting")) {
 			c.classList.remove("selecting");
