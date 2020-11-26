@@ -15,8 +15,21 @@ body {
 	-webkit-user-select: none;
 }
 
+svg {
+	width: 100vw;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: -1;
+}
+
 .columns {
 	display: flex;
+}
+
+#em, #ch {
+	height: 0;
 }
 
 /* column */
@@ -46,6 +59,7 @@ body {
 	margin: 1.5rem;
 	padding: 0.5rem;
 	height: 1.5rem;
+	background: #000000;
 	border: 1px solid currentColor;
 	white-space: pre;
 }
@@ -53,15 +67,17 @@ body {
 .row.focus {
 	background: #dddddd;
 	color: #000000;
+	border: 1px solid #dddddd;
 }
 
 .columns.selecting .row.focus {
 	background: #777777;
+	border: 1px solid #777777;
 }
 
 .row.editing  {
-	background: #000000;
 	color: #dddddd;
+	background: #000000;
 	border: 1px solid #000000;
 	border-bottom: 1px solid currentColor;
 }
@@ -92,4 +108,5 @@ body {
 .columns.selecting .column.selecting .row.focus {
 	background: #dddddd;
 	color: #000000;
+	border: 1px solid #dddddd;
 }

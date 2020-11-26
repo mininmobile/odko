@@ -1,6 +1,11 @@
 const elements = {
+	em: document.getElementById("em"),
+	ch: document.getElementById("ch"),
+
 	columns: document.getElementById("columns"),
 	cursor: document.getElementById("cursor"),
+	linesWrapper: document.getElementById("lines-wrapper"),
+	lines: document.getElementById("lines"),
 }
 
 let selected = { x: 0, y: 0 }
@@ -14,6 +19,7 @@ let table = [["nil","nil","nil"],["nil","nil","nil","nil","nil"],["nil","nil","n
 /**
  * @type {Array.<Array.<number>>}
  */
+//
 let connections = []
 
 update();
@@ -241,27 +247,53 @@ function updateConnectCursor() {
 	let c = elements.columns; // sanity
 
 	if (mode == 2) {
+		// get selecting column
 		connectCursor.x = selected.x + (connectCursor.right ? 1 : -1);
 
+		// save the connect cursor position
 		if (connectCursor.y < 0)
 			connectCursor.y = 0;
 
 		if (connectCursor.y >= table[connectCursor.x].length)
 			connectCursor.y = table[connectCursor.x].length > 0 ? table[connectCursor.x].length - 1 : 0;
 
+		// reflect selected row
 		c.children[connectCursor.x].children[connectCursor.y].classList.add("focus");
 
-		if (!c.classList.contains("selecting"))
-			elements.columns.classList.add("selecting");
+		let pl = elements.lines.children[0];
+		let s = getConnectionPosition(connectCursor.x, connectCursor.y);
+		let t = getConnectionPosition(selected.x, selected.y);
+		pl.setAttribute("x1", s.x);
+		pl.setAttribute("y1", s.y);
+		pl.setAttribute("x2", t.x);
+		pl.setAttribute("y2", t.y);
 
+		// initialize connect mode if not done
+		if (!c.classList.contains("selecting")) {
+			elements.columns.classList.add("selecting");
+			// show connection preview line
+			elements.lines.children[0].classList.remove("hidden");
+		}
+
+		// initialize selecting column if not done
 		if (!c.children[connectCursor.x].classList.contains("selecting"))
 			c.children[connectCursor.x].classList.add("selecting");
 	} else {
 		if (c.classList.contains("selecting")) {
+			// remove selecting classes from column view
 			c.classList.remove("selecting");
 			c.children[connectCursor.x].classList.remove("selecting");
 			c.children[connectCursor.x].children[connectCursor.y].classList.remove("focus");
+			// hide connection preview line
+			elements.lines.children[0].classList.add("hidden");
 		}
+	}
+}
+
+function getConnectionPosition(x, y, right = true) {
+	return {
+		x: (em(4) + ch(7) + 2) * x + em(2) + ch(3.5) + 1,
+		y: (em(4) + 2) * y + em(2.875),
 	}
 }
 
@@ -321,4 +353,15 @@ function insert(string, text, index) {
 // remove from string
 function remove(string, index, amount = 1) {
 	return string.substring(0, index) + string.substring(index + amount);
+}
+
+// get css measurements
+function em(x) {
+	elements.em.style.width = x + "em";
+	return elements.em.clientWidth;
+}
+
+function ch(x) {
+	elements.ch.style.width = x + "ch";
+	return elements.ch.clientWidth;
 }

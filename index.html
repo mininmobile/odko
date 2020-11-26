@@ -9,9 +9,20 @@
 	<title>odko</title>
 </head>
 <body>
+	<!-- help js get css measurements -->
+	<div id="em"></div>
+	<div id="ch"></div>
+	<!-- editing cursor -->
 	<div id="cursor" class="cursor hidden"></div>
-	<div id="columns" class="columns">
-		<!-- b wow -->
-	</div>
+	<!-- connections wrapper -->
+	<svg id="lines-wrapper" xmlns="http://www.w3.org/2000/svg" stroke="white" stroke-width="1">
+		<!-- connections container, this is scrolled via x attribute -->
+		<svg id="lines" x="0" y="0">
+			<!-- preview connection-->
+			<line class="hidden"></line>
+		</svg>
+	</svg>
+	<!-- columns -->
+	<div id="columns" class="columns"></div>
 </body>
 </html>
