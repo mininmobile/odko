@@ -70,8 +70,8 @@ addEventListener("keydown", e => {
 
 				if (connections[selected.x + 1])
 					connections[selected.x + 1] =
-						connections[selected.x + 1].map((x, i) => {
-							if (x) {
+						connections[selected.x + 1].map((x) => {
+							if (x != null) {
 								if (x == selected.y) {
 									return null;
 								} else if (x > selected.y) {
@@ -85,6 +85,19 @@ addEventListener("keydown", e => {
 						});
 
 				update();
+			} break;
+
+			case "d": { // disconnect left of block
+				connections[selected.x][selected.y] = null;
+				updateConnections();
+			} break;
+
+			case "D": { // disconnect right of block
+				if (connections[selected.x + 1])
+					connections[selected.x + 1] =
+						connections[selected.x + 1].map(x => x == selected.y ? null : x);
+
+				updateConnections();
 			} break;
 
 			case "Delete": { // delete column
