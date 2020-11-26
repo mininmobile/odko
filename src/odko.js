@@ -15,12 +15,12 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<string>>}
  */
-let table = [["nil","nil","nil"],["nil","nil","nil","nil","nil"],["nil","nil","nil","nil"],["nil","nil"]]
+let table =[]
 /**
  * @type {Array.<Array.<number>>}
  */
 //
-let connections = [[], [null, 0]]; saveConnectionTable();
+let connections = []
 
 update();
 
@@ -44,15 +44,18 @@ addEventListener("keydown", e => {
 			case "a": { // add block
 				if (table.length == 0) {
 					table[0] = [];
+					connections[0] = [];
 					selected.x = selected.y = 0;
 				}
 
 				table[selected.x].push("nil");
+				connections[selected.x].push(null);
 				update();
 			} break;
 
 			case "A": { // add column
 				table.splice(selected.x + 1, 0, []);
+				connections.splice(selected.x + 1, 0, []);
 				selected.x++;
 				selected.y = 0;
 				update();
@@ -63,6 +66,24 @@ addEventListener("keydown", e => {
 				if (table[selected.x].length == 0) break;
 
 				table[selected.x].splice(selected.y, 1);
+				connections[selected.x].splice(selected.y, 1);
+
+				if (connections[selected.x + 1])
+					connections[selected.x + 1] =
+						connections[selected.x + 1].map((x, i) => {
+							if (x) {
+								if (x == selected.y) {
+									return null;
+								} else if (x > selected.y) {
+									return x - 1;
+								} else {
+									return x;
+								}
+							} else {
+								return null;
+							}
+						});
+
 				update();
 			} break;
 
@@ -70,6 +91,11 @@ addEventListener("keydown", e => {
 				if (table.length == 0) break;
 
 				table.splice(selected.x, 1);
+				connections.splice(selected.x, 1);
+
+				if (connections[selected.x])
+					connections[selected.x] = connections[selected.x].map(() => null);
+
 				update();
 			} break;
 
