@@ -286,14 +286,11 @@ function evaluate(_x, _y) {
 	}
 
 	let c = expression.shift();
-	console.log(c)
 	switch (c) {
-		case "+":
-			return die(
-				expression.map(x => parseInt(x))
-					.filter(x => !isNaN(x))
-					.reduce((a, b) => a + b)
-			);
+		case "+": return die(reduce((a, b) => a + b));
+		case "-": return die(reduce((a, b) => a - b));
+		case "*": return die(reduce((a, b) => a * b));
+		case "/": return die(reduce((a, b) => a / b));
 
 		case "nil": return die("nil");
 
@@ -308,9 +305,17 @@ function evaluate(_x, _y) {
 	}
 
 	function die(v) {
-		console.log(v)
+		if (typeof(v) == "number")
+			v = v.toFixed(0);
+
 		elements.columns.children[_x].children[_y].setAttribute("data-returns", v.toString());
 		return v.toString();
+	}
+
+	function reduce(callback) {
+		return expression.map(x => parseInt(x))
+			.filter(x => !isNaN(x))
+			.reduce(callback);
 	}
 }
 
