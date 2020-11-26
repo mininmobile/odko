@@ -60,19 +60,29 @@ addEventListener("keydown", e => {
 					table[0] = [];
 					connections[0] = [];
 					selected.x = selected.y = 0;
+					update();
 				}
 
-				table[selected.x].push("nil");
-				connections[selected.x].push(null);
-				update();
+				table[selected.x].splice(selected.y + 1, 0, "nil");
+				connections[selected.x].splice(selected.y + 1, 0, null);
+				let row = document.createElement("div");
+					row.classList.add("row");
+					row.innerText = "nil";
+					elements.columns.children[selected.x]
+						.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
+
+				selected.y++;
 			} break;
 
 			case "A": { // add column
 				table.splice(selected.x + 1, 0, []);
 				connections.splice(selected.x + 1, 0, []);
+				let col = document.createElement("div");
+					col.classList.add("column");
+					elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
+
 				selected.x++;
 				selected.y = 0;
-				update();
 			} break;
 
 			case "x": { // delete block
@@ -82,7 +92,7 @@ addEventListener("keydown", e => {
 				table[selected.x].splice(selected.y, 1);
 				connections[selected.x].splice(selected.y, 1);
 
-				if (connections[selected.x + 1])
+				if (connections[selected.x + 1]) {
 					connections[selected.x + 1] =
 						connections[selected.x + 1].map((x) => {
 							if (x != null) {
@@ -98,7 +108,11 @@ addEventListener("keydown", e => {
 							}
 						});
 
-				update();
+					updateConnections();
+				}
+
+				elements.columns.children[selected.x]
+					.removeChild(elements.columns.children[selected.x].childNodes[selected.y]);
 			} break;
 
 			case "d": { // disconnect left of block
@@ -119,17 +133,20 @@ addEventListener("keydown", e => {
 
 				table.splice(selected.x, 1);
 				connections.splice(selected.x, 1);
+				elements.columns.removeChild(elements.columns.childNodes[selected.x]);
 
-				if (connections[selected.x])
+				if (connections[selected.x]) {
 					connections[selected.x] = connections[selected.x].map(() => null);
 
-				update();
+					updateConnections();
+				}
 			} break;
 
 			case "e": case "Enter": case "F2": // edit mode
 				if (_e) {
 					mode = 1;
 					editCursor = table[selected.x][selected.y].length;
+					getFocusedElement().removeAttribute("data-returns");
 					getFocusedElement().classList.add("editing");
 					updateEditCursor();
 				}
@@ -336,8 +353,22 @@ function update() {
 				col.appendChild(row);
 		});
 	});
-
+	// update connections
 	updateConnections();
+	// make sure cursor is in safe position
+	saveCursorPosition();
+	// show new cursor position
+	if (_c = columns.children[selected.x]) {
+		_c.classList.add("focus");
+		scroll(_c.offsetLeft - _c.clientWidth * 3.5, scrollY);
+
+		if (_e = _c.children[selected.y]) {
+			_e.classList.add("focus");
+			scroll(scrollX, _e.offsetTop - _e.clientHeight * 3.5);
+		} else {
+			scroll(scrollX, 0);
+		}
+	}
 }
 
 function updateConnections() {
