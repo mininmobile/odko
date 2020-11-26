@@ -52,12 +52,8 @@ addEventListener("keydown", e => {
 				updateConnections();
 			} break;
 
-			case "t": { // test
-				let e;
-
-				if (e = getFocusedElement())
-					e.setAttribute("data-returns", evaluate(selected.x, selected.y));
-			} break;
+			// test
+			case "t": if (_e) evaluate(selected.x, selected.y); break;
 
 			case "a": { // add block
 				if (table.length == 0) {
@@ -131,7 +127,7 @@ addEventListener("keydown", e => {
 			} break;
 
 			case "e": case "Enter": case "F2": // edit mode
-				if (getFocused()) {
+				if (_e) {
 					mode = 1;
 					editCursor = table[selected.x][selected.y].length;
 					getFocusedElement().classList.add("editing");
@@ -144,7 +140,7 @@ addEventListener("keydown", e => {
 				let l = (table[selected.x - 1] || []).length > 0;
 				let r = (table[selected.x + 1] || []).length > 0;
 				if (l || r) {
-					if (getFocused()) {
+					if (_e) {
 						// connect mode
 						mode = 2;
 
@@ -280,12 +276,42 @@ addEventListener("keydown", e => {
 	console.log(e.key)
 });
 
-function evaluate(x, y) {
-	let input = getFocused();
+function evaluate(_x, _y) {
+	let expression = table[_x][_y].split(/ +/g).filter(x => x.length > 0);
+	let _input = getConnection(_x, _y);
 
-	// evaluate the input
+	if (_x > 0 && _input !== null) {
+		let input = evaluate(_x - 1, _input);
+		expression = expression.map(x => x == "_" ? input : x);
+	}
 
-	return "nil";
+	let c = expression.shift();
+	console.log(c)
+	switch (c) {
+		case "+":
+			return die(
+				expression.map(x => parseInt(x))
+					.filter(x => !isNaN(x))
+					.reduce((a, b) => a + b)
+			);
+
+		case "nil": return die("nil");
+
+		default: {
+			let n = parseInt(c);
+			if (!isNaN(n)) {
+				return die(c);
+			} else {
+				return die(-1);
+			}
+		}
+	}
+
+	function die(v) {
+		console.log(v)
+		elements.columns.children[_x].children[_y].setAttribute("data-returns", v.toString());
+		return v.toString();
+	}
 }
 
 function update() {
@@ -338,7 +364,7 @@ function updateEditCursor() {
 		elements.cursor.style.left =
 			`calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 1px)`;
 		elements.cursor.style.top =
-			`calc((4rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
+			`calc((${4 + (debug ? 1.5 : 0)}rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
 	} else {
 		elements.cursor.classList.add("hidden");
 	}
@@ -459,6 +485,15 @@ function getFocusedColumn() {
 		return columns.children[selected.x];
 
 	return false;
+}
+
+// get the connection to this block
+function getConnection(x = selected.x, y = selected.y) {
+	if (connections[selected.x] !== undefined)
+		if (connections[selected.x][selected.y] !== undefined)
+			return connections[selected.x][selected.y];
+
+	return null;
 }
 
 // insert into string
