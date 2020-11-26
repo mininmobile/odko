@@ -110,3 +110,21 @@ svg {
 	color: #000000;
 	border: 1px solid #dddddd;
 }
+
+/* debug */
+
+.columns.debug .row {
+	height: 3rem;
+}
+
+.columns.debug .row::after{
+	content: "?";
+	width: 7ch;
+	opacity: .5;
+	display: block;
+	overflow: hidden;
+}
+
+.columns.debug .row[data-returns]::after {
+	content: attr(data-returns) !important;
+}

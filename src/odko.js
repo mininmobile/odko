@@ -10,6 +10,7 @@ const elements = {
 
 let selected = { x: 0, y: 0 }
 let mode = 0;
+let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
 /**
@@ -41,6 +42,23 @@ addEventListener("keydown", e => {
 		}
 
 		switch (e.key) {
+			case "Z": { // toggle debug view
+				debug = !debug;
+
+				debug ?
+					elements.columns.classList.add("debug") :
+					elements.columns.classList.remove("debug");
+
+				updateConnections();
+			} break;
+
+			case "t": { // test
+				let e;
+
+				if (e = getFocusedElement())
+					e.setAttribute("data-returns", evaluate(selected.x, selected.y));
+			} break;
+
 			case "a": { // add block
 				if (table.length == 0) {
 					table[0] = [];
@@ -262,14 +280,24 @@ addEventListener("keydown", e => {
 	console.log(e.key)
 });
 
-function update() {
-	columns.innerHTML = "";
+function evaluate(x, y) {
+	let input = getFocused();
 
+	// evaluate the input
+
+	return "nil";
+}
+
+function update() {
+	// reset columns element
+	columns.innerHTML = "";
+	// add columns
 	table.forEach(c => {
 		let col = document.createElement("div");
 			col.classList.add("column");
 			elements.columns.appendChild(col);
 
+		// add rows
 		c.forEach(r => {
 			let row = document.createElement("div");
 				row.classList.add("row");
@@ -282,12 +310,13 @@ function update() {
 }
 
 function updateConnections() {
+	// reset lines element
 	while (elements.lines.children[1])
 		elements.lines.children[1].remove();
-
+	// add lines
 	connections.forEach((c, i) => {
 		c.forEach((r, j) => {
-			if (r != null) {
+			if (r != null) { // if row is connected
 				let from = getConnectionPosition(i, j, false);
 				let to = getConnectionPosition(i - 1, r, true)
 
@@ -306,8 +335,10 @@ function updateEditCursor() {
 	if (mode == 1) {
 		elements.cursor.classList.remove("hidden");
 
-		elements.cursor.style.left = `calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 1px)`;
-		elements.cursor.style.top = `calc((4rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
+		elements.cursor.style.left =
+			`calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 1px)`;
+		elements.cursor.style.top =
+			`calc((4rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
 	} else {
 		elements.cursor.classList.add("hidden");
 	}
@@ -365,7 +396,7 @@ function updateConnectCursor() {
 function getConnectionPosition(x, y, right = true) {
 	return {
 		x: (em(4) + ch(7) + 2) * x + em(2 + (right ? .5 : -.5)) + ch(right ? 7 : 0) + 1,
-		y: (em(4) + 2) * y + em(2.875),
+		y: (em(4 + (debug ? 1.5 : 0)) + 2) * y + em(2.875 + (debug ? .75 : 0)),
 	}
 }
 
