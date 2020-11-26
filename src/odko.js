@@ -24,7 +24,7 @@ let connections = []
 
 update();
 
-addEventListener("keydown", (e) => {
+addEventListener("keydown", e => {
 	e.preventDefault();
 
 	if (e.key == "r" && e.ctrlKey)
@@ -232,6 +232,28 @@ function update() {
 	});
 }
 
+function updateConnections() {
+	for (let i = 1; i < elements.lines.children.length; i++) {
+		elements.lines.children[i].remove();
+	}
+
+	connections.forEach((c, i) => {
+		c.forEach((r, j) => {
+			if (r != null) {
+				let from = getConnectionPosition(i, j, false);
+				let to = getConnectionPosition(i - 1, r, true)
+
+				let l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+					l.setAttribute("x1", from.x);
+					l.setAttribute("y1", from.y);
+					l.setAttribute("x2", to.x);
+					l.setAttribute("y2", to.y);
+					elements.lines.appendChild(l);
+			}
+		});
+	});
+}
+
 function updateEditCursor() {
 	if (mode == 1) {
 		elements.cursor.classList.remove("hidden");
@@ -261,17 +283,18 @@ function updateConnectCursor() {
 		c.children[connectCursor.x].children[connectCursor.y].classList.add("focus");
 
 		let pl = elements.lines.children[0];
-		let s = getConnectionPosition(connectCursor.x, connectCursor.y, !connectCursor.right);
-		let t = getConnectionPosition(selected.x, selected.y, connectCursor.right);
-		pl.setAttribute("x1", s.x);
-		pl.setAttribute("y1", s.y);
-		pl.setAttribute("x2", t.x);
-		pl.setAttribute("y2", t.y);
+		let from = getConnectionPosition(connectCursor.x, connectCursor.y, !connectCursor.right);
+		let to = getConnectionPosition(selected.x, selected.y, connectCursor.right);
+		pl.setAttribute("x1", from.x);
+		pl.setAttribute("y1", from.y);
+		pl.setAttribute("x2", to.x);
+		pl.setAttribute("y2", to.y);
 
 		// initialize connect mode if not done
 		if (!c.classList.contains("selecting")) {
 			elements.columns.classList.add("selecting");
-			// show connection preview line
+			// lines
+			elements.linesWrapper.setAttribute("stroke", "#777777");
 			elements.lines.children[0].classList.remove("hidden");
 		}
 
@@ -284,7 +307,8 @@ function updateConnectCursor() {
 			c.classList.remove("selecting");
 			c.children[connectCursor.x].classList.remove("selecting");
 			c.children[connectCursor.x].children[connectCursor.y].classList.remove("focus");
-			// hide connection preview line
+			// lines
+			elements.linesWrapper.setAttribute("stroke", "#dddddd");
 			elements.lines.children[0].classList.add("hidden");
 		}
 	}
