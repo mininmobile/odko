@@ -20,7 +20,7 @@ let table = [["nil","nil","nil"],["nil","nil","nil","nil","nil"],["nil","nil","n
  * @type {Array.<Array.<number>>}
  */
 //
-let connections = []
+let connections = [[], [null, 0]]; saveConnectionTable();
 
 update();
 
@@ -181,12 +181,20 @@ addEventListener("keydown", e => {
 		elements.columns.children[connectCursor.x].children[connectCursor.y].classList.remove("focus");
 
 		switch (e.key) {
-			case "Escape": { // exit connect mode and cancel connection
+			case "Escape": case "c": { // exit connect mode and cancel connection
 				mode = 0;
 			} break;
 
-			case "Enter": { // exit connect mode and confirm connection
+			case "Enter": case "C": { // exit connect mode and confirm connection
 				mode = 0;
+
+				if (connectCursor.right) {
+					connections[connectCursor.x][connectCursor.y] = selected.y;
+				} else {
+					connections[selected.x][selected.y] = connectCursor.y;
+				}
+
+				updateConnections();
 			} break;
 
 			// swap to connecting rightwards
@@ -230,12 +238,13 @@ function update() {
 				col.appendChild(row);
 		});
 	});
+
+	updateConnections();
 }
 
 function updateConnections() {
-	for (let i = 1; i < elements.lines.children.length; i++) {
-		elements.lines.children[i].remove();
-	}
+	while (elements.lines.children[1])
+		elements.lines.children[1].remove();
 
 	connections.forEach((c, i) => {
 		c.forEach((r, j) => {
@@ -335,6 +344,19 @@ function saveCursorPosition() {
 	if (table[selected.x])
 		if (selected.y >= table[selected.x].length)
 			selected.y = table[selected.x].length > 0 ? table[selected.x].length - 1 : 0;
+}
+
+// make the connection table safe
+function saveConnectionTable() {
+	table.forEach((c, i) => {
+		if (connections[i] == undefined)
+			connections[i] = [];
+
+		c.forEach((r, j) => {
+			if (connections[i][j] == undefined)
+				connections[i][j] = null;
+		})
+	});
 }
 
 // get focused block
