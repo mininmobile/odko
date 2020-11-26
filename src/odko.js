@@ -261,8 +261,8 @@ function updateConnectCursor() {
 		c.children[connectCursor.x].children[connectCursor.y].classList.add("focus");
 
 		let pl = elements.lines.children[0];
-		let s = getConnectionPosition(connectCursor.x, connectCursor.y);
-		let t = getConnectionPosition(selected.x, selected.y);
+		let s = getConnectionPosition(connectCursor.x, connectCursor.y, !connectCursor.right);
+		let t = getConnectionPosition(selected.x, selected.y, connectCursor.right);
 		pl.setAttribute("x1", s.x);
 		pl.setAttribute("y1", s.y);
 		pl.setAttribute("x2", t.x);
@@ -292,7 +292,7 @@ function updateConnectCursor() {
 
 function getConnectionPosition(x, y, right = true) {
 	return {
-		x: (em(4) + ch(7) + 2) * x + em(2) + ch(3.5) + 1,
+		x: (em(4) + ch(7) + 2) * x + em(2 + (right ? .5 : -.5)) + ch(right ? 7 : 0) + 1,
 		y: (em(4) + 2) * y + em(2.875),
 	}
 }
