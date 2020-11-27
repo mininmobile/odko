@@ -218,6 +218,11 @@ addEventListener("keydown", e => {
 					editCursor = getFocused().length;
 			} break;
 
+			case "ArrowUp": case "Home": // move cursor to start
+				editCursor = 0; break;
+			case "ArrowDown": case "End": // move cursor to end
+				editCursor = getFocusedElement().innerText.length; break;
+
 			case "Backspace": { // delete char behind cursor
 				getFocusedElement().innerText =
 					table[selected.x][selected.y] =
