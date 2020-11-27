@@ -1,7 +1,8 @@
 const elements = {
 	em: document.getElementById("em"),
 	ch: document.getElementById("ch"),
-
+	leftStatus: document.getElementById("status-left"),
+	rightStatus: document.getElementById("status-right"),
 	columns: document.getElementById("columns"),
 	cursor: document.getElementById("cursor"),
 	linesWrapper: document.getElementById("lines-wrapper"),
@@ -52,8 +53,10 @@ addEventListener("keydown", e => {
 				updateConnections();
 			} break;
 
-			// test
+			// evaluate current block
 			case "t": if (_e) evaluate(selected.x, selected.y); break;
+			// activate move mode
+			case "g": if (_e) mode = 3; break;
 
 			case "a": { // add block
 				if (table.length == 0) {
@@ -289,8 +292,13 @@ addEventListener("keydown", e => {
 		}
 
 		updateConnectCursor();
+	} else if (mode == 3) { // move mode
+		switch (e.key) {
+			case "Escape": mode = 0; break;
+		}
 	}
-	console.log(e.key)
+
+	updateStatus();
 });
 
 function evaluate(_x, _y) {
@@ -353,6 +361,8 @@ function update() {
 				col.appendChild(row);
 		});
 	});
+	// update the status bar
+	updateStatus();
 	// update connections
 	updateConnections();
 	// make sure cursor is in safe position
@@ -393,6 +403,36 @@ function updateConnections() {
 	});
 }
 
+function updateStatus() {
+	let status = `[x: ${selected.x}, y: ${selected.y}]   `;
+
+	switch (mode) {
+		case 0: status += "none"; break;
+
+		case 1: {
+			status += "edit   ";
+			status += `[col: ${editCursor}]   `;
+		} break;
+
+		case 2: {
+			status += "connect   ";
+			status += `=>[x: ${connectCursor.x}, y: ${connectCursor.y}]`;
+		} break;
+
+		case 3: status += "move"; break;
+
+		default: status += "????";
+	}
+
+	elements.leftStatus.innerText = status;
+
+	let _e;
+	if (_e = getFocusedElement()) {
+		let r = _e.getAttribute("data-returns") || "?";
+		elements.rightStatus.innerText = "<" + r + ">";
+	}
+}
+
 function updateEditCursor() {
 	if (mode == 1) {
 		elements.cursor.classList.remove("hidden");
@@ -400,7 +440,7 @@ function updateEditCursor() {
 		elements.cursor.style.left =
 			`calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 1px)`;
 		elements.cursor.style.top =
-			`calc((${4 + (debug ? 1.5 : 0)}rem + 2px) * ${selected.y} + 2.25rem + 1px)`;
+			`calc((${4 + (debug ? 1.5 : 0)}rem + 2px) * ${selected.y} + 3.75rem + 1px)`;
 	} else {
 		elements.cursor.classList.add("hidden");
 	}

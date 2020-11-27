@@ -3,8 +3,6 @@
 	src: url(font/SPACEMONO-REGULAR.TTF);
 }
 
-/* wrappers */
-
 body {
 	margin: 0;
 	background: #000000;
@@ -17,9 +15,9 @@ body {
 
 svg {
 	width: 100vw;
-	height: 100vh;
+	height: calc(100vh - 1.5rem);
 	position: fixed;
-	top: 0;
+	top: 1.5rem;
 	left: 0;
 	z-index: -1;
 }
@@ -30,6 +28,26 @@ svg {
 
 #em, #ch {
 	height: 0;
+}
+
+/* status bar */
+
+.status {
+	width: 100vw;
+	height: 1.5rem;
+	background: #dddddd;
+	color: #000000;
+	white-space: pre;
+	display: flex;
+}
+
+.status .left {
+	flex: 1;
+}
+
+.status .right {
+	padding-right: 0.175rem;
+	font-variant-ligatures: none;
 }
 
 /* column */
