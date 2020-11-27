@@ -312,11 +312,30 @@ addEventListener("keydown", e => {
 			} break;
 
 			case "ArrowLeft": if (selected.x > 0) { // move block left
+				let c = elements.columns.children[selected.x - 1];
+				let neighbor = c.childNodes[selected.y];
 
+				if (neighbor) {
+					c.insertBefore(b, neighbor);
+				} else {
+					c.appendChild(b);
+				}
+
+				selected.x--;
 			} break;
 
 			case "ArrowRight": if (selected.x < table.length - 1) { // move block right
+				let c = elements.columns.children[selected.x + 1];
+				let neighbor = c.childNodes[selected.y];
 
+				if (neighbor) {
+					c.insertBefore(b, neighbor);
+				} else {
+					c.appendChild(b);
+					selected.y = c.childElementCount - 1;
+				}
+
+				selected.x++;
 			} break;
 		}
 	}
