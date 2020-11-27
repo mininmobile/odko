@@ -199,12 +199,10 @@ addEventListener("keydown", e => {
 		}
 	} else if (mode == 1) { // edit mode
 		switch (e.key) {
-			case "Escape": case "Enter":
-				{ // exit edit mode
-					mode = 0;
-					getFocusedElement().classList.remove("editing");
-				}
-			break;
+			case "Escape": case "Enter": { // exit edit mode
+				mode = 0;
+				getFocusedElement().classList.remove("editing");
+			} break;
 
 			case "ArrowLeft": { // move cursor left
 				editCursor--;
@@ -221,7 +219,7 @@ addEventListener("keydown", e => {
 			case "ArrowUp": case "Home": // move cursor to start
 				editCursor = 0; break;
 			case "ArrowDown": case "End": // move cursor to end
-				editCursor = getFocusedElement().innerText.length; break;
+				editCursor = getFocused().length; break;
 
 			case "Backspace": { // delete char behind cursor
 				getFocusedElement().innerText =
