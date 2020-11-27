@@ -302,11 +302,17 @@ addEventListener("keydown", e => {
 			case "Escape": case "g": mode = 0; break;
 
 			case "ArrowUp": if (selected.y > 0) { // move block up
+				let s = table[selected.x].slice(selected.y - 1, selected.y + 1).reverse();
+				table[selected.x].splice(selected.y - 1, 2, ...s);
+
 				b.parentNode.insertBefore(b, b.previousElementSibling);
 				selected.y--;
 			} break;
 
 			case "ArrowDown": if (selected.y < table[selected.x].length - 1) { // move block down
+				let s = table[selected.x].slice(selected.y, selected.y + 2).reverse();
+				table[selected.x].splice(selected.y, 2, ...s);
+
 				b.parentNode.insertBefore(b.nextElementSibling, b);
 				selected.y++;
 			} break;
@@ -314,11 +320,15 @@ addEventListener("keydown", e => {
 			case "ArrowLeft": if (selected.x > 0) { // move block left
 				let c = elements.columns.children[selected.x - 1];
 				let neighbor = c.childNodes[selected.y];
+				let r = table[selected.x].splice(selected.y, 1);
 
 				if (neighbor) {
-					c.insertBefore(b, neighbor);
+					c.insertBefore(b, neighbor)
+					table[selected.x - 1].splice(selected.y, 0, ...r);
 				} else {
 					c.appendChild(b);
+					table[selected.x - 1].push(...r);
+					selected.y = c.childElementCount - 1;
 				}
 
 				selected.x--;
@@ -327,11 +337,14 @@ addEventListener("keydown", e => {
 			case "ArrowRight": if (selected.x < table.length - 1) { // move block right
 				let c = elements.columns.children[selected.x + 1];
 				let neighbor = c.childNodes[selected.y];
+				let r = table[selected.x].splice(selected.y, 1);
 
 				if (neighbor) {
 					c.insertBefore(b, neighbor);
+					table[selected.x + 1].splice(selected.y, 0, ...r);
 				} else {
 					c.appendChild(b);
+					table[selected.x + 1].push(...r);
 					selected.y = c.childElementCount - 1;
 				}
 
