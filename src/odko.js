@@ -296,8 +296,28 @@ addEventListener("keydown", e => {
 
 		updateConnectCursor();
 	} else if (mode == 3) { // move mode
+		let b = getFocusedElement();
+
 		switch (e.key) {
 			case "Escape": case "g": mode = 0; break;
+
+			case "ArrowUp": if (selected.y > 0) { // move block up
+				b.parentNode.insertBefore(b, b.previousElementSibling);
+				selected.y--;
+			} break;
+
+			case "ArrowDown": if (selected.y < table[selected.x].length - 1) { // move block down
+				b.parentNode.insertBefore(b.nextElementSibling, b);
+				selected.y++;
+			} break;
+
+			case "ArrowLeft": if (selected.x > 0) { // move block left
+
+			} break;
+
+			case "ArrowRight": if (selected.x < table.length - 1) { // move block right
+
+			} break;
 		}
 	}
 
