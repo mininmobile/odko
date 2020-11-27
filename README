@@ -45,3 +45,46 @@ and the program is executed in parallel in that order.
 
 each  block  contains  a  command  and  arguments for it, it then passes what it
 returns down to the connected block(s).
+
+[ KEYBOARD SHORTCUTS ]
+
+> ^ is short for  "ctrl + ..."  and  capital  letters imply shift being pressed,
+  slashes  delimitate  aliases  of  a  certain  function, and shortcuts that are
+  longer  than  one or two characters and begin with a capital represent special
+  keys on the keyboard
+> we  call  them keyboard shortcuts but there's no mouse control implemented yet
+  so they are really the only kind of control you have right now
+
+A) default mode
+  a: add block
+  A: add column
+  x: remove block
+  Delete: remove column
+  g: move block (enters move mode)
+  Z: toggle debug view
+  t: test current block
+  c: connect block (enters connect mode)
+  d: disconnect connection to the current block
+  D: disconnect connections originating from current block
+  e/Enter/F2: edit block (enters edit mode)
+  Arrow Keys: change focus
+
+B) edit mode
+  Escape/Enter: exit edit mode
+  ArrowLeft/Right: move edit cursor
+  ArrowUp/Home: move cursor to start of block
+  ArrowDown/End: move cursor to end of block
+  Backspace: delete character behind cursor
+  Delete: delete character in front of cursor
+  normal typing: normal typing
+
+C) connect mode
+  Escape/c: exit connect mode and cancel connection
+  Enter/C: exit connect mode and confirm connection
+  ArrowRight: select column right of the focused block
+  ArrowLeft: select column left of the focused block
+  ArrowUp/Down: change selected block
+
+D) move mode
+  Escape/g: exit move mode
+  Arrow Keys: move block

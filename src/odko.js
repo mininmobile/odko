@@ -32,7 +32,7 @@ addEventListener("keydown", e => {
 	if (e.key == "r" && e.ctrlKey)
 	location.reload();
 
-	if (mode == 0) { // editing mode
+	if (mode == 0) { // no mode
 		let _e;
 		let _c;
 		// hide old cursor position
@@ -297,7 +297,7 @@ addEventListener("keydown", e => {
 		updateConnectCursor();
 	} else if (mode == 3) { // move mode
 		switch (e.key) {
-			case "Escape": mode = 0; break;
+			case "Escape": case "g": mode = 0; break;
 		}
 	}
 
