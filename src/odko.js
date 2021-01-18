@@ -146,9 +146,9 @@ addEventListener("keydown", e => {
 
 			case "c": // connect mode
 				// if it can connect left or right
-				let l = (table[selected.x - 1] || []).length > 0;
-				let r = (table[selected.x + 1] || []).length > 0;
-				if (l || r) {
+				let _l = (table[selected.x - 1] || []).length > 0;
+				let _r = (table[selected.x + 1] || []).length > 0;
+				if (_l || _r) {
 					if (_e) {
 						// draw preview line on top
 						let l = document.createElementNS("http://www.w3.org/2000/svg", "use");
@@ -161,7 +161,7 @@ addEventListener("keydown", e => {
 							// try to remain on same row as connecting to
 							y: selected.y,
 							// if it can't connect left, connect right
-							right: l ? false : true,
+							right: _l ? false : true,
 						}
 
 						updateConnectCursor();
@@ -534,13 +534,13 @@ function updateConnectCursor() {
 		// reflect selected row
 		c.children[connectCursor.x].children[connectCursor.y].classList.add("focus");
 
-		let pl = elements.lines.children[0];
 		let from = getConnectionPosition(connectCursor.x, connectCursor.y, !connectCursor.right);
 		let to = getConnectionPosition(selected.x, selected.y, connectCursor.right);
-		pl.setAttribute("x1", from.x);
-		pl.setAttribute("y1", from.y);
-		pl.setAttribute("x2", to.x);
-		pl.setAttribute("y2", to.y);
+		let pl = elements.lines.children[0];
+			pl.setAttribute("x1", from.x);
+			pl.setAttribute("y1", from.y);
+			pl.setAttribute("x2", to.x);
+			pl.setAttribute("y2", to.y);
 
 		// initialize connect mode if not done
 		if (!c.classList.contains("selecting")) {
