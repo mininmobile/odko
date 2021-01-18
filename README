@@ -60,9 +60,9 @@ A) default mode
   A: add column
   x: remove block
   Delete: remove column
-  g: move block (enters move mode)
   Z: toggle debug view
   t: test current block
+  g: move block (enters move mode)
   c: connect block (enters connect mode)
   d: disconnect connection to the current block
   D: disconnect connections originating from current block
@@ -84,7 +84,8 @@ C) connect mode
   ArrowRight: select column right of the focused block
   ArrowLeft: select column left of the focused block
   ArrowUp/Down: change selected block
+  d: if the highlighted connection exists, disconnect it
 
 D) move mode
-  Escape/g: exit move mode
+  Escape/Enter/g: exit move mode
   Arrow Keys: move block
