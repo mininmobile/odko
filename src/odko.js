@@ -137,7 +137,7 @@ addEventListener("keydown", e => {
 			case "e": case "Enter": case "F2": // edit mode
 				if (_e) {
 					mode = 1;
-					editCursor = table[selected.x][selected.y].length;
+					editCursor = table[selected.x][selected.y].v.length;
 					getFocusedElement().removeAttribute("data-returns");
 					getFocusedElement().classList.add("editing");
 					updateEditCursor();
@@ -216,8 +216,8 @@ addEventListener("keydown", e => {
 
 			case "Backspace": { // delete char behind cursor
 				getFocusedElement().innerText =
-					table[selected.x][selected.y] =
-						remove(getFocused(), editCursor - 1);
+					table[selected.x][selected.y].v =
+						remove(getFocused().v, editCursor - 1);
 
 				editCursor--;
 
@@ -227,18 +227,18 @@ addEventListener("keydown", e => {
 
 			case "Delete": { // delete char in front of cursor
 				getFocusedElement().innerText =
-					table[selected.x][selected.y] =
-						remove(getFocused(), editCursor);
+					table[selected.x][selected.y].v =
+						remove(getFocused().v, editCursor);
 			} break;
 
 			default: // normal typing
-				if (getFocused().length < 7) { // limit block size
+				if (getFocused().v.length < 7) { // limit block size
 					// check for valid character
 					if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
 						// append char at cursor
 						getFocusedElement().innerText =
-							table[selected.x][selected.y] =
-								insert(getFocused(), e.key, editCursor);
+							table[selected.x][selected.y].v =
+								insert(getFocused().v, e.key, editCursor);
 
 						editCursor++;
 					}
@@ -373,13 +373,13 @@ addEventListener("keydown", e => {
 });
 
 function evaluate(_x, _y) {
-	let expression = table[_x][_y].split(/ +/g).filter(x => x.length > 0);
-	let _input = getConnection(_x, _y);
+	let expression = table[_x][_y].v.split(/ +/g).filter(x => x.length > 0);
+	let _inputs = table[_x][_y].c;
 
-	if (_x > 0 && _input !== null) {
-		let input = evaluate(_x - 1, _input);
+	_inputs.forEach(c => {
+		let input = evaluate(_x - 1, c);
 		expression = expression.map(x => x == "_" ? input : x);
-	}
+	});
 
 	let c = expression.shift();
 	switch (c) {
@@ -409,9 +409,14 @@ function evaluate(_x, _y) {
 	}
 
 	function reduce(callback) {
-		return expression.map(x => parseInt(x))
-			.filter(x => !isNaN(x))
-			.reduce(callback);
+		let _x = expression
+			.map(x => x == "nil" ? 0 : parseInt(x))
+			.filter(x => !isNaN(x));
+
+		if (_x.length == 0)
+			_x = [ -1 ];
+
+		return _x.reduce(callback);
 	}
 }
 
@@ -619,15 +624,6 @@ function getFocusedColumn() {
 		return columns.children[selected.x];
 
 	return false;
-}
-
-// get the connection to this block
-function getConnection(x = selected.x, y = selected.y) {
-	if (connections[selected.x] !== undefined)
-		if (connections[selected.x][selected.y] !== undefined)
-			return connections[selected.x][selected.y];
-
-	return null;
 }
 
 // insert into string
