@@ -28,6 +28,11 @@
 
                      a minimal graphical programming language.
 
+- DESCRIPTION @L36
+- LANGUAGE DESIGN @L43
+- SYNTAX AND EXAMPLES @L56
+- KEYBOARD SHORTCUTS @L65
+
 [ DESCRIPTION ]
 
 the main purpose is to make it look cool and make working in it cool enough just
@@ -40,11 +45,22 @@ doesn't matter as long as it's cool.
 > everything is vague right now, but this gives a broad outline of what i'm
   trying to accomplish and will aid in development
 
-you have blocks in rows in columns, you then connect the blocks mostly linearly
+you  have blocks as rows in columns, you then connect the blocks mostly linearly
 and the program is executed in parallel in that order.
 
 each  block  contains  a  command  and  arguments for it, it then passes what it
-returns down to the connected block(s).
+returns  down  to the connected block(s). because odko is event-driven each line
+should start with an event command,  and then when that event occurs the program
+branches out from that first block by activating the connected blocks.
+
+[ SYNTAX AND EXAMPLES ]
+
+look in the  code/ folder in this repository, depending on how far i have gotten
+in working on this project  there will be either screenshots of code in the odko
+ui or plaintext representations of code.
+
+yes, i am planning on coming up with a way to write plaintext odko code,  and it
+may be presented with a tui version of odko as well.
 
 [ KEYBOARD SHORTCUTS ]
 
