@@ -372,12 +372,12 @@ addEventListener("keydown", e => {
 	updateStatus();
 });
 
-function evaluate(_x, _y) {
+function test(_x, _y) {
 	let expression = table[_x][_y].v.split(/ +/g).filter(x => x.length > 0);
 	let _connections = table[_x][_y].c.sort((a, b) => a - b);
 
 	_connections.forEach((c, i) => {
-		let input = evaluate(_x - 1, c);
+		let input = test(_x - 1, c);
 
 		// index to alphabet
 		let itoa;
