@@ -271,6 +271,24 @@ addEventListener("keydown", e => {
 				updateConnections();
 			} break;
 
+			case "d": { // disconnect
+				if (connectCursor.right) {
+					table[connectCursor.x][connectCursor.y].c =
+						table[connectCursor.x][connectCursor.y].c.filter(c => c != selected.y);
+				} else {
+					table[selected.x][selected.y].c =
+						table[selected.x][selected.y].c.filter(c => c != connectCursor.y);
+				}
+
+				// TODO i really use updateConnections() too much i have to optimize the fuck outta it or where i use it, cause then i wouldn't have to readd the <use> tag
+				updateConnections();
+
+				// draw preview line on top
+				let l = document.createElementNS("http://www.w3.org/2000/svg", "use");
+					l.setAttribute("href", "#preview-line");
+					elements.lines.appendChild(l);
+			} break;
+
 			// swap to connecting rightwards
 			case "ArrowRight": if ((table[selected.x + 1] || []).length > 0)
 				if (!connectCursor.right) {
