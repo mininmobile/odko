@@ -15,14 +15,15 @@ let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
 /**
- * @type {Array.<Array.<string>>}
+ * @typedef {Object} Row
+ * @property {string} v
+ * @property {Array.<number>} c
  */
-let table =[]
+
 /**
- * @type {Array.<Array.<number>>}
+ * @type {Array.<Array.<Row>>}
  */
-//
-let connections = []
+let table = [[{"v":"nil","c":[]},{"v":"nil","c":[]},{"v":"nil","c":[]}],[{"v":"a","c":[]},{"v":"b","c":[1,0,2]},{"v":"c","c":[]}],[{"v":"nil","c":[1]},{"v":"nil","c":[1]},{"v":"nil","c":[1]}]]//[];
 
 update();
 
@@ -61,28 +62,29 @@ addEventListener("keydown", e => {
 			case "a": { // add block
 				if (table.length == 0) {
 					table[0] = [];
-					connections[0] = [];
 					selected.x = selected.y = 0;
 					update();
 				}
 
-				table[selected.x].splice(selected.y + 1, 0, "nil");
-				connections[selected.x].splice(selected.y + 1, 0, null);
+				table[selected.x].splice(selected.y + 1, 0, { v: "nil", c: [] });
 				let row = document.createElement("div");
 					row.classList.add("row");
 					row.innerText = "nil";
 					elements.columns.children[selected.x]
 						.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
 
+				updateConnections();
+
 				selected.y++;
 			} break;
 
 			case "A": { // add column
 				table.splice(selected.x + 1, 0, []);
-				connections.splice(selected.x + 1, 0, []);
 				let col = document.createElement("div");
 					col.classList.add("column");
 					elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
+
+				updateConnections();
 
 				selected.x++;
 				selected.y = 0;
@@ -93,40 +95,28 @@ addEventListener("keydown", e => {
 				if (table[selected.x].length == 0) break;
 
 				table[selected.x].splice(selected.y, 1);
-				connections[selected.x].splice(selected.y, 1);
-
-				if (connections[selected.x + 1]) {
-					connections[selected.x + 1] =
-						connections[selected.x + 1].map((x) => {
-							if (x != null) {
-								if (x == selected.y) {
-									return null;
-								} else if (x > selected.y) {
-									return x - 1;
-								} else {
-									return x;
-								}
-							} else {
-								return null;
-							}
-						});
-
-					updateConnections();
-				}
-
 				elements.columns.children[selected.x]
 					.removeChild(elements.columns.children[selected.x].childNodes[selected.y]);
-			} break;
 
-			case "d": { // disconnect left of block
-				connections[selected.x][selected.y] = null;
+				// if there were any connections to this row, no
+				if (table[selected.x + 1])
+					table[selected.x + 1]
+						.forEach((r) =>
+							r.c = r.c
+								.filter(c => c != selected.y)
+								.map(c => c > selected.y ? c - 1 : c));
+
 				updateConnections();
 			} break;
 
-			case "D": { // disconnect right of block
-				if (connections[selected.x + 1])
-					connections[selected.x + 1] =
-						connections[selected.x + 1].map(x => x == selected.y ? null : x);
+			case "d": { // disconnect left of block
+				table[selected.x][selected.y].c = [];
+				updateConnections();
+			} break;
+
+			case "D": if (table[selected.x + 1]) { // disconnect right of block
+				table[selected.x + 1]
+					.forEach(r => r.c = r.c.filter(c => c != selected.y));
 
 				updateConnections();
 			} break;
@@ -135,14 +125,13 @@ addEventListener("keydown", e => {
 				if (table.length == 0) break;
 
 				table.splice(selected.x, 1);
-				connections.splice(selected.x, 1);
 				elements.columns.removeChild(elements.columns.childNodes[selected.x]);
 
-				if (connections[selected.x]) {
-					connections[selected.x] = connections[selected.x].map(() => null);
+				// if this row connected to the one behind it, no
+				if (table[selected.x])
+					table[selected.x].forEach(r => r.c = []);
 
-					updateConnections();
-				}
+				updateConnections();
 			} break;
 
 			case "e": case "Enter": case "F2": // edit mode
@@ -161,6 +150,10 @@ addEventListener("keydown", e => {
 				let r = (table[selected.x + 1] || []).length > 0;
 				if (l || r) {
 					if (_e) {
+						// draw preview line on top
+						let l = document.createElementNS("http://www.w3.org/2000/svg", "use");
+							l.setAttribute("href", "#preview-line");
+							elements.lines.appendChild(l);
 						// connect mode
 						mode = 2;
 
@@ -259,15 +252,20 @@ addEventListener("keydown", e => {
 		switch (e.key) {
 			case "Escape": case "c": { // exit connect mode and cancel connection
 				mode = 0;
+
+				// TODO when optimizing add this bad boy to the case below
+				elements.lines.lastChild.remove();
 			} break;
 
 			case "Enter": case "C": { // exit connect mode and confirm connection
 				mode = 0;
 
 				if (connectCursor.right) {
-					connections[connectCursor.x][connectCursor.y] = selected.y;
+					if (!table[connectCursor.x][connectCursor.y].c.includes(selected.y))
+						table[connectCursor.x][connectCursor.y].c.push(selected.y);
 				} else {
-					connections[selected.x][selected.y] = connectCursor.y;
+					if (!table[selected.x][selected.y].c.includes(connectCursor.y))
+						table[selected.x][selected.y].c.push(connectCursor.y);
 				}
 
 				updateConnections();
@@ -299,7 +297,7 @@ addEventListener("keydown", e => {
 		let b = getFocusedElement();
 
 		switch (e.key) {
-			case "Escape": case "g": mode = 0; break;
+			case "Escape": case "Enter": case "g": mode = 0; break;
 
 			case "ArrowUp": if (selected.y > 0) { // move block up
 				let s = table[selected.x].slice(selected.y - 1, selected.y + 1).reverse();
@@ -412,7 +410,7 @@ function update() {
 		c.forEach(r => {
 			let row = document.createElement("div");
 				row.classList.add("row");
-				row.innerText = r;
+				row.innerText = r.v;
 				col.appendChild(row);
 		});
 	});
@@ -441,11 +439,11 @@ function updateConnections() {
 	while (elements.lines.children[1])
 		elements.lines.children[1].remove();
 	// add lines
-	connections.forEach((c, i) => {
+	table.forEach((c, i) => {
 		c.forEach((r, j) => {
-			if (r != null) { // if row is connected
+			r.c.forEach(c => { // for each connection
 				let from = getConnectionPosition(i, j, false);
-				let to = getConnectionPosition(i - 1, r, true)
+				let to = getConnectionPosition(i - 1, c, true)
 
 				let l = document.createElementNS("http://www.w3.org/2000/svg", "line");
 					l.setAttribute("x1", from.x);
@@ -453,7 +451,7 @@ function updateConnections() {
 					l.setAttribute("x2", to.x);
 					l.setAttribute("y2", to.y);
 					elements.lines.appendChild(l);
-			}
+			});
 		});
 	});
 }
@@ -571,19 +569,6 @@ function saveCursorPosition() {
 	if (table[selected.x])
 		if (selected.y >= table[selected.x].length)
 			selected.y = table[selected.x].length > 0 ? table[selected.x].length - 1 : 0;
-}
-
-// make the connection table safe
-function saveConnectionTable() {
-	table.forEach((c, i) => {
-		if (connections[i] == undefined)
-			connections[i] = [];
-
-		c.forEach((r, j) => {
-			if (connections[i][j] == undefined)
-				connections[i][j] = null;
-		})
-	});
 }
 
 // get focused block

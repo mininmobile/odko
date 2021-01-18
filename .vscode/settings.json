@@ -10,5 +10,6 @@
 		"SPACEMONO",
 		"odko",
 		"viewbox"
-	]
+	],
+	"dimmer.enabled": false
 }
