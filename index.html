@@ -10,6 +10,7 @@
 	<meta property="og:image:height" content="128">
 	<link rel="shortcut icon" href="logo/odko128.png" type="image/png">
 	<link rel="stylesheet" href="src/odko.css">
+	<script defer src="src/lib/console.js"></script>
 	<script defer src="src/odko.js"></script>
 	<title>odko</title>
 </head>
@@ -17,22 +18,32 @@
 	<!-- help js get css measurements -->
 	<div id="em"></div>
 	<div id="ch"></div>
+
 	<!-- editing cursor -->
 	<div id="cursor" class="cursor hidden"></div>
+
 	<!-- connections wrapper -->
 	<svg id="lines-wrapper" xmlns="http://www.w3.org/2000/svg" stroke="#dddddd" stroke-width="2">
-		<!-- connections container, this is scrolled via x attribute -->
+		<!-- connections container, this is scrolled via the x & y attributes -->
 		<svg id="lines" x="0" y="0">
 			<!-- preview connection-->
 			<line id="preview-line" class="hidden" stroke="#dddddd"></line>
 		</svg>
 	</svg>
+
 	<!-- status bar -->
 	<div class="status">
 		<span id="status-left" class="left"></span>
 		<span id="status-right" class="right"></span>
 	</div>
+
 	<!-- columns -->
 	<div id="columns" class="columns"></div>
+
+	<!-- console -->
+	<div id="console-wrapper" class="console wrapper hidden">
+		<div id="console-titlebar" class="console titlebar">console</div>
+		<canvas id="console-canvas" class="console canvas"></canvas>
+	</div>
 </body>
 </html>

@@ -146,3 +146,25 @@ svg {
 .columns.debug .row[data-returns]::after {
 	content: attr(data-returns) !important;
 }
+
+/* console */
+
+.console.wrapper {
+	width: 400px;
+	height: 300px;
+	background: #000000;
+	color: #dddddd;
+	border: 1px solid #dddddd;
+	position: fixed;
+	z-index: 999;
+	resize: both;
+	overflow: hidden;
+}
+
+.console.titlebar {
+	height: 1.5rem;
+	padding: 0 0.175rem;
+	background: #dddddd;
+	color: #000000;
+	white-space: pre;
+}

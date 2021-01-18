@@ -7,6 +7,9 @@ const elements = {
 	cursor: document.getElementById("cursor"),
 	linesWrapper: document.getElementById("lines-wrapper"),
 	lines: document.getElementById("lines"),
+	consoleWrapper: document.getElementById("console-wrapper"),
+	consoleTitlebar: document.getElementById("console-titlebar"),
+	consoleCanvas: document.getElementById("console-canvas"),
 }
 
 let selected = { x: 0, y: 0 }
@@ -23,11 +26,12 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<Row>>}
  */
-let table = [[{"v":"nil","c":[]},{"v":"nil","c":[]},{"v":"nil","c":[]}],[{"v":"a","c":[]},{"v":"b","c":[1,0,2]},{"v":"c","c":[]}],[{"v":"nil","c":[1]},{"v":"nil","c":[1]},{"v":"nil","c":[1]}]]//[];
-
+let table = [];
 update();
+initConsole();
 
 addEventListener("keydown", e => {
+	//console.log(e.key);
 	e.preventDefault();
 
 	if (e.key == "r" && e.ctrlKey)
@@ -52,6 +56,10 @@ addEventListener("keydown", e => {
 					elements.columns.classList.remove("debug");
 
 				updateConnections();
+			} break;
+
+			case "`": { // toggle console
+				elements.consoleWrapper.classList.toggle("hidden");
 			} break;
 
 			// evaluate current block
