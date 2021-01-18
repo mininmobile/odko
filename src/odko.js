@@ -374,11 +374,23 @@ addEventListener("keydown", e => {
 
 function evaluate(_x, _y) {
 	let expression = table[_x][_y].v.split(/ +/g).filter(x => x.length > 0);
-	let _inputs = table[_x][_y].c;
+	let _connections = table[_x][_y].c.sort((a, b) => a - b);
 
-	_inputs.forEach(c => {
+	_connections.forEach((c, i) => {
 		let input = evaluate(_x - 1, c);
-		expression = expression.map(x => x == "_" ? input : x);
+
+		// index to alphabet
+		let itoa;
+		if (expression.length == 1 && expression[0] == "_") {
+			// if just a pipe
+			itoa = "_";
+		} else {
+			itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+			// if index is not in alphabet, fuck
+			itoa = i > 26 ? "_" : itoa[i];
+		}
+
+		expression = expression.map(x => x == itoa ? input : x);
 	});
 
 	let c = expression.shift();
