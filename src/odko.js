@@ -117,7 +117,7 @@ addEventListener("keydown", e => {
 				updateConnections();
 			} break;
 
-			case "d": { // disconnect left of block
+			case "d": if (_e) { // disconnect left of block
 				table[selected.x][selected.y].c = [];
 				updateConnections();
 			} break;
@@ -242,7 +242,7 @@ addEventListener("keydown", e => {
 			default: // normal typing
 				if (getFocused().v.length < 7) { // limit block size
 					// check for valid character
-					if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
+					if ("01234567890-_=+qwertyuiopasdfghjklzxcvbnm`~!@#$%^&*()[]{}:;',./<>? \"\\".includes(e.key.toLowerCase())) {
 						// append char at cursor
 						getFocusedElement().innerText =
 							table[selected.x][selected.y].v =

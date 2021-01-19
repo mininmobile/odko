@@ -1,10 +1,13 @@
 let consoleData = {
 	w: 400,
 	h: 300,
+	/** @type {HTMLElement} */
 	c: undefined,
+	/** @type {CanvasRenderingContext2D} */
 	ctx: undefined,
 	text: "",
 	drag: false,
+	timeout: null,
 }
 
 function initConsole() {
@@ -12,25 +15,50 @@ function initConsole() {
 
 	let canvas = _c.c = elements.consoleCanvas;
 	let ctx = _c.ctx = canvas.getContext("2d");
-	ctx.lineWidth = 2;
-	ctx.font = "1em \"Space Mono\", monospace";
-	updateConsole();
+	updateConsole(true);
 
 	// detect titlebar drag
 	attachDragHandler(elements.consoleTitlebar, elements.consoleWrapper);
 	// detect window resize
-	let observer = new MutationObserver(updateConsole);
+	let observer = new MutationObserver(() => updateConsole());
 	observer.observe(elements.consoleWrapper, { attributes: true });
+
+	// aaa();
 }
 
-function updateConsole() {
-	if (consoleData.drag) return;
-
+function updateConsole(noResize = false) {
 	let w = Math.floor(elements.consoleWrapper.clientWidth / ch(1)) * ch(1) - ch(1);
-	let h = Math.floor(elements.consoleWrapper.clientHeight / em(1)) * em(1) - em(2.5);
+	let h = Math.floor(elements.consoleWrapper.clientHeight / em(1)) * em(1) - em(1.5);
+
+	if (consoleData.drag || noResize) {
+		elements.consoleTitlebar.innerText = "console";
+	} else {
+		elements.consoleTitlebar.innerText = `console [${w / ch(1) - 1}x${h / em(1) - .5}]`;
+		clearTimeout(consoleData.timeout);
+		consoleData.timeout = setTimeout(() => {
+			elements.consoleTitlebar.innerText = "console";
+			clearTimeout(consoleData.timeout);
+		}, 500);
+	}
 
 	consoleData.c.width = consoleData.w = w;
 	consoleData.c.height = consoleData.h = h;
+	consoleData.ctx.lineWidth = 2;
+	consoleData.ctx.font = "1rem \"Space Mono\", monospace";
+}
+
+function aaa() {
+	requestAnimationFrame(aaa);
+
+	let ctx = consoleData.ctx;
+	ctx.fillStyle = "#000000";
+	ctx.fillRect(0, 0, consoleData.w, consoleData.h);
+	ctx.fillStyle = "#dddddd";
+	ctx.fillText("0123456789", 0, em(1))
+	ctx.fillText("i love cock! B", 0, em(2))
+	ctx.fillText("i love cock! C", 0, em(3))
+	ctx.fillText("i love cock! D", 0, em(4))
+	ctx.fillText("i love cock! E", 0, em(5))
 }
 
 /**
