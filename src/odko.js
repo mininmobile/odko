@@ -14,7 +14,7 @@ const elements = {
 
 let selected = { x: 0, y: 0 }
 let mode = 0;
-let run = { state: 0, registers: {} };
+let run = { state: 0, registers: {}, events: {} };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
@@ -390,8 +390,13 @@ addEventListener("keydown", e => {
 	} else if (mode == 4) { // run mode
 		switch (e.key) {
 			case "`": { // exit run mode
-				elements.consoleWrapper.classList.add("hidden");
 				mode = 0;
+				// reset state
+				run.state = 0;
+				run.registers = {};
+				run.events = {};
+				// hided console
+				elements.consoleWrapper.classList.add("hidden");
 			} break;
 
 			case "Tab": {

@@ -31,7 +31,8 @@
 - DESCRIPTION @L36
 - LANGUAGE DESIGN @L43
 - SYNTAX AND EXAMPLES @L56
-- KEYBOARD SHORTCUTS @L65
+- EVENTS @L66
+- KEYBOARD SHORTCUTS @L106
 
 [ DESCRIPTION ]
 
@@ -62,6 +63,46 @@ ui or plaintext representations of code.
 yes, i am planning on coming up with a way to write plaintext odko code,  and it
 may be presented with a tui version of odko as well.
 
+[ EVENTS ]
+
+> if a block is in the first column, and it starts with  "o",  "k", or "c",  the
+  block will be ignored when (and only when) testing, even if it is connected
+> events are only valid when placed in the first column (for now?)
+
+most  events  have argument locations,  which are places the interpreter expects
+you to have entered an argument.  the # argument(s)  are required,  and capitals
+(when stated as having such meaning) are optional arguments
+
+some  events can be followed by a numerical id so the interpreter knows in which
+order  to  execute multiple instances of an event, by default all events have an
+id of 0 which means they will run as soon as possible, if multiple events of the
+same  type and id are present, they will execute in the order they appear in the
+starting column (top to bottom) this fact also holds true for events that do not
+permit you to input an id through an argument.
+
+  [ onRun X ]
+   blocks connected to this block will run as soon as possible after the program
+   has begun execution. the event can be assigned an id via. the X argument.
+
+  [ k_# ABC ]
+   blocks  connected  to this block will run after the key # has been depressed.
+   A,  B,  and  C  are switches which  enable  or disable the requirement of the
+   Shift, Ctrl, or  Alt  modifiers modifier keys  respectively. the switches can
+   also  be omitted or replaced with a question mark  (?)   (eg. if you need the
+   Shift  and  Alt  keys  to be held, but don't care about the state of the Ctrl
+   key, your ABC would be "1?1")
+
+  [ k-# ABC ]
+   same as previous event except fires after a key has been released.
+
+  [ c##_ABC ]
+   same as the  [ k_# ]  event except instead of a character you would input two
+   hexadecimal digits that represent a javascript keycode.
+
+  [ c##-ABC ]
+   same as the  [ k-# ]  event except instead of a character you would input two
+   hexadecimal digits that represent a javascript keycode.
+
 [ KEYBOARD SHORTCUTS ]
 
 > ^ is short for  "ctrl + ..."  and  capital  letters imply shift being pressed,
@@ -71,11 +112,11 @@ may be presented with a tui version of odko as well.
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 
-- DEFAULT MODE @L80
-- EDIT MODE @L95
-- CONNECT MODE @L104
-- MOVE MODE @L112
-- RUN MODE @L116
+- DEFAULT MODE @L121
+- EDIT MODE @L136
+- CONNECT MODE @L145
+- MOVE MODE @L153
+- RUN MODE @L157
 
 A) default mode
   a: add block
