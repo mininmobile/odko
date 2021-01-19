@@ -5,7 +5,7 @@ let consoleData = {
 	c: undefined,
 	/** @type {CanvasRenderingContext2D} */
 	ctx: undefined,
-	text: "",
+	text: [],
 	drag: false,
 	timeout: null,
 }
@@ -45,20 +45,30 @@ function updateConsole(noResize = false) {
 	consoleData.c.height = consoleData.h = h;
 	consoleData.ctx.lineWidth = 2;
 	consoleData.ctx.font = "1rem \"Space Mono\", monospace";
+
+	consoleDraw();
 }
 
-function aaa() {
-	requestAnimationFrame(aaa);
-
-	let ctx = consoleData.ctx;
+function consoleDraw() {
+	let ctx = consoleData.ctx; // sanity
+	// clear screen
 	ctx.fillStyle = "#000000";
 	ctx.fillRect(0, 0, consoleData.w, consoleData.h);
+	// draw text
 	ctx.fillStyle = "#dddddd";
-	ctx.fillText("0123456789", 0, em(1))
-	ctx.fillText("i love cock! B", 0, em(2))
-	ctx.fillText("i love cock! C", 0, em(3))
-	ctx.fillText("i love cock! D", 0, em(4))
-	ctx.fillText("i love cock! E", 0, em(5))
+	consoleData.text.forEach((t, i) => {
+		ctx.fillText(t, 0, em(i + 1));
+	});
+}
+
+function conLog(text) {
+	consoleData.text.unshift(text);
+	consoleDraw();
+}
+
+function conClear() {
+	consoleData.text = [];
+	consoleDraw();
 }
 
 /**

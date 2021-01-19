@@ -14,6 +14,7 @@ const elements = {
 
 let selected = { x: 0, y: 0 }
 let mode = 0;
+let run = { state: 0, registers: {} };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
@@ -26,7 +27,7 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<Row>>}
  */
-let table = [];
+let table = [[]];
 update();
 initConsole();
 
@@ -59,11 +60,14 @@ addEventListener("keydown", e => {
 			} break;
 
 			case "`": { // toggle console
-				elements.consoleWrapper.classList.toggle("hidden");
+				mode = 4;
+				run.state = 0;
+				conClear();
+				elements.consoleWrapper.classList.remove("hidden");
 			} break;
 
-			// evaluate current block
-			case "t": if (_e) evaluate(selected.x, selected.y); break;
+			// test current block
+			case "t": if (_e) test(selected.x, selected.y); break;
 			// activate move mode
 			case "g": if (_e) mode = 3; break;
 
@@ -375,70 +379,40 @@ addEventListener("keydown", e => {
 				selected.x++;
 			} break;
 		}
+	} else if (mode == 4) { // run mode
+		switch (e.key) {
+			case "`": { // exit run mode
+				elements.consoleWrapper.classList.add("hidden");
+				mode = 0;
+			} break;
+
+			case "Tab": {
+				if (run.state == 0 || run.state == 2 || run.state == 3) {
+					run.state = 1;
+					conLog("=> start of execution");
+
+					// register events
+					table[0].forEach(r => {
+						// fuck
+					});
+				}
+			} break;
+
+			case "~": if (run.state == 1 || run.state == 2) {
+				if (e.ctrlKey && run.state !== 3) {
+					run.state = 3;
+					conLog("=> halted execution (preserve registers)");
+				} else {
+					run.state = 0;
+					run.registers = {};
+					conLog("=> halted execution");
+				}
+			} break;
+		}
 	}
 
 	updateStatus();
 });
-
-function test(_x, _y) {
-	let expression = table[_x][_y].v.split(/ +/g).filter(x => x.length > 0);
-	let _connections = table[_x][_y].c.sort((a, b) => a - b);
-
-	_connections.forEach((c, i) => {
-		let input = test(_x - 1, c);
-
-		// index to alphabet
-		let itoa;
-		if (expression.length == 1 && expression[0] == "_") {
-			// if just a pipe
-			itoa = "_";
-		} else {
-			itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
-			// if index is not in alphabet, fuck
-			itoa = i > 26 ? "_" : itoa[i];
-		}
-
-		expression = expression.map(x => x == itoa ? input : x);
-	});
-
-	let c = expression.shift();
-	switch (c) {
-		case "+": return die(reduce((a, b) => a + b));
-		case "-": return die(reduce((a, b) => a - b));
-		case "*": return die(reduce((a, b) => a * b));
-		case "/": return die(reduce((a, b) => a / b));
-
-		case "nil": return die("nil");
-
-		default: {
-			let n = parseInt(c);
-			if (!isNaN(n)) {
-				return die(c);
-			} else {
-				return die(-1);
-			}
-		}
-	}
-
-	function die(v) {
-		if (typeof(v) == "number")
-			v = v.toFixed(0);
-
-		elements.columns.children[_x].children[_y].setAttribute("data-returns", v.toString());
-		return v.toString();
-	}
-
-	function reduce(callback) {
-		let _x = expression
-			.map(x => x == "nil" ? 0 : parseInt(x))
-			.filter(x => !isNaN(x));
-
-		if (_x.length == 0)
-			_x = [ -1 ];
-
-		return _x.reduce(callback);
-	}
-}
 
 function update() {
 	// reset columns element
@@ -517,15 +491,32 @@ function updateStatus() {
 
 		case 3: status += "move"; break;
 
-		default: status += "????";
+		case 4: {
+			status += "run   [state: ";
+
+			switch (run.state) {
+				case 0: status += "halted"; break;
+				case 1: status += "running"; break;
+				case 2: status += "paused"; break;
+				case 3: status += "halted (preserved)"; break;
+			}
+
+			status += "]";
+		} break;
+
+		default: status += "?";
 	}
 
 	elements.leftStatus.innerText = status;
 
-	let _e;
-	if (_e = getFocusedElement()) {
-		let r = _e.getAttribute("data-returns") || "?";
-		elements.rightStatus.innerText = "<" + r + ">";
+	if (mode == 0) {
+		let _e;
+		if (_e = getFocusedElement()) {
+			let r = _e.getAttribute("data-returns") || "?";
+			elements.rightStatus.innerText = "<" + r + ">";
+		}
+	} else {
+		elements.rightStatus.innerText = "";
 	}
 }
 

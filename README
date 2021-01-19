@@ -76,6 +76,7 @@ A) default mode
   A: add column
   x: remove block
   Delete: remove column
+  `: enter run mode (show console)
   Z: toggle debug view
   t: test current block
   g: move block (enters move mode)
@@ -105,3 +106,9 @@ C) connect mode
 D) move mode
   Escape/Enter/g: exit move mode
   Arrow Keys: move block
+
+E) run mode
+  `: exit run mode (hide console)
+  Tab: start execution
+  ~: halt execution (discard set registers)
+  ^~: halt execution (preserve set registers)
