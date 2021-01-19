@@ -71,7 +71,7 @@ may be presented with a tui version of odko as well.
 
 most  events  have argument locations,  which are places the interpreter expects
 you to have entered an argument.  the # argument(s)  are required,  and capitals
-(when stated as having such meaning) are optional arguments
+(when stated as having such meaning) are optional arguments.
 
 some  events can be followed by a numerical id so the interpreter knows in which
 order  to  execute multiple instances of an event, by default all events have an
@@ -79,6 +79,12 @@ id of 0 which means they will run as soon as possible, if multiple events of the
 same  type and id are present, they will execute in the order they appear in the
 starting column (top to bottom) this fact also holds true for events that do not
 permit you to input an id through an argument.
+
+sometimes optional arguments take the form of 'switches',  basically a 0 or 1 or
+more value (depending on function, 0 or 1 if not stated otherwise) which enables
+or disables something to make the event more specific/etc. you get it hopefully.
+
+events return their position in the starting column unless specified otherwise
 
   [ onRun X ]
    blocks connected to this block will run as soon as possible after the program

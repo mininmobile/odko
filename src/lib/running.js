@@ -56,11 +56,12 @@ function test(_x, _y) {
 	let { expression, connections } = parse(table[_x][_y]);
 
 	connections.forEach((c, i) => {
-		if (_x == 1)
-			if (["o", "k", "c"].includes(table[0][c].v.charAt(0)))
-				return;
-
-		let input = test(_x - 1, c);
+		let input;
+		// if connected to an event
+		if (_x == 1 && ["o", "k", "c"].includes(table[0][c].v.charAt(0)))
+			input = c;
+		else
+			input = test(_x - 1, c);
 
 		// index to alphabet
 		let itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"][i];
