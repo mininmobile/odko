@@ -150,21 +150,35 @@ svg {
 /* console */
 
 .console.wrapper {
+	min-width: 100px;
+	min-height: 100px;
 	width: 400px;
 	height: 300px;
 	background: #000000;
 	color: #dddddd;
 	border: 1px solid #dddddd;
 	position: fixed;
-	z-index: 999;
+	top: 60%;
+	left: 60%;
+	z-index: 1;
 	resize: both;
 	overflow: hidden;
 }
 
 .console.titlebar {
 	height: 1.5rem;
+	width: 100%;
 	padding: 0 0.175rem;
 	background: #dddddd;
 	color: #000000;
 	white-space: pre;
+}
+
+.console.container { /* this is so fucking dirty i'm sorry */
+	width: 100%;
+	height: calc(100% - 1.5rem);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
 }

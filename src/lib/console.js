@@ -3,7 +3,8 @@ let consoleData = {
 	h: 300,
 	c: undefined,
 	ctx: undefined,
-	drag: false, // -gin these nuts across your face
+	text: "",
+	drag: false,
 }
 
 function initConsole() {
@@ -19,14 +20,14 @@ function initConsole() {
 	attachDragHandler(elements.consoleTitlebar, elements.consoleWrapper);
 	// detect window resize
 	let observer = new MutationObserver(updateConsole);
-	observer.observe(elements.consoleWrapper, { attributes: true })
+	observer.observe(elements.consoleWrapper, { attributes: true });
 }
 
 function updateConsole() {
 	if (consoleData.drag) return;
 
-	let w = elements.consoleWrapper.clientWidth;
-	let h = elements.consoleWrapper.clientHeight - em(1.5);
+	let w = Math.floor(elements.consoleWrapper.clientWidth / ch(1)) * ch(1) - ch(1);
+	let h = Math.floor(elements.consoleWrapper.clientHeight / em(1)) * em(1) - em(2.5);
 
 	consoleData.c.width = consoleData.w = w;
 	consoleData.c.height = consoleData.h = h;
@@ -40,7 +41,7 @@ function attachDragHandler(handle, wrapper) {
 	handle.onmousedown =
 		e => e.button == 0 ? windowDragEvent(e, wrapper) : undefined;
 
-		wrapper.onmousedown =
+	wrapper.onmousedown =
 		e => e.altKey && e.button == 0 ? windowDragEvent(e, wrapper) : undefined;
 
 	/**
@@ -73,6 +74,9 @@ function attachDragHandler(handle, wrapper) {
 
 			// calculate x offset
 			let nx = w.offsetLeft - pos1;
+			// always on screen
+			nx = nx >= 0 ? nx : 0;
+			nx = nx <= window.innerWidth - w.clientWidth ? nx : window.innerWidth - w.clientWidth;
 
 			// calculate y offset
 			let ny = w.offsetTop - pos2;
