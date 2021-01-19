@@ -71,6 +71,12 @@ may be presented with a tui version of odko as well.
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 
+- DEFAULT MODE @L80
+- EDIT MODE @L95
+- CONNECT MODE @L104
+- MOVE MODE @L112
+- RUN MODE @L116
+
 A) default mode
   a: add block
   A: add column
@@ -110,5 +116,5 @@ D) move mode
 E) run mode
   `: exit run mode (hide console)
   Tab: start execution
-  ~: halt execution (discard set registers)
-  ^~: halt execution (preserve set registers)
+  Shift + Tab/F12: halt execution (discard set registers)
+  Shift + F12: halt execution (preserve set registers)

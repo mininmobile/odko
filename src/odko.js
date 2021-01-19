@@ -60,9 +60,17 @@ addEventListener("keydown", e => {
 			} break;
 
 			case "`": { // toggle console
+				// set variables
 				mode = 4;
 				run.state = 0;
 				conClear();
+				// disable debug view
+				if (debug) {
+					elements.columns.classList.remove("debug");
+					debug = false;
+					updateConnections();
+				}
+				// show console
 				elements.consoleWrapper.classList.remove("hidden");
 			} break;
 
@@ -387,6 +395,17 @@ addEventListener("keydown", e => {
 			} break;
 
 			case "Tab": {
+				// if user wants to halt
+				// nested ifs to break if not running, so you can't hold Shift + Tab to rapidly restart the execution over and over
+				if (e.shiftKey) {
+					if (run.state == 1) {
+						run.state = 0;
+						run.registers = {};
+						conLog("=> halted execution");
+					}
+
+					break;
+				}
 				if (run.state == 0 || run.state == 2 || run.state == 3) {
 					run.state = 1;
 					conLog("=> start of execution");
@@ -395,11 +414,13 @@ addEventListener("keydown", e => {
 					table[0].forEach(r => {
 						// fuck
 					});
+				} else if (run.state == 1) {
+					// pause
 				}
 			} break;
 
-			case "~": if (run.state == 1 || run.state == 2) {
-				if (e.ctrlKey && run.state !== 3) {
+			case "F12": if (run.state == 1 || run.state == 2) {
+				if (e.shiftKey && run.state !== 3) {
 					run.state = 3;
 					conLog("=> halted execution (preserve registers)");
 				} else {

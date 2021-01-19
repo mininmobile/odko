@@ -56,6 +56,10 @@ function test(_x, _y) {
 	let { expression, connections } = parse(table[_x][_y]);
 
 	connections.forEach((c, i) => {
+		if (_x == 1)
+			if (["o", "k", "c"].includes(table[0][c].v.charAt(0)))
+				return;
+
 		let input = test(_x - 1, c);
 
 		// index to alphabet
