@@ -16,7 +16,7 @@ function parseEvent(block, y) {
 		case "onRun": return {
 			type: "onRun",
 			activates: activates,
-			with: y,
+			origin: y,
 			id: isNaN(parseInt(event[0])) ? 0 : parseInt(event[0]),
 		}
 
@@ -32,7 +32,7 @@ function parseEvent(block, y) {
 						alt = null;
 					// parse
 					let fuck = false;
-					for (let i = 1; i < e.length; i++) {
+					for (let i = 1; i < block.v.length; i++) {
 						let c = block.v.charAt(i);
 						if (i == 1) {
 							// keyDown or keyUp event
@@ -40,45 +40,45 @@ function parseEvent(block, y) {
 						} else if (i == 2) {
 							// if no character provided
 							if (key = c) continue;
-							else { fuck = true; break }
+							else { fuck = i; break }
 						} else if (i == 3) {
 							// goof check
 							if (c !== " ")
-								{ fuck = true; break }
+								{ fuck = i; break }
 						}
 						// modifiers
 						else if (i == 4) {
 							if (c == "1") shift = true;
 							else if (c == "0") shift = false;
 							else if (c == "?") shift = null;
-							else { fuck = true; break };
+							else { fuck = i; break };
 						} else if (i == 5) {
 							if (c == "1") ctrl = true;
 							else if (c == "0") ctrl = false;
 							else if (c == "?") ctrl = null;
-							else { fuck = true; break };
+							else { fuck = i; break };
 						} else if (i == 6) {
 							if (c == "1") alt = true;
 							else if (c == "0") alt = false;
 							else if (c == "?") alt = null;
-							else { fuck = true; break };
+							else { fuck = i; break };
 						}
 					}
 					// self explanatory
 					if (fuck !== false) {
-						throw `![@x0y${y}] error at position ${fuck}`;
+						throw `![@x0y${y}] error at position ${fuck + 1}`;
 					} else return {
-						type: "onKey" + releasing ? "Up" : "Down",
+						type: "onKey" + (releasing ? "Up" : "Down"),
 						key: key,
 						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
 						activates: activates,
-						with: y,
+						origin: y,
 						id: 0,
 					}
 				}
 
 				// onCodeUp & onCodeDown
-				case "c": if (e.charAt(1) == "_" || e.charAt(1) == "-") {
+				case "c": if (e.charAt(3) == "_" || e.charAt(3) == "-") {
 					// placeholder variables
 					let releasing, codeA, codeB;
 					let shift = null,
@@ -86,18 +86,18 @@ function parseEvent(block, y) {
 						alt = null;
 					// parse
 					let fuck = false;
-					for (let i = 1; i < e.length; i++) {
+					for (let i = 1; i < block.v.length; i++) {
 						let c = block.v.charAt(i);
 						if (i == 1) {
 							codeA = c;
 							// if valid character provided
 							if (!isNaN(parseInt(c, 16))) continue;
-							else { fuck = true; break }
+							else { fuck = i; break }
 						} else if (i == 2) {
 							codeB = c;
 							// if valid character provided
 							if (!isNaN(parseInt(c, 16))) continue;
-							else { fuck = true; break }
+							else { fuck = i; break }
 						} else if (i == 3) {
 							// codeDown or codeUp event
 							releasing = c == "_" ? false : true;
@@ -107,28 +107,28 @@ function parseEvent(block, y) {
 							if (c == "1") shift = true;
 							else if (c == "0") shift = false;
 							else if (c == "?") shift = null;
-							else { fuck = true; break };
+							else { fuck = i; break };
 						} else if (i == 5) {
 							if (c == "1") ctrl = true;
 							else if (c == "0") ctrl = false;
 							else if (c == "?") ctrl = null;
-							else { fuck = true; break };
+							else { fuck = i; break };
 						} else if (i == 6) {
 							if (c == "1") alt = true;
 							else if (c == "0") alt = false;
 							else if (c == "?") alt = null;
-							else { fuck = true; break };
+							else { fuck = i; break };
 						}
 					}
 					// self explanatory
 					if (fuck !== false) {
-						throw `![x0y${y}] error at position ${fuck}`;
+						throw `![x0y${y}] error at position ${fuck + 1}`;
 					} else return {
-						type: "onCode" + releasing ? "Up" : "Down",
+						type: "onCode" + (releasing ? "Up" : "Down"),
 						code: codeA + codeB,
 						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
 						activates: activates,
-						with: y,
+						origin: y,
 						id: 0,
 					}
 				}

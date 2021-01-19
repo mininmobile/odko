@@ -420,6 +420,7 @@ addEventListener("keydown", e => {
 						try {
 							run.events.push(parseEvent(r, i));
 						} catch (e) {
+							console.error(e);
 							conLog(e);
 						}
 					});
@@ -693,7 +694,7 @@ function getFocusedColumn() {
 function getConnections(x, y) {
 	let connections = [];
 
-	table[x + 1].forEach((r, i) => {
+	(table[x + 1] || []).forEach((r, i) => {
 		if (r.c.includes(y))
 			connections.push(i);
 	});
