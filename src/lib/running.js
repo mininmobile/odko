@@ -205,3 +205,39 @@ function test(_x, _y) {
 
 	return evaluate(expression, { x: _x, y: _y });
 }
+
+// find event/event handler almost
+/**
+ * @param {(0|1)} type 0: keyboard, 1: other idfk
+ * @param {KeyboardEvent} event
+ * @param {boolean} releasing
+ */
+function findEvents(type, event, releasing = false) {
+	let events = [];
+
+	if (type == 0) {
+		events = run.events.filter(e => {
+			// if event doesn't match search direction
+			if ((e.type.endsWith("Up") && releasing) || (e.type.endsWith("Down") && !releasing)) {
+				let m = e.modifiers;
+				// check if modifiers match
+				if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
+					if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
+						if ((m.alt == event.altKey && m.alt !== null) || m.alt == null) {
+							// check if keys match
+							if (e.type.startsWith("onKey")) {
+								if (event.key.toLowerCase() == e.key)
+									return true;
+							} else if (e.type.startsWith("onCode")) {
+								if (event.which == parseInt(e.code, 16))
+									return true
+							}
+						}
+			}
+			// if no match found, fuck off
+			return false;
+		});
+	}
+
+	return events;
+}

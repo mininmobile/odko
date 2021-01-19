@@ -32,7 +32,6 @@ update();
 initConsole();
 
 addEventListener("keydown", e => {
-	//console.log(e.key);
 	e.preventDefault();
 
 	if (e.key == "r" && e.ctrlKey)
@@ -420,7 +419,9 @@ addEventListener("keydown", e => {
 						try {
 							run.events.push(parseEvent(r, i));
 						} catch (e) {
-							console.error(e);
+							if (typeof e !== "string")
+								console.log(e);
+
 							conLog(e);
 						}
 					});
@@ -444,7 +445,7 @@ addEventListener("keydown", e => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1) {
-				// call a func or sum idfk
+				console.log(findEvents(0, e, false));
 			}
 		}
 	}
@@ -461,7 +462,7 @@ addEventListener("keyup", (e) => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1) {
-				// call a func or sum idfk
+				console.log(findEvents(0, e, true));
 			}
 		}
 	}
