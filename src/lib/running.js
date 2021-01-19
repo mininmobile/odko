@@ -23,6 +23,7 @@ function parseEvent(block, y) {
 		// really compressed events
 		default: {
 			switch (e.charAt(0)) {
+				// onKeyUp & onKeyDown
 				case "k": if (e.charAt(1) == "_" || e.charAt(1) == "-") {
 					// placeholder variables
 					let releasing, key;
@@ -65,7 +66,7 @@ function parseEvent(block, y) {
 					}
 					// self explanatory
 					if (fuck !== false) {
-						throw `![@L${y}] error at position ${fuck}`;
+						throw `![@x0y${y}] error at position ${fuck}`;
 					} else return {
 						type: "onKey" + releasing ? "Up" : "Down",
 						key: key,
@@ -76,11 +77,63 @@ function parseEvent(block, y) {
 					}
 				}
 
-				case "c": {
+				// onCodeUp & onCodeDown
+				case "c": if (e.charAt(1) == "_" || e.charAt(1) == "-") {
+					// placeholder variables
+					let releasing, codeA, codeB;
+					let shift = null,
+						ctrl = null,
+						alt = null;
+					// parse
+					let fuck = false;
+					for (let i = 1; i < e.length; i++) {
+						let c = block.v.charAt(i);
+						if (i == 1) {
+							codeA = c;
+							// if valid character provided
+							if (!isNaN(parseInt(c, 16))) continue;
+							else { fuck = true; break }
+						} else if (i == 2) {
+							codeB = c;
+							// if valid character provided
+							if (!isNaN(parseInt(c, 16))) continue;
+							else { fuck = true; break }
+						} else if (i == 3) {
+							// codeDown or codeUp event
+							releasing = c == "_" ? false : true;
+						}
+						// modifiers
+						else if (i == 4) {
+							if (c == "1") shift = true;
+							else if (c == "0") shift = false;
+							else if (c == "?") shift = null;
+							else { fuck = true; break };
+						} else if (i == 5) {
+							if (c == "1") ctrl = true;
+							else if (c == "0") ctrl = false;
+							else if (c == "?") ctrl = null;
+							else { fuck = true; break };
+						} else if (i == 6) {
+							if (c == "1") alt = true;
+							else if (c == "0") alt = false;
+							else if (c == "?") alt = null;
+							else { fuck = true; break };
+						}
+					}
+					// self explanatory
+					if (fuck !== false) {
+						throw `![x0y${y}] error at position ${fuck}`;
+					} else return {
+						type: "onCode" + releasing ? "Up" : "Down",
+						code: codeA + codeB,
+						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
+						activates: activates,
+						with: y,
+						id: 0,
+					}
+				}
 
-				} break;
-
-				default: throw `![@L${y}] unknown event "${e}"`;
+				default: throw `![x0y${y}] unknown event "${e}"`;
 			}
 		}
 	}
