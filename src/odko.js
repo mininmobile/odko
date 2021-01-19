@@ -14,7 +14,7 @@ const elements = {
 
 let selected = { x: 0, y: 0 }
 let mode = 0;
-let run = { state: 0, registers: {}, events: {} };
+let run = { state: 0, registers: {}, events: [] };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
@@ -36,7 +36,7 @@ addEventListener("keydown", e => {
 	e.preventDefault();
 
 	if (e.key == "r" && e.ctrlKey)
-	location.reload();
+		location.reload();
 
 	if (mode == 0) { // no mode
 		let _e;
@@ -394,7 +394,7 @@ addEventListener("keydown", e => {
 				// reset state
 				run.state = 0;
 				run.registers = {};
-				run.events = {};
+				run.events = [];
 				// hided console
 				elements.consoleWrapper.classList.add("hidden");
 			} break;
@@ -416,9 +416,15 @@ addEventListener("keydown", e => {
 					conLog("=> start of execution");
 
 					// register events
-					table[0].forEach(r => {
-						// fuck
+					table[0].forEach((r, i) => {
+						try {
+							run.events.push(parseEvent(r, i));
+						} catch (e) {
+							conLog(e);
+						}
 					});
+					// run onRun events
+					// code
 				} else if (run.state == 1) {
 					// pause
 				}
@@ -434,11 +440,31 @@ addEventListener("keydown", e => {
 					conLog("=> halted execution");
 				}
 			} break;
+
+			// only trigger onKey functions when running
+			default: if (run.state == 1) {
+				// call a func or sum idfk
+			}
 		}
 	}
 
 	updateStatus();
 });
+
+addEventListener("keyup", (e) => {
+	e.preventDefault();
+
+	if (mode == 4) { // run mode
+		switch (e.key) {
+			case "`": case "Tab": case "F12": break;
+
+			// only trigger onKey functions when running
+			default: if (run.state == 1) {
+				// call a func or sum idfk
+			}
+		}
+	}
+})
 
 function update() {
 	// reset columns element
@@ -661,6 +687,18 @@ function getFocusedColumn() {
 		return columns.children[selected.x];
 
 	return false;
+}
+
+// calculate connections from current block
+function getConnections(x, y) {
+	let connections = [];
+
+	table[x + 1].forEach((r, i) => {
+		if (r.c.includes(y))
+			connections.push(i);
+	});
+
+	return connections;
 }
 
 // insert into string
