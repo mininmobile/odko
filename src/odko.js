@@ -444,9 +444,8 @@ addEventListener("keydown", e => {
 			} break;
 
 			// only trigger onKey functions when running
-			default: if (run.state == 1) {
-				console.log(findEvents(0, e, false));
-			}
+			default: if (run.state == 1)
+				findEvents(0, e, false).forEach(event => runFrom(0, event.origin));
 		}
 	}
 
@@ -461,9 +460,8 @@ addEventListener("keyup", (e) => {
 			case "`": case "Tab": case "F12": break;
 
 			// only trigger onKey functions when running
-			default: if (run.state == 1) {
-				console.log(findEvents(0, e, true));
-			}
+			default: if (run.state == 1)
+				findEvents(0, e, true).forEach(event => runFrom(0, event.origin));
 		}
 	}
 })

@@ -1,8 +1,8 @@
 // parse expression
-function parse(block) {
+function parse(block, calcConn = false) {
 	return {
 		expression: block.v.split(/ +/g).filter(x => x.length > 0),
-		connections: block.c.sort((a, b) => a - b),
+		connections: calcConn ? block.c.sort((a, b) => a - b) : [],
 	}
 }
 
@@ -140,13 +140,15 @@ function parseEvent(block, y) {
 }
 
 // evaluate expression
-function evaluate(expression, position) {
+function evaluate(expression, position = undefined) {
 	let c = expression.shift();
 	switch (c) {
 		case "+": return die(reduce((a, b) => a + b));
 		case "-": return die(reduce((a, b) => a - b));
 		case "*": return die(reduce((a, b) => a * b));
 		case "/": return die(reduce((a, b) => a / b));
+
+		case "log": conLog(expression.join(" ")); return die(expression.join(" "));
 
 		case "nil": return die("nil");
 
@@ -163,7 +165,7 @@ function evaluate(expression, position) {
 	function die(v) {
 		if (position) {
 			if (typeof(v) == "number")
-			v = v.toFixed(0);
+				v = v.toFixed(0);
 
 			elements.columns.children[position.x].children[position.y]
 				.setAttribute("data-returns", v.toString());
@@ -184,21 +186,63 @@ function evaluate(expression, position) {
 	}
 }
 
+// run from coords
+function runFrom(_x, _y) {
+	let startingBlock = table[_x][_y]; // sanity
+	let startingExpression, toEval; // blocks to evaluate before moving on to next column
+	{
+		let {expression} = parse(startingBlock);
+		startingExpression = expression;
+		toEval = getConnections(_x, _y);
+	}
+	// temp table
+	let t = [];
+	t[_x] = t[_x + 1] = [];
+	// calculate starting value
+	if (["o", "k", "c"].includes(startingBlock.v.charAt(0)) && _x == 0)
+		t[_x][_y] = _y.toString();
+	else {
+		t[_x][_y] == evaluate(startingExpression);
+	}
+	// go go go
+	for (let x = _x + 1; x < table.length; x++) {
+		t[x] = [];
+		let n = [];
+		for (let i = 0; i < toEval.length; i++) {
+			let y = toEval[i];
+
+			let { expression, connections } = parse(table[x][y], true);
+			// evaluate with connections
+			connections.forEach((c, i) => {
+				let input = t[x -1][c] || "-1";
+				// index to alphabet
+				let itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"][i];
+				// substitutions in expression
+				expression = expression.map(x =>
+					(connections.length == 1 ? (x == "A" || x == "_") : (x == itoa))? input : x);
+			});
+			t[x][y] = evaluate(expression);
+			n = n.concat(getConnections(x, y));
+		}
+		toEval = n.filter((v, i, a) => a.indexOf(v) === i);
+	}
+}
+
 // testing in default mode
 function test(_x, _y) {
-	let { expression, connections } = parse(table[_x][_y]);
+	let { expression, connections } = parse(table[_x][_y], true);
 
 	connections.forEach((c, i) => {
 		let input;
 		// if connected to an event
 		if (_x == 1 && ["o", "k", "c"].includes(table[0][c].v.charAt(0)))
-			input = c;
+			input = c.toString();
 		else
 			input = test(_x - 1, c);
 
 		// index to alphabet
 		let itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"][i];
-
+		// substitutions in expression
 		expression = expression.map(x =>
 			(connections.length == 1 ? (x == "A" || x == "_") : (x == itoa))? input : x);
 	});
