@@ -219,7 +219,7 @@ function runFrom(_x, _y) {
 				let itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"][i];
 				// substitutions in expression
 				expression = expression.map(x =>
-					(connections.length == 1 ? (x == "A" || x == "_") : (x == itoa))? input : x);
+					(i == 0 ? (x == "A" || x == "_") : (x == itoa)) ? input : x);
 			});
 			t[x][y] = evaluate(expression);
 			n = n.concat(getConnections(x, y));
@@ -244,7 +244,7 @@ function test(_x, _y) {
 		let itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"][i];
 		// substitutions in expression
 		expression = expression.map(x =>
-			(connections.length == 1 ? (x == "A" || x == "_") : (x == itoa))? input : x);
+			(i == 0 ? (x == "A" || x == "_") : (x == itoa)) ? input : x);
 	});
 
 	return evaluate(expression, { x: _x, y: _y });
