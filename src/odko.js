@@ -445,7 +445,7 @@ addEventListener("keydown", e => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1)
-				findEvents(0, e, false).forEach(event => runFrom(0, event.origin));
+				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values));
 		}
 	}
 
@@ -461,7 +461,7 @@ addEventListener("keyup", (e) => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1)
-				findEvents(0, e, true).forEach(event => runFrom(0, event.origin));
+				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values));
 		}
 	}
 })

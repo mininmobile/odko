@@ -195,7 +195,8 @@ function evaluate(expression, position = undefined) {
 }
 
 // run from coords
-function runFrom(_x, _y) {
+function runFrom(_x, _y, values = {}) {
+	const itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]; // index to alphabet
 	let startingBlock = table[_x][_y]; // sanity
 	let startingExpression, toEval; // blocks to evaluate before moving on to next column
 	{
@@ -207,7 +208,7 @@ function runFrom(_x, _y) {
 	let t = [];
 	t[_x] = t[_x + 1] = [];
 	// calculate starting value
-	if (["o", "k", "c"].includes(startingBlock.v.charAt(0)) && _x == 0)
+	if (["o", "k", "c", "m"].includes(startingBlock.v.charAt(0)) && _x == 0)
 		t[_x][_y] = _y.toString();
 	else {
 		t[_x][_y] == evaluate(startingExpression);
@@ -220,15 +221,20 @@ function runFrom(_x, _y) {
 			let y = toEval[i];
 
 			let { expression, connections } = parse(table[x][y], true);
-			// evaluate with connections
+			// substitute with connections
 			connections.forEach((c, i) => {
 				let input = t[x -1][c] || "-1";
-				// index to alphabet
-				let itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"][i];
 				// substitutions in expression
 				expression = expression.map(x =>
-					(i == 0 ? (x == "A" || x == "_") : (x == itoa)) ? input : x);
+					(i == 0 ? (x == "A" || x == "_") : (x == itoa[i])) ? input : x);
 			});
+			// substitute with values
+			Object.keys(values).forEach((v) => {
+				// substitutions in expression
+				expression = expression.map(x =>
+					x == v ? values[v] : x);
+			});
+			// evaluate
 			t[x][y] = evaluate(expression);
 			n = n.concat(getConnections(x, y));
 		}
@@ -266,6 +272,8 @@ function test(_x, _y) {
  */
 function findEvents(type, event, releasing = false) {
 	let events = [];
+	let values = {};
+	let count = 0;
 
 	events = run.events.filter(e => {
 		// if event doesn't match search direction
@@ -277,16 +285,32 @@ function findEvents(type, event, releasing = false) {
 					if ((m.alt == event.altKey && m.alt !== null) || m.alt == null)
 						// check if keys/buttons match
 						if (e.type == "onKey" && type == 0) {
-							if (event.key.toLowerCase() == e.key) return true;
+							if (event.key.toLowerCase() == e.key.toLowerCase()) return match();
 						} else if (e.type == "onCode" && type == 0) {
-							if (event.which == e.code) return true
+							if (event.which == e.code) return match();
 						} else if (e.type == "onMouse" && type == 1) {
-							if (event.button == e.button) return true;
+							if (event.button == e.button) return match({
+								"X": Math.floor(event.offsetX / ch(1)),
+								"Y": Math.floor(event.offsetY / em(1)),
+								"M": event.offsetX,
+								"N": event.offsetY,
+							});
 						}
 		}
 		// if no match found, fuck off
 		return false;
 	});
+
+	function match(vs) {
+		if (vs)
+			values[count] = vs;
+
+		count++;
+		return true;
+	}
+
+	Object.keys(values).forEach(v =>
+		events[v].values = values[v]);
 
 	return events;
 }
