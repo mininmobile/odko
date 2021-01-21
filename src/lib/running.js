@@ -148,6 +148,9 @@ function parseEvent(block, y) {
 }
 
 // evaluate expression
+/**
+ * @param {Array.<String>} expression
+ */
 function evaluate(expression, position = undefined) {
 	let c = expression.shift();
 	switch (c) {
@@ -161,12 +164,14 @@ function evaluate(expression, position = undefined) {
 		case "nil": return die("nil");
 
 		default: {
+			if (c.charAt(0) == "\"" || c.charAt(0))
+				return c.substring(1) + (expression.length > 0 ? " " + expression.join(" ") : "");
+
 			let n = parseInt(c);
-			if (!isNaN(n)) {
+			if (!isNaN(n))
 				return die(c);
-			} else {
+			else
 				return die(-1);
-			}
 		}
 	}
 
@@ -221,19 +226,32 @@ function runFrom(_x, _y, values = {}) {
 			let y = toEval[i];
 
 			let { expression, connections } = parse(table[x][y], true);
-			// substitute with connections
-			connections.forEach((c, i) => {
-				let input = t[x -1][c] || "-1";
-				// substitutions in expression
-				expression = expression.map(x =>
-					(i == 0 ? (x == "A" || x == "_") : (x == itoa[i])) ? input : x);
-			});
 			// substitute with values
 			Object.keys(values).forEach((v) => {
 				// substitutions in expression
 				expression = expression.map(x =>
 					x == v ? values[v] : x);
 			});
+			// if string
+			let _c = expression[0].charAt(0);
+			if ((_c == "\"" || _c == "'") && x > 1) {
+				let temp = [ ];
+				// concatenate connections
+				connections.forEach((c) =>
+					temp.unshift(t[x - 1][c]));
+
+				temp = temp.filter(x => x !== "nil");
+				if (_c == "\"") temp = temp.reverse();
+				expression = (_c + temp.join("") + expression.join(" ").substring(1)).trimEnd().split();
+			} else {
+				// substitute with connections
+				connections.forEach((c, i) => {
+					let input = t[x - 1][c] || "-1";
+					// substitutions in expression
+					expression = expression.map(x =>
+						(i == 0 ? (x == "A" || x == "_") : (x == itoa[i])) ? input : x);
+				});
+			}
 			// evaluate
 			t[x][y] = evaluate(expression);
 			n = n.concat(getConnections(x, y));

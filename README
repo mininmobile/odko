@@ -32,9 +32,9 @@
 - LANGUAGE DESIGN @L43
 - SYNTAX AND EXAMPLES @L56
 - VALUES @L68
-- COMMANDS @L90
-- EVENTS @L109
-- KEYBOARD SHORTCUTS @L166
+- COMMANDS @L91
+- EVENTS @L110
+- KEYBOARD SHORTCUTS @L167
 
 [ DESCRIPTION ]
 
@@ -74,7 +74,8 @@ also used as booleans in the forms of 1s and 0s.
 
 strings are written as [ "###### ] where the double-quotes tell the interpreter
 that you are handing it a string, the rest is stored as raw characters ie. incl.
-stuff like trailing spaces.
+stuff like trailing spaces. if this is connected to a new value this block would
+then return that previous value with the string concatenated onto it.
 
 special are usually placeholder values to make code neater, like;
 
@@ -172,11 +173,11 @@ if multiple values are returned then they will be stated.
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 
-- DEFAULT MODE @L181
-- EDIT MODE @L196
-- CONNECT MODE @L205
-- MOVE MODE @L213
-- RUN MODE @L217
+- DEFAULT MODE @L182
+- EDIT MODE @L197
+- CONNECT MODE @L206
+- MOVE MODE @L214
+- RUN MODE @L218
 
 A) default mode
   a: add block
