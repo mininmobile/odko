@@ -22,6 +22,8 @@ function initConsole() {
 	// detect window resize
 	let observer = new MutationObserver(() => updateConsole());
 	observer.observe(elements.consoleWrapper, { attributes: true });
+	// mouse events
+	attachConsoleClickHandlers();
 
 	// aaa();
 }
@@ -135,4 +137,14 @@ function attachDragHandler(handle, wrapper) {
 			document.onmousemove = null;
 		}
 	}
+}
+
+function attachConsoleClickHandlers() {
+	elements.consoleCanvas.addEventListener("mousedown", (e) => {
+		// fuck
+	});
+
+	elements.consoleCanvas.addEventListener("mouseup", (e) => {
+		// fuck
+	});
 }

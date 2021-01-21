@@ -31,8 +31,10 @@
 - DESCRIPTION @L36
 - LANGUAGE DESIGN @L43
 - SYNTAX AND EXAMPLES @L56
-- EVENTS @L66
-- KEYBOARD SHORTCUTS @L106
+- VALUES @L68
+- COMMANDS @L90
+- EVENTS @L109
+- KEYBOARD SHORTCUTS @L166
 
 [ DESCRIPTION ]
 
@@ -49,7 +51,7 @@ doesn't matter as long as it's cool.
 you  have blocks as rows in columns, you then connect the blocks mostly linearly
 and the program is executed in parallel in that order.
 
-each  block  contains  a  command  and  arguments for it, it then passes what it
+each block contains a single value or command and arguments for it, it then passes what it
 returns  down  to the connected block(s). because odko is event-driven each line
 should start with an event command,  and then when that event occurs the program
 branches out from that first block by activating the connected blocks.
@@ -62,6 +64,47 @@ ui or plaintext representations of code.
 
 yes, i am planning on coming up with a way to write plaintext odko code,  and it
 may be presented with a tui version of odko as well.
+
+[ VALUES ]
+
+values take the forms of numbers, strings, and specials.
+
+number values (specifically integers) can simply typed into a block. they are
+also used as booleans in the forms of 1s and 0s.
+
+strings are written as [ "###### ] where the double-quotes tell the interpreter
+that you are handing it a string, the rest is stored as raw characters ie. incl.
+stuff like trailing spaces.
+
+special are usually placeholder values to make code neater, like;
+
+  [ nil ]
+   placeholder value, returns "nil". evaluated to 0 by arithmetic commands.
+  [ true, tru ]
+   placeholder value, returns 1.
+  [ false, fal ]
+   placeholder value, returns 0.
+  [ unknown, error, bad ]
+   placeholder value, returns -1.
+
+[ COMMANDS ]
+
+> if a command has a simple non-fatal error, they just return -1, else they halt
+  the execution of the program and write the error in the console.
+> arithmetic commands error if no arguments are provided.
+
+  [ + A B C ]
+   add A B C together, B or C can be omitted. returns the sum.
+  [ - A B C ]
+   subtract B from A and C from that, B or C can be omitted. returns the result.
+  [ * A B C ]
+   multiply A B C together, B or C and be omitted. returns product.
+  [ / A B C ]
+   divide A by B and that by C, B or C can be omitted. returns the result.
+
+  [ log ### ]
+   concatenates arguments (with space, " ") and prints them to console.
+
 
 [ EVENTS ]
 
@@ -84,7 +127,8 @@ sometimes optional arguments take the form of 'switches',  basically a 0 or 1 or
 more value (depending on function, 0 or 1 if not stated otherwise) which enables
 or disables something to make the event more specific/etc. you get it hopefully.
 
-events return their position in the starting column unless specified otherwise
+events return their position in the starting column unless specified  otherwise,
+if multiple values are returned then they will be stated.
 
   [ onRun X ]
    blocks connected to this block will run as soon as possible after the program
@@ -99,7 +143,7 @@ events return their position in the starting column unless specified otherwise
    key, your ABC would be "1?1")
 
   [ k-# ABC ]
-   same as previous event except fires after a key has been released.
+   same as previous except fires after the key # has been released.
 
   [ c##_ABC ]
    same as the  [ k_# ]  event except instead of a character you would input two
@@ -108,6 +152,16 @@ events return their position in the starting column unless specified otherwise
   [ c##-ABC ]
    same as the  [ k-# ]  event except instead of a character you would input two
    hexadecimal digits that represent a javascript keycode.
+
+  [ m_# ABC ]
+   same as the [ k_# ] event except executed on mouse button # depressing. # can
+   be 0 for left click, 1 for middle click, 2 for right click. (etc?)  when this
+   event is  triggered it returns  multiple values,   value X for the horizontal
+   cell clicked, Y for the vertical cell clicked,  M for the raw x position, and
+   N for the raw y position.
+
+  [ m-# ABC ]
+   same as previous except fires after the mouse button # has been released.
 
 [ KEYBOARD SHORTCUTS ]
 
@@ -118,11 +172,11 @@ events return their position in the starting column unless specified otherwise
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 
-- DEFAULT MODE @L121
-- EDIT MODE @L136
-- CONNECT MODE @L145
-- MOVE MODE @L153
-- RUN MODE @L157
+- DEFAULT MODE @L181
+- EDIT MODE @L196
+- CONNECT MODE @L205
+- MOVE MODE @L213
+- RUN MODE @L217
 
 A) default mode
   a: add block
