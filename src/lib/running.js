@@ -24,7 +24,7 @@ function parseEvent(block, y) {
 		default: {
 			switch (e.charAt(0)) {
 				// onKeyUp & onKeyDown
-				case "k": if (e.charAt(1) == "_" || e.charAt(1) == "-") {
+				case "k": case "m": if (e.charAt(1) == "_" || e.charAt(1) == "-") {
 					// placeholder variables
 					let releasing, key;
 					let shift = null,
@@ -37,10 +37,15 @@ function parseEvent(block, y) {
 						if (i == 1) {
 							// keyDown or keyUp event
 							releasing = c == "_" ? false : true;
-						} else if (i == 2) {
+						} else if (i == 2 && e.charAt(0) == "k") {
 							// if no character provided
 							if (key = c) continue;
 							else { fuck = i; break }
+						} else if (i == 2 && e.charAt(0) == "m") {
+							// if no button provided
+							if (c == "0" || c == "1" || c == "2") {
+								key = c; continue;
+							} else { fuck = i; break }
 						} else if (i == 3) {
 							// goof check
 							if (c !== " ")
@@ -68,8 +73,10 @@ function parseEvent(block, y) {
 					if (fuck !== false) {
 						throw `![@x0y${y}] error at position ${fuck + 1}`;
 					} else return {
-						type: "onKey" + (releasing ? "Up" : "Down"),
-						key: key,
+						type: e.charAt(0) == "k" ? "onKey" : "onMouse",
+						direction: releasing,
+						key: e.charAt(0) == "k" ? key : undefined,
+						button: e.charAt(0) == "m" ? parseInt(key) : undefined,
 						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
 						activates: activates,
 						origin: y,
@@ -124,8 +131,9 @@ function parseEvent(block, y) {
 					if (fuck !== false) {
 						throw `![x0y${y}] error at position ${fuck + 1}`;
 					} else return {
-						type: "onCode" + (releasing ? "Up" : "Down"),
-						code: codeA + codeB,
+						type: "onCode",
+						direction: releasing,
+						code: parseInt(codeA + codeB, 16),
 						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
 						activates: activates,
 						origin: y,
@@ -235,7 +243,7 @@ function test(_x, _y) {
 	connections.forEach((c, i) => {
 		let input;
 		// if connected to an event
-		if (_x == 1 && ["o", "k", "c"].includes(table[0][c].v.charAt(0)))
+		if (_x == 1 && ["o", "k", "c", "m"].includes(table[0][c].v.charAt(0)))
 			input = c.toString();
 		else
 			input = test(_x - 1, c);
@@ -252,36 +260,33 @@ function test(_x, _y) {
 
 // find event/event handler almost
 /**
- * @param {(0|1)} type 0: keyboard, 1: other idfk
- * @param {KeyboardEvent} event
+ * @param {(0|1)} type 0: keyboard, 1: mouse
+ * @param {(KeyboardEvent|MouseEvent)} event
  * @param {boolean} releasing
  */
 function findEvents(type, event, releasing = false) {
 	let events = [];
 
-	if (type == 0) {
-		events = run.events.filter(e => {
-			// if event doesn't match search direction
-			if ((e.type.endsWith("Up") && releasing) || (e.type.endsWith("Down") && !releasing)) {
-				let m = e.modifiers;
-				// check if modifiers match
-				if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
-					if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
-						if ((m.alt == event.altKey && m.alt !== null) || m.alt == null) {
-							// check if keys match
-							if (e.type.startsWith("onKey")) {
-								if (event.key.toLowerCase() == e.key)
-									return true;
-							} else if (e.type.startsWith("onCode")) {
-								if (event.which == parseInt(e.code, 16))
-									return true
-							}
+	events = run.events.filter(e => {
+		// if event doesn't match search direction
+		if (e.direction == releasing) {
+			let m = e.modifiers;
+			// check if modifiers match
+			if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
+				if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
+					if ((m.alt == event.altKey && m.alt !== null) || m.alt == null)
+						// check if keys/buttons match
+						if (e.type == "onKey" && type == 0) {
+							if (event.key.toLowerCase() == e.key) return true;
+						} else if (e.type == "onCode" && type == 0) {
+							if (event.which == e.code) return true
+						} else if (e.type == "onMouse" && type == 1) {
+							if (event.button == e.button) return true;
 						}
-			}
-			// if no match found, fuck off
-			return false;
-		});
-	}
+		}
+		// if no match found, fuck off
+		return false;
+	});
 
 	return events;
 }
