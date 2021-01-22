@@ -100,6 +100,20 @@ svg {
 	border-bottom: 1px solid currentColor;
 }
 
+.row:empty::before {
+	content: ".......";
+	color: #777777;
+}
+
+.row.focus:empty::before {
+	color: #000000;
+}
+
+.row.editing:empty:before {
+	content: " ......";
+	color: #777777;
+}
+
 /* edit cursor */
 
 .cursor {

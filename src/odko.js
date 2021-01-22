@@ -85,10 +85,9 @@ addEventListener("keydown", e => {
 					update();
 				}
 
-				table[selected.x].splice(selected.y + 1, 0, { v: "nil", c: [] });
+				table[selected.x].splice(selected.y + 1, 0, { v: "", c: [] });
 				let row = document.createElement("div");
 					row.classList.add("row");
-					row.innerText = "nil";
 					elements.columns.children[selected.x]
 						.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
 
@@ -224,14 +223,14 @@ addEventListener("keydown", e => {
 
 			case "ArrowRight": { // move cursor right
 				editCursor++;
-				if (editCursor > getFocused().length - 1)
-					editCursor = getFocused().length;
+				if (editCursor > getFocused().v.length - 1)
+					editCursor = getFocused().v.length;
 			} break;
 
 			case "ArrowUp": case "Home": // move cursor to start
 				editCursor = 0; break;
 			case "ArrowDown": case "End": // move cursor to end
-				editCursor = getFocused().length; break;
+				editCursor = getFocused().v.length; break;
 
 			case "Backspace": { // delete char behind cursor
 				getFocusedElement().innerText =
