@@ -107,8 +107,20 @@ special values are usually placeholder values to make code neater, like;
   [ / A B C ]
    divide A by B and that by C, B or C can be omitted. returns the result.
 
-  [ log ### ]
-   concatenates arguments (with space, " ") and prints them to console.
+  [ log ### ]   log _,  log A B
+   concatenates arguments (with space, " ") and prints them to console. can omit
+   space when using the ! alias in the form [ !###### ]
+
+  [ ?A ## B ]   ?A == B,  ?A > B
+   conditional if statement, it compares two A with B,  if the statement is true
+   it activates  the first connected block,  else the second.   all of the other
+   connections are ignored.  the spaces around the ## can be omitted to compare
+   registers. ## can be one of the following operations:
+    [ == ] A is equal to B               [ != ] A is not equal to B
+    [ >  ] A is greater/longer than B    [ <  ] A is smaller/shorter then B
+    [ >= ] A is >, or equal to B         [ <= ] A is <, or equal to B
+    [ && ] A and B are greater then 0    [ || ] A or B are greater then 0
+    [ ^^ ] A or B is greater than 0, but not both A and B (XOR)
 
 
 [ EVENTS ]
