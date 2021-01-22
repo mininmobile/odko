@@ -237,12 +237,16 @@ function runFrom(_x, _y, values = {}) {
 			if ((_c == "\"" || _c == "'") && x > 1) {
 				let temp = [ ];
 				// concatenate connections
-				connections.forEach((c) =>
-					temp.unshift(t[x - 1][c]));
-
+				connections.forEach((c) => // different quotes different directions
+					temp[_c == "\"" ? "push" : "unshift"](t[x - 1][c]));
+				// nil == empty string
 				temp = temp.filter(x => x !== "nil");
-				if (_c == "\"") temp = temp.reverse();
-				expression = (_c + temp.join("") + expression.join(" ").substring(1)).trimEnd().split();
+				// different quotes different directions
+				temp[_c == "\"" ? "push" : "unshift"](expression.join(" ").substring(1));
+				// return
+				expression =
+					(_c + temp.join(""))
+						.trimEnd().split(" ");
 			} else {
 				// substitute with connections
 				connections.forEach((c, i) => {

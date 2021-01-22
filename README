@@ -28,13 +28,13 @@
 
                      a minimal graphical programming language.
 
-- DESCRIPTION @L36
-- LANGUAGE DESIGN @L43
-- SYNTAX AND EXAMPLES @L56
-- VALUES @L68
-- COMMANDS @L91
-- EVENTS @L110
-- KEYBOARD SHORTCUTS @L167
+- DESCRIPTION
+- LANGUAGE DESIGN
+- SYNTAX AND EXAMPLES
+- VALUES
+- COMMANDS
+- EVENTS
+- KEYBOARD SHORTCUTS
 
 [ DESCRIPTION ]
 
@@ -72,15 +72,19 @@ values take the forms of numbers, strings, and specials.
 number values (specifically integers) can simply typed into a block. they are
 also used as booleans in the forms of 1s and 0s.
 
-strings are written as [ "###### ] where the double-quotes tell the interpreter
-that you are handing it a string, the rest is stored as raw characters ie. incl.
-stuff like trailing spaces. if this is connected to a new value this block would
-then return that previous value with the string concatenated onto it.
+strings are marked with a quote followed by any six characters of your choosing,
+this  returns whatever you write after the quotes,   and if it is connected to a
+block, it concatenates the connected values (including other strings which means
+you can stack strings on top of each other to craft long strings) and places the
+six or less characters at the end of it when using double-quotes.  there is also
+the  single quote variant which  concatenates in the reverse order including the
+append.
 
-special are usually placeholder values to make code neater, like;
+special values are usually placeholder values to make code neater, like;
 
   [ nil ]
-   placeholder value, returns "nil". evaluated to 0 by arithmetic commands.
+   placeholder value, returns "nil". evaluated to 0 by arithmetic commands and
+   to an empty string when string values try to concatenate it.
   [ true, tru ]
    placeholder value, returns 1.
   [ false, fal ]
@@ -173,11 +177,11 @@ if multiple values are returned then they will be stated.
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 
-- DEFAULT MODE @L182
-- EDIT MODE @L197
-- CONNECT MODE @L206
-- MOVE MODE @L214
-- RUN MODE @L218
+- DEFAULT MODE
+- EDIT MODE
+- CONNECT MODE
+- MOVE MODE
+- RUN MODE
 
 A) default mode
   a: add block
