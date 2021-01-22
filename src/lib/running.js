@@ -162,6 +162,9 @@ function evaluate(expression, position = undefined) {
 		case "log": conLog(expression.join(" ")); return die(expression.join(" "));
 
 		case "nil": return die("nil");
+		case "tru": case "true": return die("1");
+		case "fal": case "false": return die("-1");
+		case "bad": case "error": case "unknown": return die("-1");
 
 		default: {
 			if (c.charAt(0) == "\"" || c.charAt(0))
@@ -171,7 +174,7 @@ function evaluate(expression, position = undefined) {
 			if (!isNaN(n))
 				return die(c);
 			else
-				return die(-1);
+				return die("-1");
 		}
 	}
 
