@@ -116,12 +116,11 @@ special values are usually placeholder values to make code neater, like;
    it activates  the first connected block,  else the second.   all of the other
    connections are ignored.  the spaces around the ## can be omitted to compare
    registers. ## can be one of the following operations:
-    [ == ] A is equal to B               [ != ] A is not equal to B
-    [ >  ] A is greater/longer than B    [ <  ] A is smaller/shorter then B
-    [ >= ] A is >, or equal to B         [ <= ] A is <, or equal to B
-    [ && ] A and B are greater then 0    [ || ] A or B are greater then 0
-    [ ^^ ] A or B is greater than 0, but not both A and B (XOR)
-
+    [ == ] A is equal (in length to) B  [ != ] A is not equal (in length) to B
+    [ >  ] A is greater/longer than B   [ <  ] A is smaller/shorter then B
+    [ >= ] A is >, or equal to B        [ <= ] A is <, or equal to B
+    [ && ] A and B are greater then 0   [ || ] A or B are greater then 0
+    [ ^^ ] A or B is greater/longer than 0, but not both A and B (XOR)
 
 [ EVENTS ]
 

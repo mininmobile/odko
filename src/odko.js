@@ -419,7 +419,7 @@ addEventListener("keydown", e => {
 							run.events.push(parseEvent(r, i));
 						} catch (e) {
 							if (typeof e !== "string")
-								console.log(e);
+								console.error(e);
 
 							conLog(e);
 						}
@@ -708,6 +708,25 @@ function insert(string, text, index) {
 // remove from string
 function remove(string, index, amount = 1) {
 	return string.substring(0, index) + string.substring(index + amount);
+}
+
+// (try) to make number
+function tNum(string, toLen = false, radix) {
+	let number = parseInt(string, radix);
+	if (isNaN(number))
+		return toLen ? string.length : string;
+	else
+		return number;
+}
+
+// bool to num
+function btn(bool) {
+	return bool ? 1 : 0;
+}
+
+// num to bool
+function ntb(num) {
+	return num > 0 ? true : false;
 }
 
 // get css measurements

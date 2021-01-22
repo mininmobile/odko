@@ -66,6 +66,7 @@ function consoleDraw() {
 function conLog(text) {
 	consoleData.text.unshift(text);
 	consoleDraw();
+	return text;
 }
 
 function conClear() {

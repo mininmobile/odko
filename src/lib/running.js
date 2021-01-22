@@ -71,7 +71,7 @@ function parseEvent(block, y) {
 					}
 					// self explanatory
 					if (fuck !== false) {
-						throw `![@x0y${y}] error at position ${fuck + 1}`;
+						throw `![x0y${y}] error at position ${fuck + 1}`;
 					} else return {
 						type: e.charAt(0) == "k" ? "onKey" : "onMouse",
 						direction: releasing,
@@ -158,34 +158,66 @@ function evaluate(expression, position = undefined) {
 		case "-": return die(reduce((a, b) => a - b));
 		case "*": return die(reduce((a, b) => a * b));
 		case "/": return die(reduce((a, b) => a / b));
-
-		case "log": conLog(expression.join(" ")); return die(expression.join(" "));
-
+		// long log command
+		case "log": return die(conLog(expression.join(" ")));
+		// special values
 		case "nil": return die("nil");
 		case "tru": case "true": return die("1");
 		case "fal": case "false": return die("-1");
 		case "bad": case "error": case "unknown": return die("-1");
+	}
 
-		default: {
-			if (c.charAt(0) == "\"" || c.charAt(0))
-				return c.substring(1) + (expression.length > 0 ? " " + expression.join(" ") : "");
-
+	switch (c.charAt(0)) {
+		// short log command
+		case "!":
+			return die(conLog(c.substring(1) + expression.join(" ")));
+		// strings
+		case "\"": case "'":
+			return die(c.substring(1) + (expression.length > 0 ? " " + expression.join(" ") : ""));
+		// conditional
+		case "?": {
+			// remove nils
+			expression = expression.filter(x => x !== "nil");
+			// get comparator
+			let comparator = expression.findIndex(x =>
+				["==", "!=", ">", "<", ">=", "<=", "&&", "||", "^^"].includes(x));
+			if (comparator == -1) throw "no comparator specified";
+			// get first input
+			let _a = expression.slice(0, comparator);
+			let a = tNum(c.substring(1) + (_a.length > 0 ? " " + _a.join(" ") : ""));
+			if (a.length == 0) throw "no first input specified";
+			// get second input
+			let b = tNum(expression.slice(comparator + 1, expression.length).join(" "));
+			if (b.length == 0) throw "no second input specified";
+			// i do not specify default: here because it is not needed due the the way the get comparator step is written
+			switch (expression[comparator]) {
+				case "==": return die(btn(a === b));
+				case "!=": return die(btn(a !== b));
+				case ">":  return die(btn(a >  b));
+				case "<":  return die(btn(a <  b));
+				case ">=": return die(btn(a >= b));
+				case "<=": return die(btn(a <= b));
+				case "&&": return die(btn(ntb(a) && ntb(b)));
+				case "||": return die(btn(ntb(a) || ntb(b)));
+				case "^^": return die(ntb(a) ^ ntb(b));
+			}
+		}
+		// by default is just number value
+		default:
 			let n = parseInt(c);
 			if (!isNaN(n))
 				return die(c);
 			else
 				return die("-1");
-		}
 	}
 
 	function die(v) {
-		if (position) {
-			if (typeof(v) == "number")
-				v = v.toFixed(0);
+		if (typeof(v) == "number")
+			v = v.toFixed(0);
 
+		if (position)
 			elements.columns.children[position.x].children[position.y]
 				.setAttribute("data-returns", v.toString());
-		}
 
 		return v.toString();
 	}
@@ -229,14 +261,17 @@ function runFrom(_x, _y, values = {}) {
 			let y = toEval[i];
 
 			let { expression, connections } = parse(table[x][y], true);
+			let _c = expression[0].charAt(0);
 			// substitute with values
 			Object.keys(values).forEach((v) => {
 				// substitutions in expression
 				expression = expression.map(x =>
-					x == v ? values[v] : x);
+					x == v ? values[v].toString() : x);
+				if (_c == "?")
+					expression = expression.map(x =>
+						x == "?" + v ? "?" + values[v].toString() : x);
 			});
 			// if string
-			let _c = expression[0].charAt(0);
 			if ((_c == "\"" || _c == "'") && x > 1) {
 				let temp = [ ];
 				// concatenate connections
@@ -257,13 +292,28 @@ function runFrom(_x, _y, values = {}) {
 					// substitutions in expression
 					expression = expression.map(x =>
 						(i == 0 ? (x == "A" || x == "_") : (x == itoa[i])) ? input : x);
+					if (_c == "?")
+						expression = expression.map(x =>
+							(i == 0 ? (x == "?A" || x == "?_") : (x == "?" + itoa[i])) ? "?" + input : x);
 				});
 			}
 			// evaluate
-			t[x][y] = evaluate(expression);
-			n = n.concat(getConnections(x, y));
+			try {
+				t[x][y] = evaluate(expression);
+			} catch (e) {
+				if (typeof e !== "string")
+					console.error(e);
+
+				return conLog(`![x${x}y${y}] ` + e);
+			}
+
+			if (_c == "?")
+				if (t[x][y] == "1")
+					n = n.concat([getConnections(x, y)[0]]);
+				else
+					n = n.concat([getConnections(x, y)[1]]);
 		}
-		toEval = n.filter((v, i, a) => a.indexOf(v) === i);
+		toEval = n;
 	}
 }
 
