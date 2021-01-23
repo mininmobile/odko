@@ -165,6 +165,54 @@ function evaluate(expression, position = undefined) {
 		case "tru": case "true": return die("1");
 		case "fal": case "false": return die("-1");
 		case "bad": case "error": case "unknown": return die("-1");
+		// register assignment
+		default: if (c.length == 2) {
+			if (isUppercase(c) && expression[0] && expression[1]){
+				switch (expression[0]) {
+					case "=":
+						run.registers[c] = expression.splice(1, expression.length).join(" ");
+						break;
+
+					case "+=": {
+						let n1 = parseInt(run.registers[c] || 0);
+						let n2 = parseInt(expression[1]);
+						if (isNaN(n1) || isNaN(n2))
+							run.registers[c] = (run.registers[c] || "") + expression[1];
+						else
+							run.registers[c] = (n1 + n2).toString();
+					} break;
+
+					case "*=": {
+						let n1 = parseInt(run.registers[c] || 1);
+						let n2 = parseInt(expression[1]);
+						if (isNaN(n2))
+							throw "cannot multiply by a string";
+						else if (isNaN(n1))
+							run.registers[c] = (run.registers[c] || "").repeat(n2);
+						else
+							run.registers[c] = (n1 * n2).toString();
+					} break;
+
+					case "-=": {
+						let n1 = parseInt(run.registers[c] || 0);
+						let n2 = parseInt(expression[1]);
+						if (isNaN(n1) || isNaN(n2))
+							throw "this operation cannot be completed with string(s)";
+						else
+							run.registers[c] = (n1 - n2).toString();
+					} break;
+
+					case "/=": {
+						let n1 = parseInt(run.registers[c] || 1);
+						let n2 = parseInt(expression[1]);
+						if (isNaN(n1) || isNaN(n2))
+							throw "this operation cannot be completed with string(s)";
+						else
+							run.registers[c] = (n1 / n2).toString();
+					} break;
+				}
+			}
+		}
 	}
 
 	switch (c.charAt(0)) {

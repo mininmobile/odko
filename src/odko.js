@@ -27,7 +27,7 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<Row>>}
  */
-let table = [[{"v":"k_a","c":[]},{"v":"k_s","c":[]},{"v":"k_d","c":[]}],[{"v":"log A","c":[0,1,2]}]];
+let table = [[{"v":"k_a","c":[]}],[{"v":"AA += 1","c":[0]}],[{"v":"!num AA","c":[0]}]];
 update();
 initConsole();
 
@@ -728,6 +728,10 @@ function btn(bool) {
 function ntb(num) {
 	return num > 0 ? true : false;
 }
+
+// check capitalization
+function isUppercase(string) { return string === string.toUpperCase(); }
+function isLowercase(string) { return string === string.toLowerCase(); }
 
 // get css measurements
 function em(x) {
