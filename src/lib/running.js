@@ -235,7 +235,7 @@ function evaluate(expression, position = undefined) {
 }
 
 // run from coords
-function runFrom(_x, _y, values = {}) {
+function runFrom(_x, _y, values = {}, overrideConnections = false) {
 	const itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]; // index to alphabet
 	let startingBlock = table[_x][_y]; // sanity
 	let startingExpression, toEval; // blocks to evaluate before moving on to next column
@@ -255,12 +255,14 @@ function runFrom(_x, _y, values = {}) {
 	}
 	// go go go
 	for (let x = _x + 1; x < table.length; x++) {
-		t[x] = [];
-		let n = [];
+		t[x] = []; // initialize new temp table column
+		let n = []; // newToEval
 		for (let i = 0; i < toEval.length; i++) {
 			let y = toEval[i];
 
-			let { expression, connections } = parse(table[x][y], true);
+			let _parsed = parse(table[x][y], true),
+				expression = _parsed.expression,
+				connections = x == 1 ? (overrideConnections || _parsed.connections) : _parsed.connections;
 			let _c = expression[0].charAt(0);
 			// substitute with values
 			Object.keys(values).forEach((v) => {
@@ -307,12 +309,19 @@ function runFrom(_x, _y, values = {}) {
 				return conLog(`![x${x}y${y}] ` + e);
 			}
 
+			let _n = getConnections(x, y);
+
 			if (_c == "?")
-				if (t[x][y] == "1")
-					n = n.concat([getConnections(x, y)[0]]);
+				if (t[x][y] == "1" && _n[0] !== undefined)
+					_n = [ _n[0] ];
+				else if (_n[1] !== undefined)
+					_n = [ _n[1] ];
 				else
-					n = n.concat([getConnections(x, y)[1]]);
+					_n = [];
+
+			n = n.concat(_n);
 		}
+		// toEval = newToEval
 		toEval = n;
 	}
 }

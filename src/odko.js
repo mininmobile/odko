@@ -27,7 +27,7 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<Row>>}
  */
-let table = [[]];
+let table = [[{"v":"k_a","c":[]},{"v":"k_s","c":[]},{"v":"k_d","c":[]}],[{"v":"log A","c":[0,1,2]}]];
 update();
 initConsole();
 
@@ -444,7 +444,7 @@ addEventListener("keydown", e => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1)
-				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values));
+				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
 		}
 	}
 
@@ -460,7 +460,7 @@ addEventListener("keyup", (e) => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1)
-				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values));
+				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
 		}
 	}
 })
