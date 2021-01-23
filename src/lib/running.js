@@ -171,7 +171,7 @@ function evaluate(expression, position = undefined) {
 				switch (expression[0]) {
 					case "=":
 						run.registers[c] = expression.splice(1, expression.length).join(" ");
-						break;
+						return die(run.registers[c]);
 
 					case "+=": {
 						let n1 = parseInt(run.registers[c] || 0);
@@ -180,7 +180,7 @@ function evaluate(expression, position = undefined) {
 							run.registers[c] = (run.registers[c] || "") + expression[1];
 						else
 							run.registers[c] = (n1 + n2).toString();
-					} break;
+					} return die(run.registers[c]);
 
 					case "*=": {
 						let n1 = parseInt(run.registers[c] || 1);
@@ -191,7 +191,7 @@ function evaluate(expression, position = undefined) {
 							run.registers[c] = (run.registers[c] || "").repeat(n2);
 						else
 							run.registers[c] = (n1 * n2).toString();
-					} break;
+					} return die(run.registers[c]);
 
 					case "-=": {
 						let n1 = parseInt(run.registers[c] || 0);
@@ -200,7 +200,7 @@ function evaluate(expression, position = undefined) {
 							throw "this operation cannot be completed with string(s)";
 						else
 							run.registers[c] = (n1 - n2).toString();
-					} break;
+					} return die(run.registers[c]);
 
 					case "/=": {
 						let n1 = parseInt(run.registers[c] || 1);
@@ -209,7 +209,7 @@ function evaluate(expression, position = undefined) {
 							throw "this operation cannot be completed with string(s)";
 						else
 							run.registers[c] = (n1 / n2).toString();
-					} break;
+					} return die(run.registers[c]);
 				}
 			}
 		}
@@ -218,7 +218,7 @@ function evaluate(expression, position = undefined) {
 	switch (c.charAt(0)) {
 		// short log command
 		case "!":
-			return die(conLog(c.substring(1) + expression.join(" ")));
+			return die(conLog(c.substring(1) + " " + expression.join(" ")));
 		// strings
 		case "\"": case "'":
 			return die(c.substring(1) + (expression.length > 0 ? " " + expression.join(" ") : ""));
@@ -306,9 +306,13 @@ function runFrom(_x, _y, values = {}, overrideConnections = false) {
 		t[x] = []; // initialize new temp table column
 		let n = []; // newToEval
 		for (let i = 0; i < toEval.length; i++) {
-			let y = toEval[i];
-
-			let _parsed = parse(table[x][y], true),
+			let y = toEval[i]; let _e = table[x][y].v;
+			// substitute with registers (FUCK!)
+			if (!(isUppercase(_e.substring(0, 2)) && _e.length >= 5 && (_e.charAt(4) == "=" || _e.charAt(3) == "=")))
+				Object.keys(run.registers).forEach(register =>
+					_e = _e.replace(new RegExp(register, "g"), run.registers[register]));
+			// parse
+			let _parsed = parse({ v: _e, c: table[x][y].c }, overrideConnections === false),
 				expression = _parsed.expression,
 				connections = x == 1 ? (overrideConnections || _parsed.connections) : _parsed.connections;
 			let _c = expression[0].charAt(0);

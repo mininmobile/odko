@@ -114,7 +114,7 @@ special values are usually placeholder values to make code neater, like;
   [ ?A ## B ]   ?A == B,  ?A > B
    conditional if statement, it compares two A with B,  if the statement is true
    it activates  the first connected block,  else the second.   all of the other
-   connections are ignored.  the spaces around the ## can be omitted to compare
+   connections are ignored.   the spaces around the ## can be omitted to compare
    registers. ## can be one of the following operations:
     [ == ] A is equal (in length to) B  [ != ] A is not equal (in length) to B
     [ >  ] A is greater/longer than B   [ <  ] A is smaller/shorter then B
