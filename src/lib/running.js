@@ -13,7 +13,7 @@ function parseEvent(block, y) {
 	let event = block.v.split(/ +/g).filter(x => x.length > 0);
 	let e = event.shift().toLowerCase();
 	switch (e) {
-		case "onRun": return {
+		case "onrun": return {
 			type: "onRun",
 			activates: activates,
 			origin: y,
@@ -158,6 +158,18 @@ function evaluate(expression, position = undefined) {
 		case "-": return die(reduce((a, b) => a - b));
 		case "*": return die(reduce((a, b) => a * b));
 		case "/": return die(reduce((a, b) => a / b));
+		// modulo/remainder command
+		case "%": {
+			let a = parseInt(expression[0]);
+			if (isNaN(a)) return die(-1);
+			let b = parseInt(expression[1]);
+			if (isNaN(b)) return die(-1);
+			let c = a % b;
+			if (isNaN(c)) return die(-1);
+			return die(c);
+		}
+		// length command
+		case "len": return die(expression.join(" ").length);
 		// long log command
 		case "log": return die(conLog(expression.join(" ")));
 		// goto/jump to command

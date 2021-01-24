@@ -27,9 +27,7 @@ let connectCursor = { x: 0, y: 0, right: false }
  * @property {Array.<number>} c
  */
 
-/**
- * @type {Array.<Array.<Row>>}
- */
+/** @type {Array.<Array.<Row>>} */
 let table = [[]];
 update();
 initConsole();
