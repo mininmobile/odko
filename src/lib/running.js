@@ -170,8 +170,22 @@ function evaluate(expression, position = undefined) {
 		}
 		// length command
 		case "len": return die(expression.join(" ").length);
+		// random number generator
+		case "rand": case "rnd": case "rng": {
+			// get maximum value
+			let max = 1;
+			if (expression[0]) {
+				max = parseInt(expression[0]);
+				if (isNaN(max))
+					max = 1;
+			}
+			// return rounded number
+			return die(Math.round(Math.random() * max));
+		}
 		// long log command
 		case "log": return die(conLog(expression.join(" ")));
+		// clear console command
+		case "clear": case "cls": consoleData.text = []; consoleDraw(); return die(1);
 		// goto/jump to command
 		case "jmp": {
 			// get x position
@@ -194,11 +208,16 @@ function evaluate(expression, position = undefined) {
 		default: if (c.length == 2) {
 			if (isUppercase(c) && expression[0] && expression[1]){
 				switch (expression[0]) {
-					case "=":
+					case "=": // set
 						run.registers[c] = expression.splice(1, expression.length).join(" ");
 						return die(run.registers[c]);
-
-					case "+=": {
+					case "\"=": // append
+						run.registers[c] = run.registers[c] + expression.splice(1, expression.length).join(" ");
+						return die(run.registers[c]);
+					case "'=": // prepend
+						run.registers[c] = expression.splice(1, expression.length).join(" ") + run.registers[c];
+						return die(run.registers[c]);
+					case "+=": { // append/add
 						let n1 = parseInt(run.registers[c] || 0);
 						let n2 = parseInt(expression[1]);
 						if (isNaN(n1) || isNaN(n2))
@@ -206,8 +225,7 @@ function evaluate(expression, position = undefined) {
 						else
 							run.registers[c] = (n1 + n2).toString();
 					} return die(run.registers[c]);
-
-					case "*=": {
+					case "*=": { // multiply
 						let n1 = parseInt(run.registers[c] || 1);
 						let n2 = parseInt(expression[1]);
 						if (isNaN(n2))
@@ -217,8 +235,7 @@ function evaluate(expression, position = undefined) {
 						else
 							run.registers[c] = (n1 * n2).toString();
 					} return die(run.registers[c]);
-
-					case "-=": {
+					case "-=": { // subtract
 						let n1 = parseInt(run.registers[c] || 0);
 						let n2 = parseInt(expression[1]);
 						if (isNaN(n1) || isNaN(n2))
@@ -226,14 +243,21 @@ function evaluate(expression, position = undefined) {
 						else
 							run.registers[c] = (n1 - n2).toString();
 					} return die(run.registers[c]);
-
-					case "/=": {
+					case "/=": { // divide
 						let n1 = parseInt(run.registers[c] || 1);
 						let n2 = parseInt(expression[1]);
 						if (isNaN(n1) || isNaN(n2))
 							throw "this operation cannot be completed with string(s)";
 						else
 							run.registers[c] = (n1 / n2).toString();
+					} return die(run.registers[c]);
+					case "%=": { // modulo
+						let n1 = parseInt(run.registers[c] || 1);
+						let n2 = parseInt(expression[1]);
+						if (isNaN(n1) || isNaN(n2))
+							throw "this operation cannot be completed with string(s)";
+						else
+							run.registers[c] = (n1 % n2).toString();
 					} return die(run.registers[c]);
 				}
 			}
@@ -254,19 +278,27 @@ function evaluate(expression, position = undefined) {
 		case "?": {
 			// remove nils
 			expression = expression.filter(x => x !== "nil");
+			let doesNotNeedB = false;
 			// get comparator
-			let comparator = expression.findIndex(x =>
-				["==", "!=", ">", "<", ">=", "<=", "&&", "||", "^^"].includes(x));
+			let comparator = expression.findIndex(x => {
+				if (["==", "!=", ">", "<", ">=", "<=", "&&", "||", "^^"].includes(x))
+					return true;
+				else if (["nan", "!nan"].includes(x.toLowerCase()))
+					return doesNotNeedB = true;
+				else
+					return false;
+			});
 			if (comparator == -1) throw "no comparator specified";
 			// get first input
 			let _a = expression.slice(0, comparator);
-			let a = tNum(c.substring(1) + (_a.length > 0 ? " " + _a.join(" ") : ""));
+			let a = c.substring(1) + (_a.length > 0 ? " " + _a.join(" ") : "");
+			a = doesNotNeedB ? a : tNum(a);
 			if (a.length == 0) throw "no first input specified";
 			// get second input
 			let b = tNum(expression.slice(comparator + 1, expression.length).join(" "));
-			if (b.length == 0) throw "no second input specified";
-			// i do not specify default: here because it is not needed due the the way the get comparator step is written
-			switch (expression[comparator]) {
+			if (b.length == 0 && !doesNotNeedB) throw "no second input specified";
+			// i do not specify default here because it is not needed due the the way the 'get comparator' step is written
+			switch (expression[comparator].toLowerCase()) {
 				case "==": return die(btn(a === b));
 				case "!=": return die(btn(a !== b));
 				case ">":  return die(btn(a >  b));
@@ -276,6 +308,9 @@ function evaluate(expression, position = undefined) {
 				case "&&": return die(btn(ntb(a) && ntb(b)));
 				case "||": return die(btn(ntb(a) || ntb(b)));
 				case "^^": return die(ntb(a) ^ ntb(b));
+				// special/singular conditions
+				case "nan": return die(btn(isNaN(parseInt(a))));
+				case "!nan": return die(btn(!isNaN(parseInt(a))));
 			}
 		}
 		// by default is just number value

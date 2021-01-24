@@ -107,13 +107,17 @@ special values are usually placeholder values to make code neater, like;
    divide A by B and that by C, B or C can be omitted. returns the result.
   [ % A B   ]
    modulo operation, returns the remainder of A / B. errors if not enough args.
-
   [ len ### ]
    returns length of arguments concatenated with a space, if no args then 0.
+  [ rand MX ]  rand 10,  rnd 100,  rng 999
+   returns random number between 0 and M(a)X, by default MX is 1. valid aliases
+   for this command are rnd and rng.
 
   [ log ### ]   log _,  log A B
    concatenates arguments (with space, " ") and prints them to console. can omit
    space when using the ! alias in the form [ !###### ]
+  [ clear   ]   clear,  cls
+   clears the console, also available under the alias cls.
 
   [ jmp X Y ]   jmp 0 0,   jmp
    adds location to jump to after current  branch finishes executing into queue,
@@ -130,6 +134,10 @@ special values are usually placeholder values to make code neater, like;
     [ >= ] A is >, or equal to B        [ <= ] A is <, or equal to B
     [ && ] A and B are greater then 0   [ || ] A or B are greater then 0
     [ ^^ ] A or B is greater/longer than 0, but not both A and B (XOR)
+
+  [ ?A #### ]   ?A NaN,  ?A !NaN
+   conditional if statement variation with only one input. works like expected.
+    [ NaN  ] A is not a number          [ !NaN ] A is (not not) a number
 
 [ EVENTS ]
 
@@ -190,11 +198,18 @@ if multiple values are returned then they will be stated.
 
 [ REGISTERS ]
 
+> errors  here  are  fatal  meaning  they will stop the execution of the current
+  branch.
+
 registers are odko's form of variables,  they are referred to with two capitals.
 they are always stored as strings but converted to integers when required.
 
   [ ## = v  ]
    sets register ## to v.
+  [ ## "= v ]
+   appends the string v to register ##.
+  [ ## '= v ]
+   prepends the string v to register ##.
   [ ## += v ]
    appends v to register ##, if register and v are integers then adds.
   [ ## -= v ]
@@ -204,6 +219,9 @@ they are always stored as strings but converted to integers when required.
    repeat string v times.
   [ ## /= v ]
    divides register ## by v, if either are not integers then errors.
+  [ ## %= v ]
+   gets the  remainder of  register ##  divided by v,  if either aren't integers
+   then errors.
 
 [ KEYBOARD SHORTCUTS ]
 
