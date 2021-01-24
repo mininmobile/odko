@@ -1,6 +1,8 @@
 let consoleData = {
 	w: 400,
 	h: 300,
+	chw: 0,
+	chh: 0,
 	/** @type {HTMLElement} */
 	c: undefined,
 	/** @type {CanvasRenderingContext2D} */
@@ -35,7 +37,9 @@ function updateConsole(noResize = false) {
 	if (consoleData.drag || noResize) {
 		elements.consoleTitlebar.innerText = "console";
 	} else {
-		elements.consoleTitlebar.innerText = `console [${w / ch(1) - 1}x${h / em(1) - .5}]`;
+		consoleData.chw = w / ch(1) - 1;
+		consoleData.chh = h / em(1) - .5;
+		elements.consoleTitlebar.innerText = `console [${consoleData.chw}x${consoleData.chh}]`;
 		clearTimeout(consoleData.timeout);
 		consoleData.timeout = setTimeout(() => {
 			elements.consoleTitlebar.innerText = "console";
@@ -58,14 +62,17 @@ function consoleDraw() {
 	ctx.fillRect(0, 0, consoleData.w, consoleData.h);
 	// draw text
 	ctx.fillStyle = "#dddddd";
-	consoleData.text.forEach((t, i) => {
-		ctx.fillText(t, 0, em(i + 1));
-	});
+	for (let i = 0; i < consoleData.text.length; i++) {
+		if (i > consoleData.chh + 1) break;
+		ctx.fillText(consoleData.text[i], 0, em(i + 1));
+	}
 }
 
 function conLog(text) {
 	consoleData.text.unshift(text);
-	consoleDraw();
+
+	if (run.queue.length == 0)
+		consoleDraw();
 	return text;
 }
 

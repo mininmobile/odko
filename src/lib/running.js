@@ -297,7 +297,7 @@ function evaluate(expression, position = undefined) {
 
 // run from coords
 function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0) {
-	if (callStack >= 3000) // 5 is a temporary debugging call stack limit
+	if (callStack >= 1000)
 		return conLog(`![x${_x}y${_y}] call stack limit exceeded`);
 
 	const itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]; // index to alphabet
