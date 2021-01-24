@@ -160,6 +160,19 @@ function evaluate(expression, position = undefined) {
 		case "/": return die(reduce((a, b) => a / b));
 		// long log command
 		case "log": return die(conLog(expression.join(" ")));
+		// goto/jump to command
+		case "jmp": {
+			// get x position
+			if (expression[0] === undefined) throw "no X given in jmp";
+			let x = parseInt(expression[0]);
+			if (isNaN(x)) throw `invalid X given in jmp (${x})`;
+			// get y position
+			if (expression[1] === undefined) throw "no Y given in jmp";
+			let y = parseInt(expression[1]);
+			if (isNaN(y)) throw `invalid Y given in jmp (${y})`;
+			// throw in queue
+			return run.queue.push({ x: x, y: y });
+		}
 		// special values
 		case "nil": return die("nil");
 		case "tru": case "true": return die("1");
@@ -283,38 +296,43 @@ function evaluate(expression, position = undefined) {
 }
 
 // run from coords
-function runFrom(_x, _y, values = {}, overrideConnections = false) {
+function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0) {
+	if (callStack >= 3000) // 5 is a temporary debugging call stack limit
+		return conLog(`![x${_x}y${_y}] call stack limit exceeded`);
+
 	const itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]; // index to alphabet
 	let startingBlock = table[_x][_y]; // sanity
-	let startingExpression, toEval; // blocks to evaluate before moving on to next column
-	{
-		let {expression} = parse(startingBlock);
-		startingExpression = expression;
-		toEval = getConnections(_x, _y);
-	}
+	let toEval; // blocks to evaluate before moving on to next column
 	// temp table
-	let t = [];
-	t[_x] = t[_x + 1] = [];
+	let t = new Array(_x + 2);
+	t = t.fill([], 0, _x + 1);
 	// calculate starting value
-	if (["o", "k", "c", "m"].includes(startingBlock.v.charAt(0)) && _x == 0)
-		t[_x][_y] = _y.toString();
-	else {
-		t[_x][_y] == evaluate(startingExpression);
+	if (callStack == 0) {
+		let { expression } = parse(startingBlock);
+		toEval = getConnections(_x, _y);
+		if (["o", "k", "c", "m"].includes(startingBlock.v.charAt(0)) && _x == 0)
+			t[_x][_y] = _y.toString();
+		else
+			t[_x][_y] == evaluate(expression);
+	} else {
+		toEval = [ _y ];
 	}
 	// go go go
-	for (let x = _x + 1; x < table.length; x++) {
+	for (let x = _x + (callStack == 0 ? 1 : 0); x < table.length; x++) {
 		t[x] = []; // initialize new temp table column
 		let n = []; // newToEval
 		for (let i = 0; i < toEval.length; i++) {
-			let y = toEval[i]; let _e = table[x][y].v;
+			let y = toEval[i]; // sanity
+			let _e = table[x][y].v;
+			let _fuckOff = false // do not run blocks connected to this block
 			// substitute with registers (FUCK!)
 			if (!(isUppercase(_e.substring(0, 2)) && _e.length >= 5 && (_e.charAt(4) == "=" || _e.charAt(3) == "=")))
 				Object.keys(run.registers).forEach(register =>
-					_e = _e.replace(new RegExp(register, "g"), run.registers[register]));
+					_e = _e.replace(new RegExp(register, "g"), " " + run.registers[register] + " "));
 			// parse
 			let _parsed = parse({ v: _e, c: table[x][y].c }, overrideConnections === false),
-				expression = _parsed.expression,
-				connections = x == 1 ? (overrideConnections || _parsed.connections) : _parsed.connections;
+			expression = _parsed.expression,
+			connections = x == 1 ? (overrideConnections || _parsed.connections) : _parsed.connections;
 			let _c = expression[0].charAt(0);
 			// substitute with values
 			Object.keys(values).forEach((v) => {
@@ -323,11 +341,11 @@ function runFrom(_x, _y, values = {}, overrideConnections = false) {
 					x == v ? values[v].toString() : x);
 				if (_c == "?")
 					expression = expression.map(x =>
-						x == "?" + v ? "?" + values[v].toString() : x);
+						x == "?" + v ? "?" + values[v].toString() : x);ze
 			});
 			// if string
 			if ((_c == "\"" || _c == "'") && x > 1) {
-				let temp = [ ];
+				let temp = [];
 				// concatenate connections
 				connections.forEach((c) => // different quotes different directions
 					temp[_c == "\"" ? "push" : "unshift"](t[x - 1][c]));
@@ -361,7 +379,7 @@ function runFrom(_x, _y, values = {}, overrideConnections = false) {
 				return conLog(`![x${x}y${y}] ` + e);
 			}
 
-			let _n = getConnections(x, y);
+			let _n = _fuckOff ? [] : getConnections(x, y);
 
 			if (_c == "?")
 				if (t[x][y] == "1" && _n[0] !== undefined)
@@ -373,8 +391,14 @@ function runFrom(_x, _y, values = {}, overrideConnections = false) {
 
 			n = n.concat(_n);
 		}
+		if (n.length == 0) break;
 		// toEval = newToEval
 		toEval = n;
+	}
+
+	if (run.queue.length > 0) {
+		let q = run.queue.shift();
+		runFrom(q.x, q.y, q.x == 1 ? values : {}, false, callStack + 1);
 	}
 }
 

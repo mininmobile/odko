@@ -13,8 +13,11 @@ const elements = {
 }
 
 let selected = { x: 0, y: 0 }
-let mode = 0;
-let run = { state: 0, registers: {}, events: [] };
+let mode = 0; // default, edit, connecting, move, run
+// state: halted, running, paused, preserved
+// registers: variables object (AA, AB, etc.)
+// events: parsed events
+let run = { state: 0, registers: {}, events: [], queue: [] };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
@@ -27,7 +30,7 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<Row>>}
  */
-let table = [[{"v":"k_a","c":[]}],[{"v":"AA += 1","c":[0]}],[{"v":"!num AA","c":[0]}]];
+let table = [[{"v":"k_a","c":[]}],[{"v":"AA += 1","c":[0]}],[{"v":"?AA> 10","c":[0]}],[{"v":"log Pog","c":[0]},{"v":"log AA","c":[0]}],[{"v":"","c":[]},{"v":"jmp 1 0","c":[1]}]];
 update();
 initConsole();
 
@@ -393,6 +396,7 @@ addEventListener("keydown", e => {
 				run.state = 0;
 				run.registers = {};
 				run.events = [];
+				run.queue = [];
 				// hided console
 				elements.consoleWrapper.classList.add("hidden");
 			} break;
@@ -404,6 +408,8 @@ addEventListener("keydown", e => {
 					if (run.state == 1) {
 						run.state = 0;
 						run.registers = {};
+						run.events = [];
+						run.queue = [];
 						conLog("=> halted execution");
 					}
 
@@ -434,10 +440,13 @@ addEventListener("keydown", e => {
 			case "F12": if (run.state == 1 || run.state == 2) {
 				if (e.shiftKey && run.state !== 3) {
 					run.state = 3;
+					run.queue = [];
 					conLog("=> halted execution (preserve registers)");
 				} else {
 					run.state = 0;
 					run.registers = {};
+					run.events = [];
+					run.queue = [];
 					conLog("=> halted execution");
 				}
 			} break;
