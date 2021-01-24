@@ -27,6 +27,7 @@ function parseEvent(block, y) {
 				case "k": case "m": if (e.charAt(1) == "_" || e.charAt(1) == "-") {
 					// placeholder variables
 					let releasing, key;
+					let any = false;
 					let shift = null,
 						ctrl = null,
 						alt = null;
@@ -37,6 +38,9 @@ function parseEvent(block, y) {
 						if (i == 1) {
 							// keyDown or keyUp event
 							releasing = c == "_" ? false : true;
+						} else if (i == 2 && c == "*") {
+							// if any key/mouse button
+							any = true; continue;
 						} else if (i == 2 && e.charAt(0) == "k") {
 							// if no character provided
 							if (key = c) continue;
@@ -75,8 +79,8 @@ function parseEvent(block, y) {
 					} else return {
 						type: e.charAt(0) == "k" ? "onKey" : "onMouse",
 						direction: releasing,
-						key: e.charAt(0) == "k" ? key : undefined,
-						button: e.charAt(0) == "m" ? parseInt(key) : undefined,
+						key: any ? "any" : (e.charAt(0) == "k" ? key : undefined),
+						button: any ? "any" : (e.charAt(0) == "m" ? parseInt(key) : undefined),
 						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
 						activates: activates,
 						origin: y,
@@ -88,6 +92,7 @@ function parseEvent(block, y) {
 				case "c": if (e.charAt(3) == "_" || e.charAt(3) == "-") {
 					// placeholder variables
 					let releasing, codeA, codeB;
+					let any = false;
 					let shift = null,
 						ctrl = null,
 						alt = null;
@@ -95,7 +100,12 @@ function parseEvent(block, y) {
 					let fuck = false;
 					for (let i = 1; i < block.v.length; i++) {
 						let c = block.v.charAt(i);
-						if (i == 1) {
+						if ((i == 1 || i == 2) && c == "*") {
+							// if any code
+							any = true;
+							i = 2; // skip
+							continue;
+						} else if (i == 1) {
 							codeA = c;
 							// if valid character provided
 							if (!isNaN(parseInt(c, 16))) continue;
@@ -133,7 +143,7 @@ function parseEvent(block, y) {
 					} else return {
 						type: "onCode",
 						direction: releasing,
-						code: parseInt(codeA + codeB, 16),
+						code: any ? "any" : (parseInt(codeA + codeB, 16)),
 						modifiers: { shift: shift, ctrl: ctrl, alt: alt },
 						activates: activates,
 						origin: y,
@@ -394,7 +404,7 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 					x == v ? values[v].toString() : x);
 				if (_c == "?")
 					expression = expression.map(x =>
-						x == "?" + v ? "?" + values[v].toString() : x);ze
+						x == "?" + v ? "?" + values[v].toString() : x);
 			});
 			// if string
 			if ((_c == "\"" || _c == "'") && x > 1) {
@@ -506,19 +516,26 @@ function findEvents(type, event, releasing = false) {
 				if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
 					if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
 						if ((m.alt == event.altKey && m.alt !== null) || m.alt == null)
-							// check if keys/buttons match
-							if (e.type == "onKey" && type == 0) {
-								if (event.key.toLowerCase() == e.key.toLowerCase()) return match();
-							} else if (e.type == "onCode" && type == 0) {
-								if (event.which == e.code) return match();
-							} else if (e.type == "onMouse" && type == 1) {
-								if (event.button == e.button) return match({
-									"X": Math.floor(event.offsetX / ch(1)),
-									"Y": Math.floor(event.offsetY / em(1)),
-									"M": event.offsetX,
-									"N": event.offsetY,
-								});
-							}
+						// "any" events
+						if (e.type == "onCode" && e.code == "any" && type == 0) { // any code
+							return match({"C": event.which});
+						} else if (e.type == "onKey" && e.key == "any" && type == 0) { // any key
+							return match({"K": event.key});
+						} else if (e.type == "onMouse" && e.button == "any" && type == 1) { // any mouse button
+							return match({"B": event.button});
+						// check if keys/buttons match
+						} else if (e.type == "onKey" && type == 0) {
+							if (event.key.toLowerCase() == e.key.toLowerCase()) return match();
+						} else if (e.type == "onCode" && type == 0) {
+							if (event.which == e.code) return match();
+						} else if (e.type == "onMouse" && type == 1) {
+							if (event.button == e.button) return match({
+								"X": Math.floor(event.offsetX / ch(1)),
+								"Y": Math.floor(event.offsetY / em(1)),
+								"M": event.offsetX,
+								"N": event.offsetY,
+							});
+						}
 			}
 			// if no match found, fuck off
 			return false;
