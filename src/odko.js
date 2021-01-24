@@ -30,7 +30,7 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @type {Array.<Array.<Row>>}
  */
-let table = [[{"v":"k_a","c":[]}],[{"v":"AA += 1","c":[0]}],[{"v":"?AA> 10","c":[0]}],[{"v":"log Pog","c":[0]},{"v":"log AA","c":[0]}],[{"v":"","c":[]},{"v":"jmp 1 0","c":[1]}]];
+let table = [[]];
 update();
 initConsole();
 
