@@ -59,9 +59,7 @@ branches out from that first block by activating the connected blocks.
 
 [ SYNTAX AND EXAMPLES ]
 
-look in the  code/ folder in this repository, depending on how far i have gotten
-in working on this project  there will be either screenshots of code in the odko
-ui or plaintext representations of code.
+- FizzBuzz @ code/fizzBuzz.png
 
 yes, i am planning on coming up with a way to write plaintext odko code,  and it
 may be presented with a tui version of odko as well.
@@ -79,7 +77,7 @@ block, it concatenates the connected values (including other strings which means
 you can stack strings on top of each other to craft long strings) and places the
 six or less characters at the end of it when using double-quotes.  there is also
 the  single quote variant which  concatenates in the reverse order including the
-append.
+append, finally there is a no-concatenation variation with a period.
 
 special values are usually placeholder values to make code neater, like;
 
