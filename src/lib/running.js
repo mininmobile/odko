@@ -216,59 +216,69 @@ function evaluate(expression, position = undefined) {
 		case "bad": case "error": case "unknown": return die("-1");
 		// register assignment
 		default: if (c.length == 2) {
-			if (isUppercase(c) && expression[0] && expression[1]){
-				switch (expression[0]) {
-					case "=": // set
-						run.registers[c] = expression.splice(1, expression.length).join(" ");
-						return die(run.registers[c]);
-					case "\"=": // append
-						run.registers[c] = run.registers[c] + expression.splice(1, expression.length).join(" ");
-						return die(run.registers[c]);
-					case "'=": // prepend
-						run.registers[c] = expression.splice(1, expression.length).join(" ") + run.registers[c];
-						return die(run.registers[c]);
-					case "+=": { // append/add
-						let n1 = parseInt(run.registers[c] || 0);
-						let n2 = parseInt(expression[1]);
-						if (isNaN(n1) || isNaN(n2))
-							run.registers[c] = (run.registers[c] || "") + expression[1];
-						else
-							run.registers[c] = (n1 + n2).toString();
-					} return die(run.registers[c]);
-					case "*=": { // multiply
-						let n1 = parseInt(run.registers[c] || 1);
-						let n2 = parseInt(expression[1]);
-						if (isNaN(n2))
-							throw "cannot multiply by a string";
-						else if (isNaN(n1))
-							run.registers[c] = (run.registers[c] || "").repeat(n2);
-						else
-							run.registers[c] = (n1 * n2).toString();
-					} return die(run.registers[c]);
-					case "-=": { // subtract
-						let n1 = parseInt(run.registers[c] || 0);
-						let n2 = parseInt(expression[1]);
-						if (isNaN(n1) || isNaN(n2))
-							throw "this operation cannot be completed with string(s)";
-						else
-							run.registers[c] = (n1 - n2).toString();
-					} return die(run.registers[c]);
-					case "/=": { // divide
-						let n1 = parseInt(run.registers[c] || 1);
-						let n2 = parseInt(expression[1]);
-						if (isNaN(n1) || isNaN(n2))
-							throw "this operation cannot be completed with string(s)";
-						else
-							run.registers[c] = (n1 / n2).toString();
-					} return die(run.registers[c]);
-					case "%=": { // modulo
-						let n1 = parseInt(run.registers[c] || 1);
-						let n2 = parseInt(expression[1]);
-						if (isNaN(n1) || isNaN(n2))
-							throw "this operation cannot be completed with string(s)";
-						else
-							run.registers[c] = (n1 % n2).toString();
-					} return die(run.registers[c]);
+			if (isUppercase(c) && expression[0]) {
+				if (["=cls"].includes(expression[0].toLowerCase())) {
+					switch (expression[0].toLowerCase()) {
+						case "=cls": // clear
+							run.registers[c] = "";
+							return die(0);
+					}
+				} else if (expression[1]) {
+					switch (expression[0]) {
+						case "=": // set
+							run.registers[c] = expression.splice(1, expression.length).join(" ");
+							return die(run.registers[c]);
+						case "\"=": // append
+							if (run.registers[c] == undefined) run.registers[c] = "";
+							run.registers[c] = run.registers[c] + expression.splice(1, expression.length).join(" ");
+							return die(run.registers[c]);
+						case "'=": // prepend
+							if (run.registers[c] == undefined) run.registers[c] = "";
+							run.registers[c] = expression.splice(1, expression.length).join(" ") + run.registers[c];
+							return die(run.registers[c]);
+						case "+=": { // append/add
+							let n1 = parseInt(run.registers[c] || 0);
+							let n2 = parseInt(expression[1]);
+							if (isNaN(n1) || isNaN(n2))
+								run.registers[c] = (run.registers[c] || "") + expression[1];
+							else
+								run.registers[c] = (n1 + n2).toString();
+						} return die(run.registers[c]);
+						case "*=": { // multiply
+							let n1 = parseInt(run.registers[c] || 1);
+							let n2 = parseInt(expression[1]);
+							if (isNaN(n2))
+								throw "cannot multiply by a string";
+							else if (isNaN(n1))
+								run.registers[c] = (run.registers[c] || "").repeat(n2);
+							else
+								run.registers[c] = (n1 * n2).toString();
+						} return die(run.registers[c]);
+						case "-=": { // subtract
+							let n1 = parseInt(run.registers[c] || 0);
+							let n2 = parseInt(expression[1]);
+							if (isNaN(n1) || isNaN(n2))
+								throw "this operation cannot be completed with string(s)";
+							else
+								run.registers[c] = (n1 - n2).toString();
+						} return die(run.registers[c]);
+						case "/=": { // divide
+							let n1 = parseInt(run.registers[c] || 1);
+							let n2 = parseInt(expression[1]);
+							if (isNaN(n1) || isNaN(n2))
+								throw "this operation cannot be completed with string(s)";
+							else
+								run.registers[c] = (n1 / n2).toString();
+						} return die(run.registers[c]);
+						case "%=": { // modulo
+							let n1 = parseInt(run.registers[c] || 1);
+							let n2 = parseInt(expression[1]);
+							if (isNaN(n1) || isNaN(n2))
+								throw "this operation cannot be completed with string(s)";
+							else
+								run.registers[c] = (n1 % n2).toString();
+						} return die(run.registers[c]);
+					}
 				}
 			}
 		}
@@ -388,12 +398,17 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 			let y = toEval[i]; // sanity
 			let _e = table[x][y].v;
 			let _fuckOff = false // do not run blocks connected to this block
-			// substitute with registers (FUCK!)
-			if (!(isUppercase(_e.substring(0, 2)) && _e.length >= 5 && (_e.charAt(4) == "=" || _e.charAt(3) == "=")))
-				Object.keys(run.registers).forEach(register =>
-					_e = _e.replace(new RegExp(register, "g"), " " + run.registers[register] + " "));
+			// don't replace assignee register with itself
+			let registerToSkip = "";
+			if (isUppercase(_e.substring(0, 2)) && _e.length >= 5 && (_e.charAt(4) == "=" || _e.charAt(3) == "="))
+				registerToSkip = _e.substring(0, 2);
+			// substitute with registers
+			Object.keys(run.registers).forEach(register => {
+				if (register == registerToSkip) return;
+				_e = _e.replace(new RegExp(register, "g"), " " + run.registers[register] + " ")
+			});
 			// parse
-			let _parsed = parse({ v: _e, c: table[x][y].c }, overrideConnections == false),
+			let _parsed = parse({ v: _e, c: table[x][y].c }, !(overrideConnections == false && x == 1)),
 			expression = _parsed.expression,
 			connections = x == 1 ? (overrideConnections || _parsed.connections) : _parsed.connections;
 			let _c = expression[0].charAt(0);
@@ -410,8 +425,9 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 			if ((_c == "\"" || _c == "'") && x > 1) {
 				let temp = [];
 				// concatenate connections
-				connections.forEach((c) => // different quotes different directions
-					temp[_c == "\"" ? "push" : "unshift"](t[x - 1][c]));
+				connections.forEach((c) => { // different quotes different directions
+					temp[_c == "\"" ? "push" : "unshift"](t[x - 1][c]);
+				});
 				// nil == empty string
 				temp = temp.filter(x => x !== "nil");
 				// different quotes different directions
@@ -421,7 +437,6 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 					(_c + temp.join(""))
 						.trimEnd().split(" ");
 			} else if (_c !== "\"" && _c !== "'") {
-
 				// substitute with connections
 				connections.forEach((c, i) => {
 					let input = t[x - 1][c] || "-1";
