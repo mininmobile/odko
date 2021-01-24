@@ -333,7 +333,7 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 				Object.keys(run.registers).forEach(register =>
 					_e = _e.replace(new RegExp(register, "g"), " " + run.registers[register] + " "));
 			// parse
-			let _parsed = parse({ v: _e, c: table[x][y].c }, overrideConnections === false),
+			let _parsed = parse({ v: _e, c: table[x][y].c }, overrideConnections == false),
 			expression = _parsed.expression,
 			connections = x == 1 ? (overrideConnections || _parsed.connections) : _parsed.connections;
 			let _c = expression[0].charAt(0);
@@ -360,7 +360,8 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 				expression =
 					(_c + temp.join(""))
 						.trimEnd().split(" ");
-			} else {
+			} else if (_c !== "\"" && _c !== "'") {
+
 				// substitute with connections
 				connections.forEach((c, i) => {
 					let input = t[x - 1][c] || "-1";
@@ -405,6 +406,7 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 	}
 
 	run.going = false;
+	consoleDraw();
 }
 
 // testing in default mode
