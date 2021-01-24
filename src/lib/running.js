@@ -445,7 +445,7 @@ function test(_x, _y) {
 
 // find event/event handler almost
 /**
- * @param {(0|1)} type 0: keyboard, 1: mouse
+ * @param {(0|1|2)} type 0: keyboard, 1: mouse, 2: onRun
  * @param {(KeyboardEvent|MouseEvent)} event
  * @param {boolean} releasing
  */
@@ -454,31 +454,38 @@ function findEvents(type, event, releasing = false) {
 	let values = {};
 	let count = 0;
 
-	events = run.events.filter(e => {
-		// if event doesn't match search direction
-		if (e.direction == releasing) {
-			let m = e.modifiers;
-			// check if modifiers match
-			if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
-				if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
-					if ((m.alt == event.altKey && m.alt !== null) || m.alt == null)
-						// check if keys/buttons match
-						if (e.type == "onKey" && type == 0) {
-							if (event.key.toLowerCase() == e.key.toLowerCase()) return match();
-						} else if (e.type == "onCode" && type == 0) {
-							if (event.which == e.code) return match();
-						} else if (e.type == "onMouse" && type == 1) {
-							if (event.button == e.button) return match({
-								"X": Math.floor(event.offsetX / ch(1)),
-								"Y": Math.floor(event.offsetY / em(1)),
-								"M": event.offsetX,
-								"N": event.offsetY,
-							});
-						}
-		}
-		// if no match found, fuck off
-		return false;
-	});
+	if (type == 2) { // onRun events
+		// check if event types match
+		events = run.events
+			.filter(e => e.type == "onRun")
+			.sort((a, b) => a.id - b.id);
+	} else { // keyboard + mouse events
+		events = run.events.filter(e => {
+			// check if event matches search direction
+			if (e.direction == releasing) {
+				let m = e.modifiers;
+				// check if modifiers match
+				if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
+					if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
+						if ((m.alt == event.altKey && m.alt !== null) || m.alt == null)
+							// check if keys/buttons match
+							if (e.type == "onKey" && type == 0) {
+								if (event.key.toLowerCase() == e.key.toLowerCase()) return match();
+							} else if (e.type == "onCode" && type == 0) {
+								if (event.which == e.code) return match();
+							} else if (e.type == "onMouse" && type == 1) {
+								if (event.button == e.button) return match({
+									"X": Math.floor(event.offsetX / ch(1)),
+									"Y": Math.floor(event.offsetY / em(1)),
+									"M": event.offsetX,
+									"N": event.offsetY,
+								});
+							}
+			}
+			// if no match found, fuck off
+			return false;
+		});
+	}
 
 	function match(vs) {
 		if (vs)

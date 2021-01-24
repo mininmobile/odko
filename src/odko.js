@@ -416,7 +416,7 @@ addEventListener("keydown", e => {
 
 					break;
 				}
-				if (run.state == 0 || run.state == 2 || run.state == 3) {
+				if (run.state == 0|| run.state == 3) {
 					run.state = 1;
 					conLog("=> start of execution");
 
@@ -432,9 +432,13 @@ addEventListener("keydown", e => {
 						}
 					});
 					// run onRun events
-					// code
+					findEvents(2).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+				} else if (run.state == 2) {
+					// unpause lol
+					run.state = 1;
 				} else if (run.state == 1) {
-					// pause
+					// pause lol
+					run.state = 2;
 				}
 			} break;
 

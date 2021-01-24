@@ -159,7 +159,7 @@ if multiple values are returned then they will be stated.
 
   [ onRun X ]
    blocks connected to this block will run as soon as possible after the program
-   has begun execution. the event can be assigned an id via. the X argument.
+   has begun execution. the event can be assigned an id with the X argument.
 
   [ k_# ABC ]
    blocks  connected  to this block will run after the key # has been depressed.
