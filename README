@@ -59,10 +59,16 @@ branches out from that first block by activating the connected blocks.
 
 [ SYNTAX AND EXAMPLES ]
 
-- FizzBuzz @ code/fizzBuzz.png
+- FizzBuzz @ code/fizzBuzz.json/png
+- hi-lo    @ code/hi-lo.json/png
 
-yes, i am planning on coming up with a way to write plaintext odko code,  and it
-may be presented with a tui version of odko as well.
+to  load  .json files open the dev console and write `load([contents of json])`.
+preferably you would copy and paste the contents of the json file. to save your
+own examples run `save()` and copy the JSON string it outputs.
+
+yes, there will be a cleaner way of importing and exporting code and, yes, i am
+planning on coming up with a way to write plaintext odko code, and it may be
+presented with a tui version of odko as well.
 
 [ VALUES ]
 

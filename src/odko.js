@@ -757,3 +757,13 @@ function ch(x) {
 	elements.ch.style.width = x + "ch";
 	return elements.ch.clientWidth;
 }
+
+// load program
+function load(json) {
+	table = json;
+	update();
+}
+
+function save() {
+	console.log(JSON.string(table));
+}
