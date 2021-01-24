@@ -244,6 +244,9 @@ function evaluate(expression, position = undefined) {
 		// short log command
 		case "!":
 			return die(conLog(c.substring(1) + " " + expression.join(" ")));
+		// no-concat string
+		case ".":
+			return die(c.substring(1) + (expression.length > 0 ? " " + expression.join(" ") : ""));
 		// strings
 		case "\"": case "'":
 			return die(c.substring(1) + (expression.length > 0 ? " " + expression.join(" ") : ""));
@@ -408,8 +411,8 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 			n = n.concat(_n);
 		}
 		if (n.length == 0) break;
-		// toEval = newToEval
-		toEval = n;
+		// toEval = unique newToEval connections
+		toEval = n.filter((v, i) => n.indexOf(v) == i);
 	}
 
 	if (run.queue.length > 0) {
