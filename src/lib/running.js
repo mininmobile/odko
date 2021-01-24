@@ -297,8 +297,11 @@ function evaluate(expression, position = undefined) {
 
 // run from coords
 function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0) {
-	if (callStack >= 1000)
+	if (callStack >= 2000) {
+		run.going = false;
 		return conLog(`![x${_x}y${_y}] call stack limit exceeded`);
+	}
+	if (callStack == 0) run.going = true;
 
 	const itoa = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]; // index to alphabet
 	let startingBlock = table[_x][_y]; // sanity
@@ -400,6 +403,8 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 		let q = run.queue.shift();
 		runFrom(q.x, q.y, q.x == 1 ? values : {}, false, callStack + 1);
 	}
+
+	run.going = false;
 }
 
 // testing in default mode

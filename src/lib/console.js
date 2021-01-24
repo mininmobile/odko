@@ -71,8 +71,7 @@ function consoleDraw() {
 function conLog(text) {
 	consoleData.text.unshift(text);
 
-	if (run.queue.length == 0)
-		consoleDraw();
+	if (!run.going) consoleDraw();
 	return text;
 }
 

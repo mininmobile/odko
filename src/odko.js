@@ -17,7 +17,7 @@ let mode = 0; // default, edit, connecting, move, run
 // state: halted, running, paused, preserved
 // registers: variables object (AA, AB, etc.)
 // events: parsed events
-let run = { state: 0, registers: {}, events: [], queue: [] };
+let run = { state: 0, registers: {}, events: [], queue: [], going: false };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
@@ -65,6 +65,9 @@ addEventListener("keydown", e => {
 				// set variables
 				mode = 4;
 				run.state = 0;
+				run.registers = {};
+				run.events = [];
+				run.queue = [];
 				conClear();
 				// disable debug view
 				if (debug) {
