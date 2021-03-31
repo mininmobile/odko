@@ -784,5 +784,5 @@ function save() {
 		}
 	}
 
-	console.log(JSON.string(table));
+	console.log(JSON.string(exportTable));
 }
