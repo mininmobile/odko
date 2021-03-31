@@ -24,6 +24,7 @@ let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @typedef {Object} Row
  * @property {string} v
+ * @property {Array.<Token>} t
  * @property {Array.<number>} c
  */
 
@@ -33,10 +34,8 @@ update();
 initConsole();
 
 addEventListener("keydown", e => {
-	e.preventDefault();
-
-	if (e.key == "r" && e.ctrlKey)
-		location.reload();
+	if (!(e.key == "I" && e.ctrlKey && e.shiftKey || e.key == "r" && e.ctrlKey))
+		e.preventDefault();
 
 	if (mode == 0) { // no mode
 		let _e;
@@ -89,7 +88,7 @@ addEventListener("keydown", e => {
 					update();
 				}
 
-				table[selected.x].splice(selected.y + 1, 0, { v: "", c: [] });
+				table[selected.x].splice(selected.y + 1, 0, { v: "", t: [], c: [] });
 				let row = document.createElement("div");
 					row.classList.add("row");
 					elements.columns.children[selected.x]
@@ -216,6 +215,7 @@ addEventListener("keydown", e => {
 		switch (e.key) {
 			case "Escape": case "Enter": { // exit edit mode
 				mode = 0;
+				table[selected.x][selected.y].t = parse(table[selected.x][selected.y].v);
 				getFocusedElement().classList.remove("editing");
 			} break;
 
@@ -477,7 +477,7 @@ addEventListener("keyup", (e) => {
 				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
 		}
 	}
-})
+});
 
 function update() {
 	// reset columns element
@@ -743,6 +743,11 @@ function ntb(num) {
 	return num > 0 ? true : false;
 }
 
+// sort array of numbers
+function sort(arr) {
+	return arr.length > 0 ? [].sort.call(arr, (a, b) => a - b) : [];
+}
+
 // check capitalization
 function isUppercase(string) { return string === string.toUpperCase(); }
 function isLowercase(string) { return string === string.toLowerCase(); }
@@ -758,12 +763,26 @@ function ch(x) {
 	return elements.ch.clientWidth;
 }
 
-// load program
+// save/load program
 function load(json) {
 	table = json;
 	update();
 }
 
 function save() {
+	let exportTable = [];
+
+	// go through every column
+	for (let x = 0; x < table.length; x++) {
+		// add new column to the export table
+		exportTable[x] = [];
+		// go through every row
+		for (let y = 0; y < table[x].length; y++) {
+			let block = table[x][y];
+			// add row to export table
+			exportTable[x][y] = { v: block.v, c: block.c }
+		}
+	}
+
 	console.log(JSON.string(table));
 }
