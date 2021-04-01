@@ -1,17 +1,125 @@
 class Token {
 	/**
-	 * @param {"thing" | "otherThing"} type
-	 * @param {any} value
+	 * @param {string} raw raw token string
+	 * @param {"nil" | "number" | "string" | "comparator" | "command" | "register" | "connection" | "event"} type how arguments are calculated/type of data
+	 * @param {any} value options/data (if any)
 	 */
-	constructor(type, value = null) {
+	constructor(raw, type, value = null) {
+		this.raw = raw;
 		this.type = type;
 		this.value = value;
 	}
 }
 
 // tokenize block
+/**
+ * @param {string} expression
+ * @returns {Array.<Token>}
+ */
 function parse(expression) {
-	return [ "drain", "gang" ];
+	let tokens = [];
+
+	let mode = 0; // normal, string/int
+	let t = "";
+	for (let i = 0; i < expression.length; i++) {
+		let c = expression.charAt(i);
+
+		switch (mode) {
+			case 0: switch (c) {
+					case " ": pushToken(); break;
+					// put da char in da temp
+					default: t += c;
+				}
+			} break;
+		}
+
+	return tokens.length == 0 ? [ new Token("nil") ] : tokens;
+
+	function pushToken() {
+		tokens.push(tokenize(t));
+		t = "";
+	}
+}
+
+// return token type + value of a potential token string
+function tokenize(potentialToken) {
+	let raw = potentialToken;
+	let type = "any"; // how arguments are calculated
+	let value = null; // options (if any)
+
+	switch (potentialToken.toLowerCase()) {
+		// special/placeholder values
+		case "nil":                 type = "nil"; break;
+		case "true": case "tru":    type = "number"; value = 1; break;
+		case "false": case "fal":   type = "number"; value = 0; break;
+		case "unknown": case "fal": type = "number"; value = 0; break;
+
+		// CONDITIONAL COMPARATORS
+
+		// two input conditional
+		case "==": type = "comparator"; value = "equal"; break;
+		case "!=": type = "comparator"; value = "notEqual"; break;
+		case ">":  type = "comparator"; value = "greater"; break;
+		case "<":  type = "comparator"; value = "lesser"; break;
+		case ">=": type = "comparator"; value = "greaterEqual"; break;
+		case "<=": type = "comparator"; value = "lesserEqual"; break;
+		case "&&": type = "comparator"; value = "and"; break;
+		case "||": type = "comparator"; value = "or"; break;
+		case "^^": type = "comparator"; value = "XOR"; break;
+		// single input conditional
+		case "nan": type = "comparator"; value = "NaN"; break;
+		case "!nan": type = "comparator"; value = "notNaN"; break;
+
+		// COMMANDS
+
+		// arithmetic/mathematical commands
+		case "+":   type = "command"; value = "add"; break;
+		case "-":   type = "command"; value = "subtract"; break;
+		case "*":   type = "command"; value = "multiply"; break;
+		case "/":   type = "command"; value = "divide"; break;
+		case "%":   type = "command"; value = "modulo"; break;
+		case "len": type = "command"; value = "length"; break;
+		case "rnd": case "rng": case "rand":
+		            type = "command"; value = "random"; break;
+		// console commands
+		case "clear": case "cls":
+		              type = "command"; value = "clear"; break;
+		case "log":   type = "command"; value = "log"; break;
+		// logic commands
+		case "jmp": type = "command"; value = "jump"; break;
+		case "?":   type = "command"; value = "conditional"; break;
+
+		// STRINGS / NUMBERS / CONNECTIONS / REGISTERS
+
+		default: {
+			// is a connection or a register
+			if (potentialToken.length == 1 || potentialToken.length == 2) {
+				const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				let canBeConnection = alphabet.includes(potentialToken.charAt(0));
+
+				if (canBeConnection && potentialToken.length == 2) {
+					if (alphabet.includes(potentialToken.charAt(1))) {
+						// is a register
+						type = "register"; value = potentialToken; break;
+					}
+				} else if (canBeConnection) {
+					// is a connection
+					type = "connection"; value = potentialToken; break;
+				}
+			}
+
+			// is a number
+			let potentialNumber = parseInt(potentialToken);
+			if (!isNaN(potentialNumber)) {
+				type = "number"; value = potentialNumber; break;
+			}
+
+			// fuck it, it's a string
+			type = "string"; value = potentialToken;
+		}
+	}
+
+	return new Token(raw, type, value);
 }
 
 // parse event
