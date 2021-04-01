@@ -35,9 +35,11 @@ function parse(expression) {
 
 	return tokens.length == 0 ? [ new Token("nil") ] : tokens;
 
-	function pushToken() {
+	function pushToken(resetMode = false) {
 		tokens.push(tokenize(t));
 		t = "";
+		if (resetMode)
+			mode = 0;
 	}
 }
 
