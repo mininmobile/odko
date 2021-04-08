@@ -19,27 +19,70 @@ class Token {
 function parse(expression) {
 	let tokens = [];
 
-	let mode = 0; // normal, string/int
+	let mode = 0; // normal, conditional
+	let submode = 0; // stage 1; stage 2; etc.
 	let t = "";
-	for (let i = 0; i < expression.length; i++) {
-		let c = expression.charAt(i);
+	for (let i = 0; i <= expression.length; i++) {
+		let c = expression.charAt(i) || "LAST";
 
 		switch (mode) {
-			case 0: switch (c) {
-					case " ": pushToken(); break;
-					// put da char in da temp
-					default: t += c;
-				}
+			case 0: { // normal
+				if (c == "LAST" || c == " ") {
+					pushToken();
+				} else if (c == "?" && i == 0) { // if this is a conditional
+					pushTemp("?");
+					changeMode(1);
+					pushToken(); break;
+				} else // put da char in da temp
+					pushTemp(c);
 			} break;
+			case 1: { // conditional
+				if (submode == 0 && " =!<>&|^".includes(c)) {
+					pushToken();
+					changeMode(1, 1);
+					if (c != " ") pushTemp(c);
+				} else if (submode == 1 && !("=!<>&|^".includes(c))) {
+					console.log(t, expression.substring(i, i + 3).toLowerCase());
+					if (t == "!" && expression.substring(i, i + 3).toLowerCase() == "nan") {
+						pushToken("!NaN");
+						i += 2;
+					} else {
+						pushToken();
+						if (c != " ") pushTemp(c);
+					}
+					changeMode(1, 2);
+				} else if ((submode == 2 && c == " ") || c == "LAST") {
+					if (c != " " && c != "LAST") pushTemp(c);
+					pushToken();
+				} else // put da char in da temp
+					pushTemp(c);
+			} break;
+			default: throw new Error("ParseError: Unknown Parsing Mode Entered");
 		}
+	}
 
 	return tokens.length == 0 ? [ new Token("nil") ] : tokens;
 
-	function pushToken(resetMode = false) {
-		tokens.push(tokenize(t));
+	function pushToken(force = false) {
+		if (t.length > 0 || typeof(force) == "string") {
+			let token = tokenize(force || t);
+			console.log(t, token);
+		} else if (force) {
+			let token = tokenize("nil");
+			console.log(t, token);
+			tokens.push(token);
+		}
+
 		t = "";
-		if (resetMode)
-			mode = 0;
+	}
+
+	function pushTemp(c) {
+		t += c;
+	}
+
+	function changeMode(newMode = 0, newSubmode = 0) {
+		mode = newMode;
+		submode = newSubmode;
 	}
 }
 
