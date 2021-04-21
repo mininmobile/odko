@@ -19,7 +19,7 @@ class Token {
 function parse(expression) {
 	let tokens = [];
 
-	let mode = 0; // normal, conditional
+	let mode = 0; // normal, conditional, log alias/raw strings
 	let submode = 0; // stage 1; stage 2; etc.
 	let t = "";
 	for (let i = 0; i <= expression.length; i++) {
@@ -29,10 +29,14 @@ function parse(expression) {
 			case 0: { // normal
 				if (c == "LAST" || c == " ") {
 					pushToken();
-				} else if (c == "?" && i == 0) { // if this is a conditional
+				} else if (i == 0 && c == "?") { // if this is a conditional
 					pushTemp("?");
+					pushToken();
 					changeMode(1);
-					pushToken(); break;
+				} else if (i == 0 && "!\"'.".includes(c)) { // if this is a log alias or a raw string
+					pushTemp(c);
+					pushToken();
+					changeMode(2);
 				} else // put da char in da temp
 					pushTemp(c);
 			} break;
@@ -42,7 +46,6 @@ function parse(expression) {
 					changeMode(1, 1);
 					if (c != " ") pushTemp(c);
 				} else if (submode == 1 && !("=!<>&|^".includes(c))) {
-					console.log(t, expression.substring(i, i + 3).toLowerCase());
 					if (t == "!" && expression.substring(i, i + 3).toLowerCase() == "nan") {
 						pushToken("!NaN");
 						i += 2;
@@ -57,19 +60,28 @@ function parse(expression) {
 				} else // put da char in da temp
 					pushTemp(c);
 			} break;
+			case 2: { // log alias/raw strings
+				if (c == "LAST") {
+					pushToken();
+				} else // put da char in da temp
+					pushTemp(c);
+			} break;
 			default: throw new Error("ParseError: Unknown Parsing Mode Entered");
 		}
 	}
 
-	return tokens.length == 0 ? [ new Token("nil") ] : tokens;
+	let returns = tokens.length == 0 ? [ new Token("nil") ] : tokens;
+	console.log(expression, "=>", returns);
+	return returns;
 
 	function pushToken(force = false) {
 		if (t.length > 0 || typeof(force) == "string") {
 			let token = tokenize(force || t);
-			console.log(t, token);
+			console.debug(t, token);
+			tokens.push(token);
 		} else if (force) {
 			let token = tokenize("nil");
-			console.log(t, token);
+			console.debug(t, token);
 			tokens.push(token);
 		}
 
@@ -97,7 +109,11 @@ function tokenize(potentialToken) {
 		case "nil":                 type = "nil"; break;
 		case "true": case "tru":    type = "number"; value = 1; break;
 		case "false": case "fal":   type = "number"; value = 0; break;
-		case "unknown": case "fal": type = "number"; value = 0; break;
+		case "unknown": case "error": case "bad": type = "number"; value = -1; break;
+		// concatinators
+		case "\"": type = "concatinator"; value = "ttb"; break;
+		case "'":  type = "concatinator"; value = "btt"; break;
+		case ".":  type = "concatinator"; value = "none"; break;
 
 		// CONDITIONAL COMPARATORS
 
@@ -128,8 +144,9 @@ function tokenize(potentialToken) {
 		            type = "command"; value = "random"; break;
 		// console commands
 		case "clear": case "cls":
-		              type = "command"; value = "clear"; break;
-		case "log":   type = "command"; value = "log"; break;
+		            type = "command"; value = "clear"; break;
+		case "log": case "!":
+		            type = "command"; value = "log"; break;
 		// logic commands
 		case "jmp": type = "command"; value = "jump"; break;
 		case "?":   type = "command"; value = "conditional"; break;

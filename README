@@ -59,8 +59,8 @@ branches out from that first block by activating the connected blocks.
 
 [ SYNTAX AND EXAMPLES ]
 
-- FizzBuzz @ code/fizzBuzz.json/png
-- hi-lo    @ code/hi-lo.json/png
+- FizzBuzz @ code/fizzBuzz.json & fizzBuzz.png
+- hi-lo    @ code/hi-lo.json    & hi-lo.png
 
 to  load  .json files open the dev console and write `load([contents of json])`.
 preferably you would copy and paste the contents of the json file. to save your
@@ -77,13 +77,17 @@ values take the forms of numbers, strings, and specials.
 number values (specifically integers) can simply typed into a block. they are
 also used as booleans in the forms of 1s and 0s.
 
-strings are marked with a quote followed by any six characters of your choosing,
-this  returns whatever you write after the quotes,   and if it is connected to a
-block, it concatenates the connected values (including other strings which means
-you can stack strings on top of each other to craft long strings) and places the
-six or less characters at the end of it when using double-quotes.  there is also
-the  single quote variant which  concatenates in the reverse order including the
-append, finally there is a no-concatenation variation with a period.
+strings are marked with a concatenator followed by a raw string (optional),  you
+are also able to forgo concatenation  completely and just return a raw string if
+need be. concatenators work by taking the connected blocks to the current block,
+and then concatenating them with a space (or not, depends on the concatenator).
+
+  [ "###### ]
+   concatenate top-to-bottom and append a raw string
+  [ '###### ]
+   concatenate bottom-to-top and prepend a raw string
+  [ .###### ]
+   simply return a raw string
 
 special values are usually placeholder values to make code neater, like;
 
