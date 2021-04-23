@@ -27,8 +27,20 @@ function parse(expression) {
 
 		switch (mode) {
 			case 0: { // normal
-				if (c == "LAST" || c == " ") {
+				if (c == "LAST") {
 					pushToken();
+				} else if (c == " ") {
+					pushToken();
+					// if potential register assignment upcoming
+					if (i == 2 && tokens[0].type == "register") {
+						// check for upcoming potential register assignment
+						let potentialAssignment = isAssignment(expression.charAt(3) + expression.charAt(4));
+						// if there is one push it and skip forward
+						if (potentialAssignment) {
+							pushToken(potentialAssignment);
+							i += 2;
+						}
+					}
 				} else if (i == 0 && c == "?") { // if this is a conditional
 					pushTemp("?");
 					pushToken();
@@ -37,6 +49,21 @@ function parse(expression) {
 					pushTemp(c);
 					pushToken();
 					changeMode(2);
+				} else if (i == 2 && isRegister(t)) { // if this is a potential register assignment
+					// if this just a set assignment
+					let isOne = c == "=";
+					// if this is another assignement that's two characters long
+					// only do it if it is not just a set assignment
+					let isTwo = false;
+					if (!isOne)
+						isTwo = isAssignment(c + expression.charAt(3));
+
+					if (isOne || isTwo) { // if this is a register assignment
+						pushToken();
+						pushToken(isOne || isTwo);
+						i += 1;
+					} else // put da char in da temp
+						pushTemp(c);
 				} else // put da char in da temp
 					pushTemp(c);
 			} break;
@@ -61,9 +88,9 @@ function parse(expression) {
 					pushTemp(c);
 			} break;
 			case 2: { // log alias/raw strings
-				if (c == "LAST") {
+				if (c == "LAST")
 					pushToken();
-				} else // put da char in da temp
+				else // put da char in da temp
 					pushTemp(c);
 			} break;
 			default: throw new Error("ParseError: Unknown Parsing Mode Entered");
@@ -77,7 +104,7 @@ function parse(expression) {
 	function pushToken(force = false) {
 		if (t.length > 0 || typeof(force) == "string") {
 			let token = tokenize(force || t);
-			console.debug(t, token);
+			console.debug(t || force, token);
 			tokens.push(token);
 		} else if (force) {
 			let token = tokenize("nil");
@@ -151,16 +178,26 @@ function tokenize(potentialToken) {
 		case "jmp": type = "command"; value = "jump"; break;
 		case "?":   type = "command"; value = "conditional"; break;
 
+		// REGISTER ASSIGNMENT
+
+		case "=":   type = "assignment"; value = "set"; break;
+		case "\"=": type = "assignment"; value = "append"; break;
+		case "'=":  type = "assignment"; value = "prepend"; break;
+		case "+=":  type = "assignment"; value = "add"; break;
+		case "-=":  type = "assignment"; value = "subtract"; break;
+		case "*=":  type = "assignment"; value = "multiply"; break;
+		case "/=":  type = "assignment"; value = "divide"; break;
+		case "%=":  type = "assignment"; value = "modulo"; break;
+
 		// STRINGS / NUMBERS / CONNECTIONS / REGISTERS
 
 		default: {
 			// is a connection or a register
 			if (potentialToken.length == 1 || potentialToken.length == 2) {
-				const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-				let canBeConnection = alphabet.includes(potentialToken.charAt(0));
+				let canBeConnection = isAlphabetic(potentialToken, true);
 
 				if (canBeConnection && potentialToken.length == 2) {
-					if (alphabet.includes(potentialToken.charAt(1))) {
+					if (isAlphabetic(potentialToken.charAt(1), true)) {
 						// is a register
 						type = "register"; value = potentialToken; break;
 					}
