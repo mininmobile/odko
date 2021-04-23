@@ -197,6 +197,10 @@ function tokenize(potentialToken) {
 		case "/=":  type = "assignment"; value = "divide"; break;
 		case "%=":  type = "assignment"; value = "modulo"; break;
 
+		// EVENTS
+
+		case "onrun": type = "event"; value = "onRun"; break;
+
 		// STRINGS / NUMBERS / CONNECTIONS / REGISTERS
 
 		default: {

@@ -260,6 +260,8 @@ A) default mode
   c: connect block (enters connect mode)
   d: disconnect connection to the current block
   D: disconnect connections originating from current block
+  p: force reparse current blocks - might fix some issues
+  P: force reparse all blocks - might fix some issues
   e/Enter/F2: edit block (enters edit mode)
   Arrow Keys: change focus
 

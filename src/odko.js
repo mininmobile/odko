@@ -80,6 +80,10 @@ addEventListener("keydown", e => {
 			case "t": if (_e) test(selected.x, selected.y); break;
 			// activate move mode
 			case "g": if (_e) mode = 3; break;
+			// force reparse current block
+			case "p": if (_e) table[selected.x][selected.y].t = parse(table[selected.x][selected.y].v); break;
+			// force reparse all blocks
+			case "P": reparseAll(table); break;
 
 			case "a": { // add block
 				if (table.length == 0) {
