@@ -636,6 +636,7 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 
 // locate all event handlers
 function findEvents() {
+	let sum = 0;
 	// clear events
 	events = [];
 	// loop over every column
@@ -644,6 +645,7 @@ function findEvents() {
 		// loop over every row
 		for (let y = 0; y < col.length; y++) {
 			let row = table[x][y];
+			sum++;
 			if (row.t.length == 0) continue;
 			// if row is an event
 			if (row.t[0].type == "event") {
@@ -667,6 +669,7 @@ function findEvents() {
 		}
 	}
 
+	conLog("iterated over " + sum + " blocks")
 	conLog("found " + events.length + " events")
-	console.log("found", events.length, "events", events);
+	console.log("iterated over", sum, "blocks. found", events.length, "events", events);
 }
