@@ -41,7 +41,6 @@ let table = [[]];
  * @property {string} type
  * @property {string} direction
  * @property {string} button
- * @property {number} id
  * @property {Point} origin
  * @property {Object} modifiers
  * @property {boolean} modifiers.shift
@@ -96,6 +95,8 @@ addEventListener("keydown", e => {
 				}
 				// show console
 				elements.consoleWrapper.classList.remove("hidden");
+				// gather events
+				setTimeout(() => findEvents(), 16);
 			} break;
 
 			// test current block
@@ -458,7 +459,7 @@ addEventListener("keydown", e => {
 						}
 					});
 					// run onRun events
-					findEvents(2).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+					//findEvents(2).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
 				} else if (run.state == 2) {
 					// unpause lol
 					run.state = 1;
@@ -483,8 +484,8 @@ addEventListener("keydown", e => {
 			} break;
 
 			// only trigger onKey functions when running
-			default: if (run.state == 1)
-				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+			/*default: if (run.state == 1)
+				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));*/
 		}
 	}
 
@@ -499,8 +500,8 @@ addEventListener("keyup", (e) => {
 			case "`": case "Tab": case "F12": break;
 
 			// only trigger onKey functions when running
-			default: if (run.state == 1)
-				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+			/*default: if (run.state == 1)
+				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));*/
 		}
 	}
 });
@@ -742,7 +743,7 @@ function getConnections(x, y) {
 
 // save/load program
 function load(json) {
-	table = json;
+	table = JSON.parse(json);
 	reparseAll();
 	update();
 }
@@ -762,5 +763,5 @@ function save() {
 		}
 	}
 
-	console.log(JSON.string(exportTable));
+	console.log(JSON.stringify(exportTable));
 }

@@ -3,7 +3,6 @@
  * @property {string} type
  * @property {string} direction
  * @property {string} button
- * @property {number} id
  * @property {Object} modifiers
  * @property {boolean} modifiers.shift
  * @property {boolean} modifiers.ctrl
@@ -28,7 +27,7 @@ class Token {
  * @param {string} expression
  * @returns {Array.<Token>}
  */
-function parse(expression) {
+function parse(expression = "") {
 	let tokens = [];
 
 	let mode = 0; // normal, conditional, log alias/raw strings
@@ -101,7 +100,6 @@ function parse(expression) {
 									type: event,
 									direction: direction,
 									button: button == "*" ? "any" : button,
-									id: 0,
 									modifiers: { shift, ctrl, alt },
 								});
 
@@ -171,7 +169,7 @@ function parse(expression) {
 				if (c == "LAST")
 					pushToken(false, true);
 					if (submode == 1) {
-
+						// TODO: remove trailing space if space before assignment operator
 					}
 				else // put da char in da temp
 					pushTemp(c);
@@ -308,38 +306,6 @@ function tokenize(potentialToken) {
 
 	return new Token(raw, type, value);
 }
-
-// parse event
-// // onRun
-// {
-//     type: "onRun",
-//     activates: activates,
-//     origin: y,
-//     id: isNaN(parseInt(event[0])) ? 0 : parseInt(event[0]),
-// }
-
-// // onKeyUp & onKeyDown/onMouseUp & onMouseDown
-// {
-//     type: e.charAt(0) == "k" ? "onKey" : "onMouse",
-//     direction: releasing,
-//     key: any ? "any" : (e.charAt(0) == "k" ? key : undefined),
-//     button: any ? "any" : (e.charAt(0) == "m" ? parseInt(key) : undefined)
-//     modifiers: { shift: shift, ctrl: ctrl, alt: alt },
-//     activates: activates,
-//     origin: y,
-//     id: 0,
-// }
-
-// // onCodeUp & onCodeDown
-// {
-//     type: "onCode",
-//     direction: releasing,
-//     code: any ? "any" : (parseInt(codeA + codeB, 16)),
-//     modifiers: { shift: shift, ctrl: ctrl, alt: alt },
-//     activates: activates,
-//     origin: y,
-//     id: 0,
-// }
 
 // evaluate expression
 /**
@@ -668,67 +634,39 @@ function runFrom(_x, _y, values = {}, overrideConnections = false, callStack = 0
 	consoleDraw();
 }
 
-// find event/event handler almost
-/**
- * @param {(0|1|2)} type 0: keyboard, 1: mouse, 2: onRun
- * @param {(KeyboardEvent|MouseEvent)} event
- * @param {boolean} releasing
- */
-function findEvents(type, event, releasing = false) {
-	let events = [];
-	let values = {};
-	let count = 0;
-
-	if (type == 2) { // onRun events
-		// check if event types match
-		events = run.events
-			.filter(e => e.type == "onRun")
-			.sort((a, b) => a.id - b.id);
-	} else { // keyboard + mouse events
-		events = run.events.filter(e => {
-			// check if event matches search direction
-			if (e.direction == releasing) {
-				let m = e.modifiers;
-				// check if modifiers match
-				if ((m.shift == event.shiftKey && m.shift !== null) || m.shift == null)
-					if ((m.ctrl == event.ctrlKey && m.ctrl !== null) || m.ctrl == null)
-						if ((m.alt == event.altKey && m.alt !== null) || m.alt == null)
-						// "any" events
-						if (e.type == "onCode" && e.code == "any" && type == 0) { // any code
-							return match({"C": event.which});
-						} else if (e.type == "onKey" && e.key == "any" && type == 0) { // any key
-							return match({"K": event.key});
-						} else if (e.type == "onMouse" && e.button == "any" && type == 1) { // any mouse button
-							return match({"B": event.button});
-						// check if keys/buttons match
-						} else if (e.type == "onKey" && type == 0) {
-							if (event.key.toLowerCase() == e.key.toLowerCase()) return match();
-						} else if (e.type == "onCode" && type == 0) {
-							if (event.which == e.code) return match();
-						} else if (e.type == "onMouse" && type == 1) {
-							if (event.button == e.button) return match({
-								"X": Math.floor(event.offsetX / ch(1)),
-								"Y": Math.floor(event.offsetY / em(1)),
-								"M": event.offsetX,
-								"N": event.offsetY,
-							});
-						}
+// locate all event handlers
+function findEvents() {
+	// clear events
+	events = [];
+	// loop over every column
+	for (let x = 0; x < table.length; x++) {
+		let col = table[x];
+		// loop over every row
+		for (let y = 0; y < col.length; y++) {
+			let row = table[x][y];
+			if (row.t.length == 0) continue;
+			// if row is an event
+			if (row.t[0].type == "event") {
+				// get event data
+				let _e = row.t[0].value;
+				// combine event data with event metadata
+				let e = {
+					type: _e.type,
+					direction: _e.direction,
+					button: _e.button,
+					modifiers: _e.modifiers,
+					origin: { x, y },
+					activates: table[x + 1] == undefined ? [] :
+						table[x + 1]
+							.map((x, i) =>x.c.includes(y) ? i : undefined)
+							.filter((x) => x != undefined),
+				}
+				// add to events list
+				events.push(e);
 			}
-			// if no match found, fuck off
-			return false;
-		});
+		}
 	}
 
-	function match(vs) {
-		if (vs)
-			values[count] = vs;
-
-		count++;
-		return true;
-	}
-
-	Object.keys(values).forEach(v =>
-		events[v].values = values[v]);
-
-	return events;
+	conLog("found " + events.length + " events")
+	console.log("found", events.length, "events", events);
 }

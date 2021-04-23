@@ -3,7 +3,7 @@ function reparseAll() {
 	for (let x = 0; x < table.length; x++) {
 		let col = table[x];
 		for (let y = 0; y < col.length; y++) {
-			table[selected.x][selected.y].t = parse(table[selected.x][selected.y].v);
+			table[x][y].t = parse(table[x][y].v);
 		}
 	}
 }

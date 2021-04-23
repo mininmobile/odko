@@ -26,8 +26,6 @@ function initConsole() {
 	observer.observe(elements.consoleWrapper, { attributes: true });
 	// mouse events
 	attachConsoleClickHandlers();
-
-	// aaa();
 }
 
 function updateConsole(noResize = false) {
@@ -148,12 +146,12 @@ function attachDragHandler(handle, wrapper) {
 
 function attachConsoleClickHandlers() {
 	elements.consoleCanvas.addEventListener("mousedown", (e) => {
-		if (mode == 4 && run.state == 1)
-				findEvents(1, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+		// if (mode == 4 && run.state == 1)
+		// 	findEvents(1, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
 	});
 
 	elements.consoleCanvas.addEventListener("mouseup", (e) => {
-		if (mode == 4 && run.state == 1)
-				findEvents(1, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+		// if (mode == 4 && run.state == 1)
+		// 	findEvents(1, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
 	});
 }
