@@ -1,8 +1,20 @@
+/**
+ * @typedef {Object} EventData
+ * @property {string} type
+ * @property {string} direction
+ * @property {string} button
+ * @property {number} id
+ * @property {Object} modifiers
+ * @property {boolean} modifiers.shift
+ * @property {boolean} modifiers.ctrl
+ * @property {boolean} modifiers.alt
+ */
+
 class Token {
 	/**
 	 * @param {string} raw raw token string
-	 * @param {"nil" | "number" | "string" | "comparator" | "command" | "register" | "connection" | "event"} type how arguments are calculated/type of data
-	 * @param {any} value options/data (if any)
+	 * @param {"nil" | "number" | "concatinator" | "string" | "comparator" | "command" | "assignment" | "register" | "connection" | "event"} type how arguments are calculated/type of data
+	 * @param {any | string | number | EventData} value options/data (if any)
 	 */
 	constructor(raw, type, value = null) {
 		this.raw = raw;
@@ -40,6 +52,71 @@ function parse(expression) {
 							pushToken(potentialAssignment);
 							i += 2;
 						}
+					}
+				} else if ((i == 1 || i == 3) && (c == "_" || c == "-")) { // if this is a potential input event
+					// determine direction of event
+					let direction = c == "_" ? "down" : "up";
+					// determine type of event
+					let event = expression.charAt(0);
+					let _continue = false;
+					if (event == "k") { event = "key"; _continue = true; } else
+					if (event == "m") { event = "mouse"; _continue = true; } else
+					if (event == "c") { event = "code"; _continue = true; }
+
+
+					// proper syntax reinforcement
+					if (event == "key" || event == "mouse")
+						if ((expression.charAt(3) || " ") != " ")
+							_continue = false;
+
+					if (_continue) {
+						// determine button of event
+						let button = null;
+						_continue = false;
+						if (event == "key") {
+							button = expression.charAt(2) || "none";
+							_continue = button != "none";
+						} else if (event == "mouse") {
+							button = expression.charAt(2) || "none";
+							_continue = button == "0" || button == "1" || button == "2" || button == "*";
+						} else if (event == "code") {
+							let _c1 = expression.charAt(1) || "X";
+							let _c2 = expression.charAt(2) || "X";
+							button = parseInt(_c1 + _c2, 16);
+							_continue = !isNaN(button);
+						}
+
+						if (_continue) {
+							// determine modifiers of event
+							let _continue = true;
+							let shift = expression.charAt(4) || "?";
+							if (!(shift == "0" || shift == "1" || shift == "?")) _continue = false;
+							let ctrl = expression.charAt(5) || "?";
+							if (!(ctrl == "0" || ctrl == "1" || ctrl == "?")) _continue = false;
+							let alt = expression.charAt(6) || "?";
+							if (!(alt == "0" || alt == "1" || alt == "?")) _continue = false;
+
+							if (_continue) {
+								let token = new Token(expression, "event", {
+									type: event,
+									direction: direction,
+									button: button == "*" ? "any" : button,
+									id: 0,
+									modifiers: { shift, ctrl, alt },
+								});
+
+								console.debug(expression, token.value);
+								tokens.push(token);
+								i = expression.length + 1;
+								t = "";
+							} else {
+								pushTemp(c);
+							}
+						} else {
+							pushTemp(c);
+						}
+					} else {
+						pushTemp(c);
 					}
 				} else if (i == 0 && c == "?") { // if this is a conditional
 					pushTemp("?");
@@ -220,9 +297,8 @@ function tokenize(potentialToken) {
 			}
 
 			// is a number
-			let potentialNumber = parseInt(potentialToken);
-			if (!isNaN(potentialNumber)) {
-				type = "number"; value = potentialNumber; break;
+			if (!isNaN(potentialToken)) {
+				type = "number"; value = parseInt(potentialToken); break;
 			}
 
 			// fuck it, it's a string

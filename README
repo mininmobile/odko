@@ -151,9 +151,7 @@ special values are usually placeholder values to make code neater, like;
 
 [ EVENTS ]
 
-> if a block is in the first column,  and it starts with "o" "k" "c" or "m", the
-  block will be ignored when (and only when) testing, even if it is connected
-> events are only valid when placed in the first column (for now?)
+> during testing, events will always return a -1 (error value)
 
 most  events  have argument locations,  which are places the interpreter expects
 you to have entered an argument.  the # argument(s)  are required,  and capitals
@@ -162,8 +160,8 @@ you to have entered an argument.  the # argument(s)  are required,  and capitals
 some  events can be followed by a numerical id so the interpreter knows in which
 order  to  execute multiple instances of an event, by default all events have an
 id of 0 which means they will run as soon as possible, if multiple events of the
-same  type and id are present, they will execute in the order they appear in the
-starting column (top to bottom) this fact also holds true for events that do not
+same  type and id are present,  they will execute in the order they appear (left
+to  right  and top to bottom).  this fact also holds true for events that do not
 permit you to input an id through an argument.
 
 sometimes optional arguments take the form of 'switches',  basically a 0 or 1 or
@@ -175,22 +173,25 @@ if multiple values are returned then they will be stated.
 
   [ onRun X ]
    blocks connected to this block will run as soon as possible after the program
-   has begun execution. the event can be assigned an id with the X argument.
+   has begun execution. the event can be assigned an id with the X argument.  it
+   returns its id X.
 
   [ k_# ABC ]
    blocks  connected  to this block will run after the key # has been depressed.
-   A,  B,  and  C  are switches which  enable  or disable the requirement of the
-   Shift, Ctrl, or  Alt  modifiers modifier keys  respectively. the switches can
-   also  be omitted or replaced with a question mark  (?)   (eg. if you need the
-   Shift  and  Alt  keys  to be held, but don't care about the state of the Ctrl
-   key, your ABC would be "1?1")
+   if # is set to an asterisk (*) then any key will call this event. A, B, and C
+   are switches which enable or disable the requirement of the Shift,  Ctrl,  or
+   Alt modifiers modifier keys respectively. the switches can also be omitted or
+   replaced with a question mark (?)  (eg. if you need the Shift and Alt keys to
+   be held,  but don't care about the state of the Ctrl key,  your ABC arguments
+   would be set to "1?1"). it returns the key which was pressed.
 
   [ k-# ABC ]
    same as previous except fires after the key # has been released.
 
   [ c##_ABC ]
    same as the  [ k_# ]  event except instead of a character you would input two
-   hexadecimal digits that represent a javascript keycode.
+   hexadecimal digits that represent a javascript keycode.  you also cannot pass
+   in two asterisks in place of the ##.
 
   [ c##-ABC ]
    same as the  [ k-# ]  event except instead of a character you would input two
@@ -201,7 +202,8 @@ if multiple values are returned then they will be stated.
    be 0 for left click, 1 for middle click, 2 for right click. (etc?)  when this
    event is  triggered it returns  multiple values,   value X for the horizontal
    cell clicked, Y for the vertical cell clicked,  M for the raw x position, and
-   N for the raw y position.
+   N for the raw y position. it returns the mouse button pressed for blocks that
+   are connected.
 
   [ m-# ABC ]
    same as previous except fires after the mouse button # has been released.
@@ -236,9 +238,9 @@ they are always stored as strings but converted to integers when required.
 [ KEYBOARD SHORTCUTS ]
 
 > ^ is short for  "ctrl + ..."  and  capital  letters imply shift being pressed,
-  slashes  delimitate  aliases  of  a  certain  function, and shortcuts that are
-  longer  than  one or two characters and begin with a capital represent special
-  keys on the keyboard
+  slashes  delimitate  aliases  of  a  certain  function, and 'special keys' are
+  written out  with  Title Case.   in the case of special keys requiring a shift
+  modifier then the shortcuts will be written out literally as "Shift + ..."
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 

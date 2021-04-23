@@ -1,3 +1,9 @@
+/**
+ * @typedef {Object} Point
+ * @property {number} x
+ * @property {number} y
+ */
+
 const elements = {
 	em: document.getElementById("em"),
 	ch: document.getElementById("ch"),
@@ -27,9 +33,25 @@ let connectCursor = { x: 0, y: 0, right: false }
  * @property {Array.<Token>} t
  * @property {Array.<number>} c
  */
-
 /** @type {Array.<Array.<Row>>} */
 let table = [[]];
+
+/**
+ * @typedef {Object} OdkoEvent
+ * @property {string} type
+ * @property {string} direction
+ * @property {string} button
+ * @property {number} id
+ * @property {Point} origin
+ * @property {Object} modifiers
+ * @property {boolean} modifiers.shift
+ * @property {boolean} modifiers.ctrl
+ * @property {boolean} modifiers.alt
+ * @property {Array.<number>} activates
+ */
+/** @type {Array.<OdkoEvent>} */
+let events = [];
+
 update();
 initConsole();
 
@@ -83,7 +105,7 @@ addEventListener("keydown", e => {
 			// force reparse current block
 			case "p": if (_e) table[selected.x][selected.y].t = parse(table[selected.x][selected.y].v); break;
 			// force reparse all blocks
-			case "P": reparseAll(table); break;
+			case "P": reparseAll(); break;
 
 			case "a": { // add block
 				if (table.length == 0) {
@@ -721,6 +743,7 @@ function getConnections(x, y) {
 // save/load program
 function load(json) {
 	table = json;
+	reparseAll();
 	update();
 }
 

@@ -1,5 +1,5 @@
 // force reparse all blocks
-function reparseAll(table) {
+function reparseAll() {
 	for (let x = 0; x < table.length; x++) {
 		let col = table[x];
 		for (let y = 0; y < col.length; y++) {
