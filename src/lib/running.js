@@ -62,6 +62,8 @@ function parse(expression) {
 						pushToken();
 						pushToken(isOne || isTwo);
 						i += 1;
+						if (isTwo == "\"=" || isTwo == "'=")
+							changeMode(2, 1);
 					} else // put da char in da temp
 						pushTemp(c);
 				} else // put da char in da temp
@@ -87,9 +89,13 @@ function parse(expression) {
 				} else // put da char in da temp
 					pushTemp(c);
 			} break;
-			case 2: { // log alias/raw strings
+			case 2: { // submode 0: log alias/raw strings
+			          //         1: register assignment prepend/append
 				if (c == "LAST")
-					pushToken();
+					pushToken(false, true);
+					if (submode == 1) {
+
+					}
 				else // put da char in da temp
 					pushTemp(c);
 			} break;
@@ -101,9 +107,11 @@ function parse(expression) {
 	console.log(expression, "=>", returns);
 	return returns;
 
-	function pushToken(force = false) {
+	function pushToken(force = false, forceString = false) {
 		if (t.length > 0 || typeof(force) == "string") {
-			let token = tokenize(force || t);
+			let token = forceString ?
+				new Token(force || t, "string", force || t)
+				: tokenize(force || t);
 			console.debug(t || force, token);
 			tokens.push(token);
 		} else if (force) {
