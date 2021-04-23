@@ -50,6 +50,13 @@ let table = [[]];
  */
 /** @type {Array.<OdkoEvent>} */
 let events = [];
+let eventsFiltered = {
+	keyboardDown: [],
+	keyboardUp: [],
+	mouseDown: [],
+	mouseUp: [],
+	run: [],
+}
 
 update();
 initConsole();
