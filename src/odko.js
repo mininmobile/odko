@@ -725,8 +725,11 @@ function getFocusedColumn() {
 }
 
 // calculate connections from current block
-function getConnections(x, y) {
+function getConnections(x, y, forwards = true) {
 	let connections = [];
+
+	if (!forwards)
+		return table[x][y].c;
 
 	(table[x + 1] || []).forEach((r, i) => {
 		if (r.c.includes(y))

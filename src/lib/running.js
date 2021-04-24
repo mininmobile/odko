@@ -499,7 +499,10 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 				if (typeof(e) !== "string")
 					console.error(e);
 
-				return conLog(`![x${x}y${y}] ` + e);
+				let formatted = `![x${x}y${y}] ` + e;
+				conLog(formatted);
+				consoleDraw();
+				return formatted;
 			}
 
 			// combine newToEval with other newToEvals
@@ -537,9 +540,10 @@ function evaluate(_tokens, p, t, _c) {
 		// if connection/register
 		if (token.type == "connection") { // if connection
 			// get connection
-			let referenced = t[p.x - 1][atoi(token.value)];
+			let _y = getConnections(p.x, p.y, false)[atoi(token.value)];
+			let referenced = t[p.x - 1][_y];
 			// check if valid
-			if (referenced)
+			if (_y != undefined)
 				// if valid then replace connection with the stuff
 				tokens[i] = new Token(referenced, "string", referenced);
 		} else if (token.type == "register") {
@@ -555,9 +559,18 @@ function evaluate(_tokens, p, t, _c) {
 	let driveToken = tokens.shift();
 	switch (driveToken.type) {
 		case "command": switch (driveToken.value) {
+			// math commands
+			case "add": return die(reduce((a, b) => a + b));
+			case "subtract": return die(reduce((a, b) => a - b));
+			case "multiply": return die(reduce((a, b) => a * b));
+			case "divide": return die(reduce((a, b) => a / b));
 			// log command
 			case "log":
 				return die(conLog(tokens.map(x => x.raw).join(" ")));
+			// clear command
+			case "clear":
+				consoleData.text = []; consoleDraw();
+				return die(1);
 
 			default:
 				throw new Error("EvaluateError: unknown command '" + driveToken.value + "'");
@@ -582,8 +595,12 @@ function evaluate(_tokens, p, t, _c) {
 			} else if (concatinator == "none") {
 				// just return the current string
 				return die(string);
-			} else throw new Error("EvaluateError: unknown concatinator '" + concatinator + "'")
+			} else throw new Error("EvaluateError: unknown concatinator '" + concatinator + "'");
 		} break;
+
+		case "string":
+		case "number":
+			return die(driveToken.value);
 
 		default:
 			return die("nil");
@@ -598,6 +615,18 @@ function evaluate(_tokens, p, t, _c) {
 			out: v.toString(),
 			toEval: c,
 		}
+	}
+
+	// for the math commands
+	function reduce(callback) {
+		let _x = tokens
+			.map(x => isNaN(x.raw) ? "nil" : parseInt(x.raw))
+			.filter(x => typeof(x) == "number");
+
+		if (_x.length == 0)
+			_x = [ -1 ];
+
+		return _x.reduce(callback);
 	}
 }
 
