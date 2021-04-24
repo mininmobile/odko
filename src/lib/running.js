@@ -20,6 +20,10 @@ class Token {
 		this.type = type;
 		this.value = value;
 	}
+
+	toString() {
+		return this.raw;
+	}
 }
 
 // tokenize block
@@ -556,11 +560,33 @@ function evaluate(_tokens, p, t, _c) {
 				return die(conLog(tokens.map(x => x.raw).join(" ")));
 
 			default:
-				throw new Error("EvaluateError: unknown command '" + tokens[0].value + "'");
+				throw new Error("EvaluateError: unknown command '" + driveToken.value + "'");
+		} break;
+
+		case "concatinator": {
+			// get current string
+			// used by all concatinators
+			let string = tokens[0] ? tokens[0].raw : "";
+
+			let concatinator = driveToken.value; // sanity
+			if (concatinator == "ttb" || concatinator == "btt") { // if ordered
+				// get connected strings
+				// used by ordered concatinators
+				let strings = t[p.x - 1].filter(x => x != undefined && x != null);
+				strings.push(string);
+				// order strings
+				if (concatinator == "btt")
+					strings.reverse();
+				// returns concatenated strings
+				return die(strings.join(" "));
+			} else if (concatinator == "none") {
+				// just return the current string
+				return die(string);
+			} else throw new Error("EvaluateError: unknown concatinator '" + concatinator + "'")
 		} break;
 
 		default:
-			return die(tokenize("nil"));
+			return die("nil");
 	}
 
 	// always exit with value as string
