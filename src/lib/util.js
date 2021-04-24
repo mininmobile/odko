@@ -65,8 +65,11 @@ function sort(arr) {
 	return arr.length > 0 ? [].sort.call(arr, (a, b) => a - b) : [];
 }
 
-// alpha to int
+// alpha to index
 function atoi(a) {
+	if (a == "_")
+		return 0;
+
 	const alphas = "abcdefghijklmnopqrstuv";
 	return alphas.indexOf(a.toLowerCase);
 }

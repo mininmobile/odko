@@ -441,5 +441,141 @@ function executeEvent(event) {
 		}
 	}
 	// run blocks connected to that point
-	runFrom(event.origin.x, event.origin.y, returns);
+	runFrom(event.origin.x, event.origin.y, returns, event.activates);
 }
+
+function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
+	if (callstack >= 2000) {
+		run.going = false;
+		return conLog(`![x${_x}y${_y}] call stack limit exceeded`);
+	}
+	if (callstack == 0) run.going = true;
+
+	// sanity
+	let startingBlock = table[_x][_y];
+	// blocks to evaluate before moving on to next column
+	let toEval;
+	// temporary table
+	let t = new Array(_x + 2);
+	t = t.fill([], 0, _x + 1);
+	// calculate starting value
+	if (callstack == 0) {
+		// get blocks to activate
+		toEval = overrideNext || getConnections(_x, _y);
+		// if this is an event
+		if (inputs != null)
+			// pass through the returned information
+			Object.keys(inputs).forEach(input =>
+				table[_x][atoi(input)] = inputs[input]);
+		else
+			// else just pass through this block evaluated
+			t[_x][_y] = evaluate(startingBlock).out;
+	} else {
+		toEval = [ _y ];
+	}
+	// loop through all (connected) blocks
+	for (let x = _x + (callstack == 0 ? 1 : 0); x < table.length; x++) {
+		t[x] = []; // initialize new temp table column
+		let n = []; // newToEval
+
+		for (let i = 0; i < toEval.length; i++) {
+			let y = toEval[i]; // sanity
+			let _n = getConnections(x, y); // connections from this block
+
+			// evaluate
+			try {
+				// pass in tokens, temp table, and potential newToEval
+				let _ = evaluate(table[x][y].t, {x,y}, t, _n);
+				// use the values you got from the evaluatemennt
+				_n = _.toEval;
+				t[x][y] = _.out;
+			} catch (e) {
+				if (typeof(e) !== "string")
+					console.error(e);
+
+				return conLog(`![x${x}y${y}] ` + e);
+			}
+
+			// combine newToEval with other newToEvals
+			n = n.concat(_n);
+		}
+		if (n.length == 0) break;
+		// toEval = unique newToEval connections
+		toEval = n.filter((v, i) => n.indexOf(v) == i);
+	}
+
+	// if there is stuff to be done in the queue then do that before quitting the thread
+	if (run.queue.length > 0) {
+		let q = run.queue.shift();
+		runFrom(q.x, q.y, q.x == 1 ? values : {}, false, callstack + 1);
+	}
+
+	run.going = false;
+	consoleDraw();
+
+	console.log(t);
+}
+
+/**
+ * @param {Array.<Token>} tokens
+ * @param {Point} p x/y coordinate
+ * @param {Array.<Array.<string>>} t outputs/temporary table
+ * @param {Array.<number>} c output connections
+ * @returns {EvalResult}
+ */
+function evaluate(tokens, p, t, _c) {
+	let c = _c;
+
+	// get register/connections values
+	for (let i = 0; i < tokens.length; i++) {
+		let token = tokens[i];
+		// if connection/register
+		if (token.type == "connection") { // if connection
+			// get connection
+			let referenced = t[p.x - 1][atoi(token.value)];
+			// check if valid
+			if (referenced)
+				// if valid then replace connection with the stuff
+				tokens[i] = new Token(referenced, "string", referenced);
+		} else if (token.type == "register") {
+			let referenced;
+			// get register/check if valid
+			if (referenced = run.registers[token.value])
+				// if valid then replace register with the stuff
+				tokens[i] = new Token(referenced, "string", referenced);
+		}
+	}
+
+	// main token that drives the rest of the expression
+	let driveToken = tokens.shift();
+	switch (driveToken.type) {
+		case "command": switch (driveToken.value) {
+			// log command
+			case "log":
+				return die(conLog(tokens.map(x => x.raw).join(" ")));
+
+			default:
+				throw new Error("EvaluateError: unknown command '" + tokens[0].value + "'");
+		} break;
+
+		default:
+			return die(tokenize("nil"));
+	}
+
+	// always exit with value as string
+	function die(v) { // v is for value
+		if (typeof(v) == "number")
+			v = v.toFixed(0);
+
+		return {
+			out: v.toString(),
+			toEval: c,
+		}
+	}
+}
+
+/**
+ * @typedef {Object} EvalResult
+ * @property {string} out
+ * @property {Array.<number>} toEval
+ */

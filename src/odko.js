@@ -23,7 +23,7 @@ let mode = 0; // default, edit, connecting, move, run
 // state: halted, running, paused, preserved
 // registers: variables object (AA, AB, etc.)
 // events: parsed events
-let run = { state: 0, registers: {}, events: [], queue: [], going: false };
+let run = { state: 0, registers: {}, queue: [], going: false };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
@@ -60,6 +60,7 @@ let eventsFiltered = {
 
 update();
 initConsole();
+load('[[{"v":"onRun","c":[]}],[{"v":"log hi!","c":[0]}],[{"v":"!bye...","c":[0]}]]');
 
 addEventListener("keydown", e => {
 	if (!(e.key == "I" && e.ctrlKey && e.shiftKey || e.key == "r" && e.ctrlKey))
@@ -453,20 +454,8 @@ addEventListener("keydown", e => {
 				if (run.state == 0|| run.state == 3) {
 					run.state = 1;
 					conLog("=> start of execution");
-
-					// register events
-					table[0].forEach((r, i) => {
-						try {
-							run.events.push(parseEvent(r, i));
-						} catch (e) {
-							if (typeof e !== "string")
-								console.error(e);
-
-							conLog(e);
-						}
-					});
 					// run onRun events
-					//findEvents(2).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+					eventsFiltered.run.forEach(executeEvent);
 				} else if (run.state == 2) {
 					// unpause lol
 					run.state = 1;
