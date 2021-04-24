@@ -517,13 +517,14 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 }
 
 /**
- * @param {Array.<Token>} tokens
+ * @param {Array.<Token>} _tokens
  * @param {Point} p x/y coordinate
  * @param {Array.<Array.<string>>} t outputs/temporary table
  * @param {Array.<number>} c output connections
  * @returns {EvalResult}
  */
-function evaluate(tokens, p, t, _c) {
+function evaluate(_tokens, p, t, _c) {
+	let tokens = _tokens.slice();
 	let c = _c;
 
 	// get register/connections values
