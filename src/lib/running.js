@@ -536,6 +536,10 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 function evaluate(_tokens, p, t, _c) {
 	let tokens = _tokens.slice();
 	let c = _c;
+	let connectionsToBlock = [];
+
+	if (p)
+		connectionsToBlock = getConnections(p.x, p.y, false);
 
 	// get register/connections values
 	for (let i = 0; i < tokens.length; i++) {
@@ -543,7 +547,7 @@ function evaluate(_tokens, p, t, _c) {
 		// if connection/register
 		if (token.type == "connection") { // if connection
 			// get connection
-			let _y = getConnections(p.x, p.y, false)[atoi(token.value)];
+			let _y = connectionsToBlock[atoi(token.value)];
 			let referenced = t[p.x - 1][_y];
 			// check if valid
 			if (_y != undefined)
@@ -569,14 +573,16 @@ function evaluate(_tokens, p, t, _c) {
 			case "divide": return die(reduce((a, b) => a / b));
 			// modulo operation
 			case "modulo": {
+				let a = tokens[0].raw;
+				let b = tokens[1].raw;
 				// exit if not enough args
 				if (tokens[0] == undefined || tokens[1] == undefined)
 					return die(-1);
 				// exit if args aren't numbers
-				if (isNaN(tokens[0].raw) || isNaN(tokens[1].raw))
+				if (isNaN(a) || isNaN(b))
 					return die(-1);
 				// calculate result
-				let result = Math.abs(parseInt(tokens[0].raw) % parseInt(tokens[0].raw));
+				let result = Math.abs(parseInt(a) % parseInt(b));
 				// exit with nil if result is NaN
 				if (isNaN(result))
 					return die("nil");
@@ -608,16 +614,16 @@ function evaluate(_tokens, p, t, _c) {
 		}
 
 		case "concatinator": {
-			// get current string
-			// used by all concatinators
+			// get current string, used by all concatinators
 			let string = tokens[0] ? tokens[0].raw : "";
 
 			let concatinator = driveToken.value; // sanity
 			if (concatinator == "ttb" || concatinator == "btt") { // if ordered
 				// get connected strings
-				// used by ordered concatinators
-				let strings = t[p.x - 1].filter(x => x != undefined && x != null);
-				strings.push(string);
+				let strings = t[p.x - 1]
+					.filter((x, i) => connectionsToBlock.includes(i) && x != undefined && x != null);
+				if (string)
+					strings.push(string);
 				// order strings
 				if (concatinator == "btt")
 					strings.reverse();
