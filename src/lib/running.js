@@ -351,6 +351,7 @@ function findEvents() {
 					// add to events list
 					events.push(e);
 					eventsFiltered.run.push(e);
+					console.log("dumb", eventToken);
 				} else { // if input event
 					// get event data
 					let _e = row.t[0].value;
@@ -379,7 +380,7 @@ function findEvents() {
 		// add to events list
 		events.push(e);
 		// filter
-		if (e.type == "char" || e.type == "key") {
+		if (e.type == "code" || e.type == "key") {
 			if (e.direction == "down") {
 				eventsFiltered.keyboardDown.push(e);
 			} else {
@@ -458,7 +459,8 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 		run.going = false;
 		return conLog(`![x${_x}y${_y}] call stack limit exceeded`);
 	}
-	if (callstack == 0) run.going = true;
+
+	run.going = true;
 
 	// sanity
 	let startingBlock = table[_x][_y];
@@ -502,10 +504,8 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 				if (typeof(e) !== "string")
 					console.error(e);
 
-				let formatted = `![x${x}y${y}] ` + e;
-				conLog(formatted);
-				consoleDraw();
-				return formatted;
+				run.going = false;
+				return conLog(`![x${x}y${y}] ` + e);
 			}
 
 			// combine newToEval with other newToEvals
@@ -562,11 +562,39 @@ function evaluate(_tokens, p, t, _c) {
 	let driveToken = tokens.shift();
 	switch (driveToken.type) {
 		case "command": switch (driveToken.value) {
-			// math commands
+			// arithmetic operations
 			case "add": return die(reduce((a, b) => a + b));
 			case "subtract": return die(reduce((a, b) => a - b));
 			case "multiply": return die(reduce((a, b) => a * b));
 			case "divide": return die(reduce((a, b) => a / b));
+			// modulo operation
+			case "modulo": {
+				// exit if not enough args
+				if (tokens[0] == undefined || tokens[1] == undefined)
+					return die(-1);
+				// exit if args aren't numbers
+				if (isNaN(tokens[0].raw) || isNaN(tokens[1].raw))
+					return die(-1);
+				// calculate result
+				let result = Math.abs(parseInt(tokens[0].raw) % parseInt(tokens[0].raw));
+				// exit with nil if result is NaN
+				if (isNaN(result))
+					return die("nil");
+				else
+					return die(result);
+			}
+			// length command
+			case "length": return die(tokens.map(x => x.raw).join(" ").length);
+			// random command
+			case "random": {
+				// get maximum value
+				let max = 1;
+				if (tokens[0])
+					if (!isNaN(tokens[0].raw))
+						max = parseInt(tokens[0].raw);
+				// return rounded number
+				return die(Math.round(Math.random() * max));
+			}
 			// log command
 			case "log":
 				return die(conLog(tokens.map(x => x.raw).join(" ")));
@@ -577,7 +605,7 @@ function evaluate(_tokens, p, t, _c) {
 
 			default:
 				throw new Error("EvaluateError: unknown command '" + driveToken.value + "'");
-		} break;
+		}
 
 		case "concatinator": {
 			// get current string
@@ -599,7 +627,7 @@ function evaluate(_tokens, p, t, _c) {
 				// just return the current string
 				return die(string);
 			} else throw new Error("EvaluateError: unknown concatinator '" + concatinator + "'");
-		} break;
+		}
 
 		case "string":
 		case "number":
