@@ -147,11 +147,11 @@ function attachDragHandler(handle, wrapper) {
 function attachConsoleClickHandlers() {
 	elements.consoleCanvas.addEventListener("mousedown", (e) => {
 		if (mode == 4 && run.state == 1)
-			findEvents(1, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+			runEvent(e);
 	});
 
 	elements.consoleCanvas.addEventListener("mouseup", (e) => {
 		if (mode == 4 && run.state == 1)
-			findEvents(1, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+			runEvent(e);
 	});
 }

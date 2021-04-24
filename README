@@ -195,7 +195,7 @@ if multiple values are returned then they will be stated.
    event is  triggered it returns  multiple values,   value X for the horizontal
    cell clicked, Y for the vertical cell clicked,  M for the raw x position, and
    N for the raw y position. it returns the mouse button pressed for blocks that
-   are connected.
+   are connected directly.
 
   [ m-# ABC ]
    same as previous except fires after the mouse button # has been released.

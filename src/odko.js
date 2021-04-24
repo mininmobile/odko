@@ -491,8 +491,8 @@ addEventListener("keydown", e => {
 			} break;
 
 			// only trigger onKey functions when running
-			/*default: if (run.state == 1)
-				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));*/
+			default: if (run.state == 1)
+				runEvent(e);
 		}
 	}
 
@@ -507,8 +507,8 @@ addEventListener("keyup", (e) => {
 			case "`": case "Tab": case "F12": break;
 
 			// only trigger onKey functions when running
-			/*default: if (run.state == 1)
-				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));*/
+			default: if (run.state == 1)
+				runEvent(e);
 		}
 	}
 });

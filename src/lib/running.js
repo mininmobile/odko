@@ -307,7 +307,7 @@ function tokenize(potentialToken) {
 	return new Token(raw, type, value);
 }
 
-// locate all event handlers
+// locate and filter event handlers
 function findEvents() {
 	// statistics
 	let sumAll = 0;
@@ -391,4 +391,55 @@ function findEvents() {
 					.map((x, i) =>x.c.includes(y) ? i : undefined)
 					.filter((x) => x != undefined);
 	}
+}
+
+// run event handler
+function runEvent(e) {
+	if (e.type == "keydown") {
+		eventsFiltered.keyboardDown
+			.filter(ev => ev.type == "key" ?
+				ev.button == e.key || ev.button == "any" :
+				ev.button == e.which).forEach(executeEvent);
+	} else if (e.type == "keyup") {
+		eventsFiltered.keyboardUp
+			.filter(ev => ev.type == "key" ?
+				ev.button == e.key || ev.button == "any" :
+				ev.button == e.which).forEach(executeEvent);
+	} else if (e.type == "mousedown") {
+		eventsFiltered.mouseDown
+			.filter(ev => ev.button == "any" ||
+				(ev.button == "0" && e.button == 0) ||
+				(ev.button == "1" && e.button == 1) ||
+				(ev.button == "2" && e.button == 2)).forEach(executeEvent);
+	} else if (e.type == "mouseup") {
+		eventsFiltered.mouseUp
+			.filter(ev => ev.button == "any" ||
+				(ev.button == "0" && e.button == 0) ||
+				(ev.button == "1" && e.button == 1) ||
+				(ev.button == "2" && e.button == 2)).forEach(executeEvent);
+	}
+}
+
+// execute event
+/**
+ * @param {OdkoEvent} event
+ */
+function executeEvent(event) {
+	// get what event returns
+	let returns = { "A": 0 }
+	if (event.type == "key") {
+		returns = { "A": e.key }
+	} else if (event.type == "char") {
+		returns = { "A": e.which }
+	} else if (event.type == "mouse") {
+		returns = {
+			"A": e.button,
+			"X": Math.floor(e.offsetX / ch(1)),
+			"Y": Math.floor(e.offsetY / em(1)),
+			"M": e.offsetX,
+			"N": e.offsetY,
+		}
+	}
+	// run blocks connected to that point
+	runFrom(event.origin.x, event.origin.y, returns);
 }
