@@ -278,6 +278,8 @@ function tokenize(potentialToken) {
 
 		// STRINGS / NUMBERS / CONNECTIONS / REGISTERS
 
+		case "_": type = "connection"; value = "A"; break;
+
 		default: {
 			// is a connection or a register
 			if (potentialToken.length == 1 || potentialToken.length == 2) {
@@ -399,24 +401,24 @@ function runEvent(e) {
 		eventsFiltered.keyboardDown
 			.filter(ev => ev.type == "key" ?
 				ev.button == e.key || ev.button == "any" :
-				ev.button == e.which).forEach(executeEvent);
+				ev.button == e.which).forEach(x => executeEvent(x, e));
 	} else if (e.type == "keyup") {
 		eventsFiltered.keyboardUp
 			.filter(ev => ev.type == "key" ?
 				ev.button == e.key || ev.button == "any" :
-				ev.button == e.which).forEach(executeEvent);
+				ev.button == e.which).forEach(x => executeEvent(x, e));
 	} else if (e.type == "mousedown") {
 		eventsFiltered.mouseDown
 			.filter(ev => ev.button == "any" ||
 				(ev.button == "0" && e.button == 0) ||
 				(ev.button == "1" && e.button == 1) ||
-				(ev.button == "2" && e.button == 2)).forEach(executeEvent);
+				(ev.button == "2" && e.button == 2)).forEach(x => executeEvent(x, e));
 	} else if (e.type == "mouseup") {
 		eventsFiltered.mouseUp
 			.filter(ev => ev.button == "any" ||
 				(ev.button == "0" && e.button == 0) ||
 				(ev.button == "1" && e.button == 1) ||
-				(ev.button == "2" && e.button == 2)).forEach(executeEvent);
+				(ev.button == "2" && e.button == 2)).forEach(x => executeEvent(x, e));
 	}
 }
 
@@ -424,7 +426,7 @@ function runEvent(e) {
 /**
  * @param {OdkoEvent} event
  */
-function executeEvent(event) {
+function executeEvent(event, e) {
 	// get what event returns
 	let returns = { "A": 0 }
 	if (event.type == "key") {
@@ -466,7 +468,7 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 		if (inputs != null)
 			// pass through the returned information
 			Object.keys(inputs).forEach(input =>
-				table[_x][atoi(input)] = inputs[input]);
+				t[_x][atoi(input)] = inputs[input]);
 		else
 			// else just pass through this block evaluated
 			t[_x][_y] = evaluate(startingBlock).out;
@@ -512,8 +514,6 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 
 	run.going = false;
 	consoleDraw();
-
-	console.log(t);
 }
 
 /**

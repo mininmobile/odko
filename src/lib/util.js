@@ -71,7 +71,7 @@ function atoi(a) {
 		return 0;
 
 	const alphas = "abcdefghijklmnopqrstuv";
-	return alphas.indexOf(a.toLowerCase);
+	return alphas.indexOf(a.toLowerCase());
 }
 
 // check capitalization
