@@ -34,7 +34,7 @@ class Token {
 function parse(expression = "") {
 	let tokens = [];
 
-	let mode = 0; // normal, conditional, log alias/raw strings
+	let mode = 0; // normal, conditional, raw strings/concatinators
 	let submode = 0; // stage 1; stage 2; etc.
 	let t = "";
 	for (let i = 0; i <= expression.length; i++) {
@@ -124,10 +124,13 @@ function parse(expression = "") {
 					pushTemp("?");
 					pushToken();
 					changeMode(1);
-				} else if (i == 0 && "!\"'.".includes(c)) { // if this is a log alias or a raw string
+				} else if (i == 0 && (c == "\"" || c == "'" || c == ".")) { // if this is a concatinator
 					pushTemp(c);
 					pushToken();
 					changeMode(2);
+				} else if (i == 0 && c == "!") {
+					pushTemp(c);
+					pushToken();
 				} else if (i == 2 && isRegister(t)) { // if this is a potential register assignment
 					// if this just a set assignment
 					let isOne = c == "=";
@@ -168,7 +171,7 @@ function parse(expression = "") {
 				} else // put da char in da temp
 					pushTemp(c);
 			} break;
-			case 2: { // submode 0: log alias/raw strings
+			case 2: { // submode 0: raw strings
 			          //         1: register assignment prepend/append
 				if (c == "LAST")
 					pushToken(false, true);
