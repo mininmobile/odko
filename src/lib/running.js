@@ -403,6 +403,9 @@ function findEvents() {
 }
 
 // run event handler
+/**
+ * @param {Event} e
+ */
 function runEvent(e) {
 	if (e.type == "keydown") {
 		eventsFiltered.keyboardDown
@@ -639,15 +642,20 @@ function evaluate(_tokens, p, t, _c) {
 		case "register": {
 			let reg = driveToken.value; // sanity
 
-			// if register is not being assigned to
+			// if register is not being assigned to return register value
 			if (tokens[0] == undefined || tokens[0].type !== "assignment")
 				return die(run.registers[reg] || "nil");
-			// calculate new register value
 			let assignment = tokens.shift().value;
-			let result;
-			// if arithmetic then add the current register value to reduction array
+			// error if register assignment does not have a righthand value
+			if ((tokens[0] == undefined) && (assignment != "set" || assignment != "\"=" || assignment != "'="))
+				throw new Error("no righthand value in register assignment");
+			//
+			let _a;
+			let _b;
 			if (assignment == "add" || assignment == "subtract" || assignment == "multiply" || assignment == "divide")
-				tokens.unshift({raw: run.registers[reg] || "0"});
+				_a = run.registers[reg], _b = tokens[0].raw;
+			// calculate new register value
+			let result;
 			switch (assignment) {
 				// basic
 				case "set":
@@ -662,14 +670,42 @@ function evaluate(_tokens, p, t, _c) {
 				case "prepend":
 					result = tokens.map(x => x.raw).join(" ") + (run.registers[reg] || ""); break;
 				// arithmetic/other strings
-				case "add":
-					result = reduce((a, b) => a + b); break;
-				case "subtract":
-					result = reduce((a, b) => a - b); break;
-				case "multiply":
-					result = reduce((a, b) => a * b); break;
-				case "divide":
-					result = reduce((a, b) => a / b); break;
+				case "add": {
+					if (isNaN(_a) || isNaN(_b)) {
+						result = (_a || "") + tokens.map(x => x.raw).join(" ");
+						break;
+					} else {
+						result = parseInt(_a) + parseInt(_b);
+						break;
+					}
+				}
+				case "subtract": {
+					if (isNaN(_a) || isNaN(_b)) {
+						throw new Error("left and/or right hand values aren't numbers");
+					} else {
+						result = parseInt(_a) - parseInt(_b);
+						break;
+					}
+				}
+				case "multiply": {
+					if (isNaN(_a) && !isNaN(_b)) {
+						result = _a.repeat(parseInt(_b));
+						break;
+					} else if (isNaN(_a) || isNaN(_b)) {
+						throw new Error("left and right hand values aren't numbers");
+					} else {
+						result = parseInt(_a) * parseInt(_b);
+						break;
+					}
+				}
+				case "divide": {
+					if (isNaN(_a) || isNaN(_b)) {
+						throw new Error("left and/or right hand values aren't numbers");
+					} else {
+						result = parseInt(_a) / parseInt(_b);
+						break;
+					}
+				}
 
 				default: throw new Error("EvaluateError: unknown register assignment '" + assignment + "'");
 			}

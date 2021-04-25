@@ -60,7 +60,6 @@ let eventsFiltered = {
 
 update();
 initConsole();
-load(`[[{"v":"onRun","c":[]},{"v":"c41_","c":[]},{"v":"c44_","c":[]},{"v":"k_s","c":[]}],[{"v":"AA = X","c":[0]},{"v":"AA '= A","c":[1]},{"v":"AA \\"= B","c":[2]},{"v":"AA = X","c":[3]}],[{"v":"log AA","c":[0,1,2,3]}]]`);
 
 addEventListener("keydown", e => {
 	if (!(e.key == "I" && e.ctrlKey && e.shiftKey || e.key == "r" && e.ctrlKey))

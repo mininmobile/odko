@@ -202,8 +202,8 @@ if multiple values are returned then they will be stated.
 
 [ REGISTERS ]
 
-> errors  here  are  fatal  meaning  they will stop the execution of the current
-  branch.
+> excluding the v argument  results in a  fatal error for all assignments except
+  for set (=), append ("=), and prepend ('=)
 
 registers are odko's form of variables,  they are referred to with two capitals.
 they are always stored as strings but converted to integers when required.
@@ -212,7 +212,7 @@ these all return the new value of the register.
 
   [ ## = v  ]
    sets register ## to v,  if no v provided then clears the register and returns
-   a null value.
+   a nil value.
   [ ## "= v ]
    appends the string v to register ##.
   [ ## '= v ]
@@ -220,15 +220,15 @@ these all return the new value of the register.
   [ ## += v ]
    appends v to register ##, if register and v are integers then adds.
   [ ## -= v ]
-   subtracts v from register ##, if either are not integers then errors.
+   subtracts v from register ##, if either are not integers then errors
   [ ## *= v ]
    v has to be an integer else errors. if register is integer then multiply else
    repeat string v times.
   [ ## /= v ]
-   divides register ## by v, if either are not integers then errors.
+   divides register ## by v, if either are not integers then returns errors
   [ ## %= v ]
    gets the  remainder of  register ##  divided by v,  if either aren't integers
-   then errors.
+   then errors
 
 [ KEYBOARD SHORTCUTS ]
 
