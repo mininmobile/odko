@@ -351,7 +351,6 @@ function findEvents() {
 					// add to events list
 					events.push(e);
 					eventsFiltered.run.push(e);
-					console.log("dumb", eventToken);
 				} else { // if input event
 					// get event data
 					let _e = row.t[0].value;
@@ -547,13 +546,15 @@ function evaluate(_tokens, p, t, _c) {
 		// if connection/register
 		if (token.type == "connection") { // if connection
 			// get connection
-			let _y = connectionsToBlock[atoi(token.value)];
-			let referenced = t[p.x - 1][_y];
+
+			let _y = connectionsToBlock
+				.filter(x => x != undefined && x != null && t[p.x - 1][x] != undefined && t[p.x - 1][x] != null);
+			let referenced = t[p.x - 1][_y[atoi(token.value)]];
 			// check if valid
 			if (_y != undefined)
 				// if valid then replace connection with the stuff
 				tokens[i] = new Token(referenced, "string", referenced);
-		} else if (token.type == "register") {
+		} else if (token.type == "register" && i > 0) {
 			let referenced;
 			// get register/check if valid
 			if (referenced = run.registers[token.value])
@@ -633,6 +634,53 @@ function evaluate(_tokens, p, t, _c) {
 				// just return the current string
 				return die(string);
 			} else throw new Error("EvaluateError: unknown concatinator '" + concatinator + "'");
+		}
+
+		case "register": {
+			let reg = driveToken.value; // sanity
+
+			// if register is not being assigned to
+			if (tokens[0] == undefined || tokens[0].type !== "assignment")
+				return die(run.registers[reg] || "nil");
+			// calculate new register value
+			let assignment = tokens.shift().value;
+			let result;
+			// if arithmetic then add the current register value to reduction array
+			if (assignment == "add" || assignment == "subtract" || assignment == "multiply" || assignment == "divide")
+				tokens.unshift({raw: run.registers[reg] || "0"});
+			switch (assignment) {
+				// basic
+				case "set":
+					if (tokens.length != 0)
+						result = tokens.map(x => x.raw).join(" ");
+					else
+						result = null;
+					break;
+				// arithmetic
+				case "add":
+					result = reduce((a, b) => a + b); break;
+				case "subtract":
+					result = reduce((a, b) => a - b); break;
+				case "multiply":
+					result = reduce((a, b) => a * b); break;
+				case "divide":
+					result = reduce((a, b) => a / b); break;
+
+				default: throw new Error("EvaluateError: unknown register assignment '" + assignment + "'");
+			}
+
+			// assign new value to register
+			if (result === null) {
+				let final = die("nil"); // only convert to string once
+				run.registers[reg] = undefined;
+				return final;
+			} else if (result === undefined) {
+				result = "nil";
+			}
+
+			let final = die(result); // only convert to string once
+			run.registers[reg] = final.out;
+			return final;
 		}
 
 		case "string":

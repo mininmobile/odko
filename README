@@ -208,8 +208,11 @@ if multiple values are returned then they will be stated.
 registers are odko's form of variables,  they are referred to with two capitals.
 they are always stored as strings but converted to integers when required.
 
+these all return the new value of the register.
+
   [ ## = v  ]
-   sets register ## to v.
+   sets register ## to v,  if no v provided then clears the register and returns
+   a null value.
   [ ## "= v ]
    appends the string v to register ##.
   [ ## '= v ]
