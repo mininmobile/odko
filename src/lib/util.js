@@ -70,7 +70,7 @@ function atoi(a) {
 	if (a == "_")
 		return 0;
 
-	const alphas = "abcdefghijklmnopqrstuv";
+	const alphas = "abcdefghijklmnopqrstuvwxyz";
 	return alphas.indexOf(a.toLowerCase());
 }
 
@@ -86,7 +86,7 @@ function isAlphabetic(_string, forceCase = false, lowerCase = false) {
 	// shortcut if you ant to force capitalization
 	if (forceCase) {
 		if (lowerCase) {
-			alphabet = alphabet.toLowerCase();
+			alphabet = "abcdefghijklmnopqrstuvwxyz";
 		}
 	} else {
 		string = _string.toLowerCase();

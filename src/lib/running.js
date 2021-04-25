@@ -586,7 +586,7 @@ function evaluate(_tokens, p, t, _c) {
 				if (isNaN(a) || isNaN(b))
 					return die(-1);
 				// calculate result
-				let result = Math.abs(parseInt(a) % parseInt(b));
+				let result = parseInt(a) % parseInt(b);
 				// exit with nil if result is NaN
 				if (isNaN(result))
 					return die("nil");
@@ -652,7 +652,7 @@ function evaluate(_tokens, p, t, _c) {
 			//
 			let _a;
 			let _b;
-			if (assignment == "add" || assignment == "subtract" || assignment == "multiply" || assignment == "divide")
+			if (assignment == "add" || assignment == "subtract" || assignment == "multiply" || assignment == "divide" || assignment == "modulo")
 				_a = run.registers[reg], _b = tokens[0].raw;
 			// calculate new register value
 			let result;
@@ -671,47 +671,44 @@ function evaluate(_tokens, p, t, _c) {
 					result = tokens.map(x => x.raw).join(" ") + (run.registers[reg] || ""); break;
 				// arithmetic/other strings
 				case "add": {
-					if (isNaN(_a) || isNaN(_b)) {
+					if (isNaN(_a) || isNaN(_b))
 						result = (_a || "") + tokens.map(x => x.raw).join(" ");
-						break;
-					} else {
+					else
 						result = parseInt(_a) + parseInt(_b);
-						break;
-					}
-				}
+				} break;
 				case "subtract": {
-					if (isNaN(_a) || isNaN(_b)) {
+					if (isNaN(_a) || isNaN(_b))
 						throw new Error("left and/or right hand values aren't numbers");
-					} else {
+					else
 						result = parseInt(_a) - parseInt(_b);
-						break;
-					}
-				}
+				} break;
 				case "multiply": {
-					if (isNaN(_a) && !isNaN(_b)) {
+					if (isNaN(_a) && !isNaN(_b))
 						result = _a.repeat(parseInt(_b));
-						break;
-					} else if (isNaN(_a) || isNaN(_b)) {
+					else if (isNaN(_a) || isNaN(_b))
 						throw new Error("left and right hand values aren't numbers");
-					} else {
+					else
 						result = parseInt(_a) * parseInt(_b);
-						break;
-					}
-				}
+				} break;
 				case "divide": {
-					if (isNaN(_a) || isNaN(_b)) {
+					if (isNaN(_a) || isNaN(_b))
 						throw new Error("left and/or right hand values aren't numbers");
-					} else {
+					else
 						result = parseInt(_a) / parseInt(_b);
-						break;
-					}
-				}
+				} break;
+				// other math
+				case "modulo": {
+					if (isNaN(_a) || isNaN(_b))
+						throw new Error("left and/or right hand values aren't numbers");
+					else
+						result = parseInt(_a) % parseInt(_b);
+				} break;
 
 				default: throw new Error("EvaluateError: unknown register assignment '" + assignment + "'");
 			}
 
 			// assign new value to register
-			if (result === null) {
+			if (result === null || (typeof(result) == "number" && isNaN(result))) {
 				let final = die("nil"); // only convert to string once
 				run.registers[reg] = undefined;
 				return final;
