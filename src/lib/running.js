@@ -551,7 +551,7 @@ function evaluate(_tokens, p, t, _c) {
 				.filter(x => x != undefined && x != null && t[p.x - 1][x] != undefined && t[p.x - 1][x] != null);
 			let referenced = t[p.x - 1][_y[atoi(token.value)]];
 			// check if valid
-			if (_y != undefined)
+			if (referenced != undefined)
 				// if valid then replace connection with the stuff
 				tokens[i] = new Token(referenced, "string", referenced);
 		} else if (token.type == "register" && i > 0) {
@@ -656,7 +656,12 @@ function evaluate(_tokens, p, t, _c) {
 					else
 						result = null;
 					break;
-				// arithmetic
+				// string specific
+				case "append":
+					result = (run.registers[reg] || "") + tokens.map(x => x.raw).join(" "); break;
+				case "prepend":
+					result = tokens.map(x => x.raw).join(" ") + (run.registers[reg] || ""); break;
+				// arithmetic/other strings
 				case "add":
 					result = reduce((a, b) => a + b); break;
 				case "subtract":
