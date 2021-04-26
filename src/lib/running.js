@@ -496,9 +496,16 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 			try {
 				// pass in tokens, temp table, and potential newToEval
 				let _ = evaluate(table[x][y].t, c, {x,y}, t, _n);
-				// use the values you got from the evaluatemennt
-				_n = _.toEval;
-				t[x][y] = _.out;
+				// if a jump statement has been encountered
+				if (_.hasJumped) {
+					// don't continue this branch
+					_n = [];
+					t[x][y] = undefined;
+				} else {
+					// use the values you got from the evaluatemennt
+					_n = _.toEval;
+					t[x][y] = _.out;
+				}
 			} catch (e) {
 				if (typeof(e) !== "string")
 					console.error(e);
@@ -641,7 +648,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 				newY = parseInt(newY);
 				let newPosition = { x: newX, y: newY }
 				run.queue.push(newPosition);
-				return newPosition;
+				return { hasJumped: true, newPosition };
 			}
 			// conditional statement
 			case "conditional": {
