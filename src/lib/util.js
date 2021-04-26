@@ -1,3 +1,18 @@
+// calculate connections from current block
+function getConnections(x, y, forwards = true) {
+	let connections = [];
+
+	if (!forwards)
+		return table[x][y].c;
+
+	(table[x + 1] || []).forEach((r, i) => {
+		if (r.c.includes(y))
+			connections.push(i);
+	});
+
+	return connections;
+}
+
 // force reparse all blocks
 function reparseAll() {
 	for (let x = 0; x < table.length; x++) {
@@ -43,11 +58,10 @@ function remove(string, index, amount = 1) {
 
 // (try) to make number
 function tNum(string, toLen = false, radix) {
-	let number = parseInt(string, radix);
-	if (isNaN(number))
+	if (isNaN(string))
 		return toLen ? string.length : string;
 	else
-		return number;
+		return parseInt(string, radix);
 }
 
 // bool to num

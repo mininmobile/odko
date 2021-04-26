@@ -136,10 +136,12 @@ special values are usually placeholder values to make code neater, like;
 
   [ ?A ## B ]   ?A == B,  ?A > B
    conditional if statement, it compares two A with B,  if the statement is true
-   it activates  the first connected block,  else the second.   all of the other
-   connections are ignored.   the spaces around the ## can be omitted to compare
-   registers. ## can be one of the following operations:
-    [ == ] A is equal (in length to) B  [ != ] A is not equal (in length) to B
+   it  activates the first connected block,  else the second, and if there is an
+   error then the third one will activate. you do not need to provide all three
+   connections,  just one or even none won't error. the spaces around the ## can
+   be omitted to compare registers and the such.  ## can be one of the following
+   operations/comparators:
+    [ == ] A is equal B                 [ != ] A is not equal to B
     [ >  ] A is greater/longer than B   [ <  ] A is smaller/shorter then B
     [ >= ] A is >, or equal to B        [ <= ] A is <, or equal to B
     [ && ] A and B are greater then 0   [ || ] A or B are greater then 0
@@ -147,7 +149,7 @@ special values are usually placeholder values to make code neater, like;
 
   [ ?A #### ]   ?A NaN,  ?A !NaN
    conditional if statement variation with only one input. works like expected.
-    [ NaN  ] A is not a number          [ !NaN ] A is (not not) a number
+    [  NaN ] A is not a number          [ !NaN ] A is (not not) a number
 
 [ EVENTS ]
 

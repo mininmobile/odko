@@ -612,6 +612,46 @@ function evaluate(_tokens, p, t, _c) {
 			case "clear":
 				consoleData.text = []; consoleDraw();
 				return die(1);
+			// conditional statement
+			case "conditional": {
+				if (tokens[0] == undefined || tokens[1] == undefined)
+					return cDie(-1);
+				if (tokens[1].type !== "comparator")
+					return cDie(-1);
+				if (tokens[2] == undefined && (tokens[1].value != "NaN" && tokens[1].value != "notNaN"))
+					return cDie(-1);
+
+				// initializer variables
+				let comparator = tokens[1].value;
+				let a = tokens[0].raw;
+				let b = tokens[2] && tokens[2].raw;
+				// if comparing strings keep them as strings
+				if (comparator != "equal" && comparator != "notEqual" && comparator != "NaN" && comparator != "notNaN") {
+					a = tNum(a, true);
+					b = b && tNum(b, true);
+				} else {
+					if (typeof(a) !== "string")
+						a = toString(a);
+					if (b && typeof(b) !== "string")
+						b = toString(b);
+				}
+
+				switch (comparator) {
+					case "equal": return cDie(a == b);
+					case "notEqual": return cDie(a != b);
+					case "greater": return cDie(a > b);
+					case "lesser": return cDie(a < b);
+					case "greaterEqual": return cDie(a >= b);
+					case "lesserEqual": return cDie(a <= b);
+					case "and": return cDie((a > 0) && (b > 0));
+					case "or": return cDie((a > 0) || (b > 0));
+					case "XOR": return cDie((a > 0) != (b > 0));
+					case "NaN": return cDie(isNaN(a));
+					case "notNaN": return cDie(!isNaN(a));
+
+					default: throw new Error("EvaluateError: unknown comparator '" + tokens[1].raw + "'")
+				}
+			}
 
 			default:
 				throw new Error("EvaluateError: unknown command '" + driveToken.value + "'");
@@ -737,6 +777,30 @@ function evaluate(_tokens, p, t, _c) {
 		return {
 			out: v.toString(),
 			toEval: c,
+		}
+	}
+
+	// exit for conditional statements
+	function cDie(v) { // v is either 1 (true) or 0 (false), anything else is error
+		let connection = undefined;
+
+		if (v === 1 || v === true) { // true
+			if (c[0] !== undefined) {
+				connection = 0;
+			}
+		} else if (v === 0 || v === false) { // false
+			if (c[1] !== undefined) {
+				connection = 1;
+			}
+		} else { // error
+			if (c[2] !== undefined) {
+				connection = 2;
+			}
+		}
+
+		return {
+			out: btn(v).toString(),
+			toEval: connection !== undefined ? [ c[connection] ] : [],
 		}
 	}
 

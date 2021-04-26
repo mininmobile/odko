@@ -724,21 +724,6 @@ function getFocusedColumn() {
 	return false;
 }
 
-// calculate connections from current block
-function getConnections(x, y, forwards = true) {
-	let connections = [];
-
-	if (!forwards)
-		return table[x][y].c;
-
-	(table[x + 1] || []).forEach((r, i) => {
-		if (r.c.includes(y))
-			connections.push(i);
-	});
-
-	return connections;
-}
-
 // save/load program
 function load(json) {
 	table = JSON.parse(json);
