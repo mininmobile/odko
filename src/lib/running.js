@@ -265,7 +265,8 @@ function tokenize(potentialToken) {
 		case "log": case "!":
 		            type = "command"; value = "log"; break;
 		// logic commands
-		case "jmp": type = "command"; value = "jump"; break;
+		case "jmp": case "@":
+			type = "command"; value = "jump"; break;
 		case "?":   type = "command"; value = "conditional"; break;
 
 		// REGISTER ASSIGNMENT
@@ -475,13 +476,8 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 	if (callstack == 0) {
 		// get blocks to activate
 		toEval = overrideNext || getConnections(_x, _y);
-		// if this is an event
-		if (inputs != null)
-			// pass through the returned information
-			Object.keys(inputs).forEach(input =>
-				t[_x][atoi(input)] = inputs[input]);
-		else
-			// else just pass through this block evaluated
+		// if this is not an event just pass through this block evaluated
+		if (inputs == null)
 			t[_x][_y] = evaluate(startingBlock).out;
 	} else {
 		toEval = [ _y ];
@@ -494,11 +490,12 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 		for (let i = 0; i < toEval.length; i++) {
 			let y = toEval[i]; // sanity
 			let _n = getConnections(x, y); // connections from this block
+			let c = x == _x + 1 ? inputs : {};
 
 			// evaluate
 			try {
 				// pass in tokens, temp table, and potential newToEval
-				let _ = evaluate(table[x][y].t, {x,y}, t, _n);
+				let _ = evaluate(table[x][y].t, c, {x,y}, t, _n);
 				// use the values you got from the evaluatemennt
 				_n = _.toEval;
 				t[x][y] = _.out;
@@ -530,12 +527,13 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 
 /**
  * @param {Array.<Token>} _tokens
+ * @param {Object.<string: number>}
  * @param {Point} p x/y coordinate
  * @param {Array.<Array.<string>>} t outputs/temporary table
  * @param {Array.<number>} c output connections
  * @returns {EvalResult}
  */
-function evaluate(_tokens, p, t, _c) {
+function evaluate(_tokens, forceConnections = null, p, t, _c) {
 	let tokens = _tokens.slice();
 	let c = _c;
 	let connectionsToBlock = [];
@@ -548,15 +546,31 @@ function evaluate(_tokens, p, t, _c) {
 		let token = tokens[i];
 		// if connection/register
 		if (token.type == "connection") { // if connection
-			// get connection
-
-			let _y = connectionsToBlock
-				.filter(x => x != undefined && x != null && t[p.x - 1][x] != undefined && t[p.x - 1][x] != null);
-			let referenced = t[p.x - 1][_y[atoi(token.value)]];
-			// check if valid
-			if (referenced != undefined)
-				// if valid then replace connection with the stuff
-				tokens[i] = new Token(referenced, "string", referenced);
+			let foundForcedConnection = false;
+			// if forced connections
+			if (forceConnections != null) {
+				// get potential connection
+				let newValue = forceConnections[token.value];
+				if (newValue != undefined) {
+					// if valid then replace connection with the stuff
+					tokens[i] = new Token(newValue, "string", newValue);
+					// do not try to find a regular connection
+					foundForcedConnection = true;
+				}
+			}
+			// if not found a forced connection
+			if (foundForcedConnection == false) {
+				// get connections
+				let _ys = connectionsToBlock
+					.filter(x => x != undefined && x != null && t[p.x - 1][x] != undefined && t[p.x - 1][x] != null);
+				// get connection + find referenced
+				let _y = _ys[atoi(token.value)];
+				let referenced = t[p.x - 1][_y];
+				// check if valid
+				if (referenced != undefined)
+					// if valid then replace connection with the stuff
+					tokens[i] = new Token(referenced, "string", referenced);
+			}
 		} else if (token.type == "register" && i > 0) {
 			let referenced;
 			// get register/check if valid
@@ -612,6 +626,23 @@ function evaluate(_tokens, p, t, _c) {
 			case "clear":
 				consoleData.text = []; consoleDraw();
 				return die(1);
+			// jump/goto statement
+			case "jump": {
+				// ensure correct amount of args
+				if (tokens[0] == undefined || tokens[1] == undefined)
+					throw new Error("x and/or y arguments are not provided");
+				// ensure correct type of args
+				let newX = tokens[0].raw;
+				let newY = tokens[1].raw;
+				if (isNaN(newX) || isNaN(newY))
+					throw new Error("x and/or y arguments are not integers");
+				// if you can
+				newX = parseInt(newX);
+				newY = parseInt(newY);
+				let newPosition = { x: newX, y: newY }
+				run.queue.push(newPosition);
+				return newPosition;
+			}
 			// conditional statement
 			case "conditional": {
 				if (tokens[0] == undefined || tokens[1] == undefined)
