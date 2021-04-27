@@ -710,7 +710,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 				if (concatinator == "btt")
 					strings.reverse();
 				// returns concatenated strings
-				return die(strings.join(" "));
+				return die(strings.join(""));
 			} else if (concatinator == "none") {
 				// just return the current string
 				return die(string);
@@ -725,7 +725,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 				return die(run.registers[reg] || "nil");
 			let assignment = tokens.shift().value;
 			// error if register assignment does not have a righthand value
-			if ((tokens[0] == undefined) && (assignment != "set" || assignment != "\"=" || assignment != "'="))
+			if ((tokens[0] == undefined) && (assignment != "set" && assignment != "append" && assignment != "prepend"))
 				throw new Error("no righthand value in register assignment");
 			//
 			let _a;
