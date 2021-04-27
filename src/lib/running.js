@@ -458,7 +458,7 @@ function executeEvent(event, e) {
 }
 
 function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
-	if (callstack >= 2000) {
+	if (callstack >= 3000) {
 		run.going = false;
 		return conLog(`![x${_x}y${_y}] call stack limit exceeded`);
 	}

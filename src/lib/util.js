@@ -126,6 +126,9 @@ function isNumerical(string) {
 			return false;
 		else
 			return true;
+	} else if (typeof(string) == "string") {
+	} else {
+		return false;
 	}
 
 	let digits = "0123456789";
