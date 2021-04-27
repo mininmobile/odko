@@ -58,7 +58,7 @@ function remove(string, index, amount = 1) {
 
 // (try) to make number
 function tNum(string, toLen = false, radix) {
-	if (isNaN(string))
+	if (!isNumerical(string))
 		return toLen ? string.length : string;
 	else
 		return parseInt(string, radix);
@@ -117,6 +117,25 @@ function isAlphabetic(_string, forceCase = false, lowerCase = false) {
 
 		return true;
 	}
+}
+
+// check if number
+function isNumerical(string) {
+	if (typeof(string) == "number") {
+		if (isNaN(string))
+			return false;
+		else
+			return true;
+	}
+
+	let digits = "0123456789";
+
+	for (let i = 0; i < string.length; i++) {
+		if (!digits.includes(string.charAt(i)))
+			return false;
+	}
+
+	return true;
 }
 
 // get css measurements

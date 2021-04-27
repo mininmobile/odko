@@ -86,7 +86,7 @@ function parse(expression = "") {
 							let _c1 = expression.charAt(1) || "X";
 							let _c2 = expression.charAt(2) || "X";
 							button = parseInt(_c1 + _c2, 16);
-							_continue = !isNaN(button);
+							_continue = isNumerical(button);
 						}
 
 						if (_continue) {
@@ -305,7 +305,7 @@ function tokenize(potentialToken) {
 			}
 
 			// is a number
-			if (!isNaN(potentialToken)) {
+			if (isNumerical(potentialToken)) {
 				type = "number"; value = parseInt(potentialToken); break;
 			}
 
@@ -604,12 +604,12 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 				if (tokens[0] == undefined || tokens[1] == undefined)
 					return die(-1);
 				// exit if args aren't numbers
-				if (isNaN(a) || isNaN(b))
+				if (!isNumerical(a) || !isNumerical(b))
 					return die(-1);
 				// calculate result
 				let result = parseInt(a) % parseInt(b);
 				// exit with nil if result is NaN
-				if (isNaN(result))
+				if (!isNumerical(result))
 					return die("nil");
 				else
 					return die(result);
@@ -621,7 +621,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 				// get maximum value
 				let max = 1;
 				if (tokens[0])
-					if (!isNaN(tokens[0].raw))
+					if (isNumerical(tokens[0].raw))
 						max = parseInt(tokens[0].raw);
 				// return rounded number
 				return die(Math.round(Math.random() * max));
@@ -641,7 +641,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 				// ensure correct type of args
 				let newX = tokens[0].raw;
 				let newY = tokens[1].raw;
-				if (isNaN(newX) || isNaN(newY))
+				if (!isNumerical(newX) || !isNumerical(newY))
 					throw new Error("x and/or y arguments are not integers");
 				// if you can
 				newX = parseInt(newX);
@@ -684,8 +684,8 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 					case "and": return cDie((a > 0) && (b > 0));
 					case "or": return cDie((a > 0) || (b > 0));
 					case "XOR": return cDie((a > 0) != (b > 0));
-					case "NaN": return cDie(isNaN(a));
-					case "notNaN": return cDie(!isNaN(a));
+					case "NaN": return cDie(!isNumerical(a));
+					case "notNaN": return cDie(isNumerical(a));
 
 					default: throw new Error("EvaluateError: unknown comparator '" + tokens[1].raw + "'")
 				}
@@ -749,34 +749,34 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 					result = tokens.map(x => x.raw).join(" ") + (run.registers[reg] || ""); break;
 				// arithmetic/other strings
 				case "add": {
-					if (isNaN(_a) || isNaN(_b))
+					if (!isNumerical(_a) || !isNumerical(_b))
 						result = (_a || "") + tokens.map(x => x.raw).join(" ");
 					else
 						result = parseInt(_a) + parseInt(_b);
 				} break;
 				case "subtract": {
-					if (isNaN(_a) || isNaN(_b))
+					if (!isNumerical(_a) || !isNumerical(_b))
 						throw new Error("left and/or right hand values aren't numbers");
 					else
 						result = parseInt(_a) - parseInt(_b);
 				} break;
 				case "multiply": {
-					if (isNaN(_a) && !isNaN(_b))
+					if (!isNumerical(_a) && isNumerical(_b))
 						result = _a.repeat(parseInt(_b));
-					else if (isNaN(_a) || isNaN(_b))
+					else if (!isNumerical(_a) || !isNumerical(_b))
 						throw new Error("left and right hand values aren't numbers");
 					else
 						result = parseInt(_a) * parseInt(_b);
 				} break;
 				case "divide": {
-					if (isNaN(_a) || isNaN(_b))
+					if (!isNumerical(_a) || !isNumerical(_b))
 						throw new Error("left and/or right hand values aren't numbers");
 					else
 						result = parseInt(_a) / parseInt(_b);
 				} break;
 				// other math
 				case "modulo": {
-					if (isNaN(_a) || isNaN(_b))
+					if (!isNumerical(_a) || !isNumerical(_b))
 						throw new Error("left and/or right hand values aren't numbers");
 					else
 						result = parseInt(_a) % parseInt(_b);
@@ -786,7 +786,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 			}
 
 			// assign new value to register
-			if (result === null || (typeof(result) == "number" && isNaN(result))) {
+			if (result === null || (typeof(result) == "number" && !isNumerical(result))) {
 				let final = die("nil"); // only convert to string once
 				run.registers[reg] = undefined;
 				return final;
@@ -845,7 +845,7 @@ function evaluate(_tokens, forceConnections = null, p, t, _c) {
 	// for the math commands
 	function reduce(callback) {
 		let _x = tokens
-			.map(x => isNaN(x.raw) ? "nil" : parseInt(x.raw))
+			.map(x => !isNumerical(x.raw) ? "nil" : parseInt(x.raw))
 			.filter(x => typeof(x) == "number");
 
 		if (_x.length == 0)
