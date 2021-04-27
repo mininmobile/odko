@@ -176,7 +176,7 @@ function parse(expression = "") {
 				if (c == "LAST")
 					pushToken(false, true);
 					if (submode == 1) {
-						// TODO: remove trailing space if space before assignment operator
+						// TODO remove trailing space if space before assignment operator
 					}
 				else // put da char in da temp
 					pushTemp(c);

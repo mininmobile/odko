@@ -309,7 +309,7 @@ addEventListener("keydown", e => {
 			case "Escape": case "c": { // exit connect mode and cancel connection
 				mode = 0;
 
-				// TODO when optimizing add this bad boy to the case below
+				// TODO also add this to the case below
 				elements.lines.lastChild.remove();
 			} break;
 
@@ -324,6 +324,7 @@ addEventListener("keydown", e => {
 						table[selected.x][selected.y].c.push(connectCursor.y);
 				}
 
+				// TODO stop using updateConnections so much
 				updateConnections();
 			} break;
 
@@ -336,7 +337,7 @@ addEventListener("keydown", e => {
 						table[selected.x][selected.y].c.filter(c => c != connectCursor.y);
 				}
 
-				// TODO i really use updateConnections() too much i have to optimize the fuck outta it or where i use it, cause then i wouldn't have to readd the <use> tag
+				// TODO stop using update connections too much
 				updateConnections();
 
 				// draw preview line on top
@@ -726,7 +727,11 @@ function getFocusedColumn() {
 
 // save/load program
 function load(json) {
-	table = JSON.parse(json);
+	if (Array.isArray(json))
+		table = json
+	else
+		table = JSON.parse(json);
+
 	reparseAll();
 	update();
 }

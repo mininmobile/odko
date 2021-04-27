@@ -61,6 +61,7 @@ branches out from that first block by activating the connected blocks.
 
 - FizzBuzz @ code/fizzBuzz.json & fizzBuzz.png
 - hi-lo    @ code/hi-lo.json    & hi-lo.png
+- targets  @ code/targets.json  & targets.png
 
 to  load  .json files open the dev console and write `load([contents of json])`.
 preferably you would copy and paste the contents of the json file. to save your
