@@ -59,8 +59,9 @@ branches out from that first block by activating the connected blocks.
 
 [ SYNTAX AND EXAMPLES ]
 
-- FizzBuzz @ code/fizzBuzz.json/png
-- hi-lo    @ code/hi-lo.json/png
+- FizzBuzz @ code/fizzBuzz.json & fizzBuzz.png
+- hi-lo    @ code/hi-lo.json    & hi-lo.png
+- targets  @ code/targets.json  & targets.png
 
 to  load  .json files open the dev console and write `load([contents of json])`.
 preferably you would copy and paste the contents of the json file. to save your
@@ -77,13 +78,17 @@ values take the forms of numbers, strings, and specials.
 number values (specifically integers) can simply typed into a block. they are
 also used as booleans in the forms of 1s and 0s.
 
-strings are marked with a quote followed by any six characters of your choosing,
-this  returns whatever you write after the quotes,   and if it is connected to a
-block, it concatenates the connected values (including other strings which means
-you can stack strings on top of each other to craft long strings) and places the
-six or less characters at the end of it when using double-quotes.  there is also
-the  single quote variant which  concatenates in the reverse order including the
-append, finally there is a no-concatenation variation with a period.
+strings are marked with a concatenator followed by a raw string (optional),  you
+are also able to forgo concatenation  completely and just return a raw string if
+need be. concatenators work by taking the connected blocks to the current block,
+and then concatenating them with a space (or not, depends on the concatenator).
+
+  [ "###### ]
+   concatenate top-to-bottom and append a raw string
+  [ '###### ]
+   concatenate bottom-to-top and prepend a raw string
+  [ .###### ]
+   simply return a raw string
 
 special values are usually placeholder values to make code neater, like;
 
@@ -119,23 +124,26 @@ special values are usually placeholder values to make code neater, like;
    returns random number between 0 and M(a)X, by default MX is 1. valid aliases
    for this command are rnd and rng.
 
-  [ log ### ]   log _,  log A B
+  [ log ### ]   log _,  log A B,  !done,  !error!
    concatenates arguments (with space, " ") and prints them to console. can omit
    space when using the ! alias in the form [ !###### ]
   [ clear   ]   clear,  cls
    clears the console, also available under the alias cls.
 
-  [ jmp X Y ]   jmp 0 0,   jmp
+  [ jmp X Y ]   jmp 0 0,  @ 12 13
    adds location to jump to after current  branch finishes executing into queue,
    this allows you to create loops in conjunction with the conditional if. X and
-   Y have to both be present and integers.
+   Y have to both be present and integers otherwise a fatal error is thrown. the
+   @ alias requires the space after at symbol.
 
   [ ?A ## B ]   ?A == B,  ?A > B
    conditional if statement, it compares two A with B,  if the statement is true
-   it activates  the first connected block,  else the second.   all of the other
-   connections are ignored.   the spaces around the ## can be omitted to compare
-   registers. ## can be one of the following operations:
-    [ == ] A is equal (in length to) B  [ != ] A is not equal (in length) to B
+   it  activates the first connected block,  else the second, and if there is an
+   error then the third one will activate. you do not need to provide all three
+   connections,  just one or even none won't error. the spaces around the ## can
+   be omitted to compare registers and the such.  ## can be one of the following
+   operations/comparators:
+    [ == ] A is equal B                 [ != ] A is not equal to B
     [ >  ] A is greater/longer than B   [ <  ] A is smaller/shorter then B
     [ >= ] A is >, or equal to B        [ <= ] A is <, or equal to B
     [ && ] A and B are greater then 0   [ || ] A or B are greater then 0
@@ -143,24 +151,15 @@ special values are usually placeholder values to make code neater, like;
 
   [ ?A #### ]   ?A NaN,  ?A !NaN
    conditional if statement variation with only one input. works like expected.
-    [ NaN  ] A is not a number          [ !NaN ] A is (not not) a number
+    [  NaN ] A is not a number          [ !NaN ] A is (not not) a number
 
 [ EVENTS ]
 
-> if a block is in the first column,  and it starts with "o" "k" "c" or "m", the
-  block will be ignored when (and only when) testing, even if it is connected
-> events are only valid when placed in the first column (for now?)
+> during testing, events will always return a -1 (error value)
 
 most  events  have argument locations,  which are places the interpreter expects
 you to have entered an argument.  the # argument(s)  are required,  and capitals
 (when stated as having such meaning) are optional arguments.
-
-some  events can be followed by a numerical id so the interpreter knows in which
-order  to  execute multiple instances of an event, by default all events have an
-id of 0 which means they will run as soon as possible, if multiple events of the
-same  type and id are present, they will execute in the order they appear in the
-starting column (top to bottom) this fact also holds true for events that do not
-permit you to input an id through an argument.
 
 sometimes optional arguments take the form of 'switches',  basically a 0 or 1 or
 more value (depending on function, 0 or 1 if not stated otherwise) which enables
@@ -169,24 +168,26 @@ or disables something to make the event more specific/etc. you get it hopefully.
 events return their position in the starting column unless specified  otherwise,
 if multiple values are returned then they will be stated.
 
-  [ onRun X ]
+  [ onRun   ]
    blocks connected to this block will run as soon as possible after the program
-   has begun execution. the event can be assigned an id with the X argument.
+   has begun execution. it returns its Y position.
 
   [ k_# ABC ]
    blocks  connected  to this block will run after the key # has been depressed.
-   A,  B,  and  C  are switches which  enable  or disable the requirement of the
-   Shift, Ctrl, or  Alt  modifiers modifier keys  respectively. the switches can
-   also  be omitted or replaced with a question mark  (?)   (eg. if you need the
-   Shift  and  Alt  keys  to be held, but don't care about the state of the Ctrl
-   key, your ABC would be "1?1")
+   if # is set to an asterisk (*) then any key will call this event. A, B, and C
+   are switches which enable or disable the requirement of the Shift,  Ctrl,  or
+   Alt modifiers modifier keys respectively. the switches can also be omitted or
+   replaced with a question mark (?)  (eg. if you need the Shift and Alt keys to
+   be held,  but don't care about the state of the Ctrl key,  your ABC arguments
+   would be set to "1?1"). it returns the key which was pressed.
 
   [ k-# ABC ]
    same as previous except fires after the key # has been released.
 
   [ c##_ABC ]
    same as the  [ k_# ]  event except instead of a character you would input two
-   hexadecimal digits that represent a javascript keycode.
+   hexadecimal digits that represent a javascript keycode.  you also cannot pass
+   in two asterisks in place of the ##.
 
   [ c##-ABC ]
    same as the  [ k-# ]  event except instead of a character you would input two
@@ -197,21 +198,25 @@ if multiple values are returned then they will be stated.
    be 0 for left click, 1 for middle click, 2 for right click. (etc?)  when this
    event is  triggered it returns  multiple values,   value X for the horizontal
    cell clicked, Y for the vertical cell clicked,  M for the raw x position, and
-   N for the raw y position.
+   N for the raw y position. it returns the mouse button pressed for blocks that
+   are connected directly.
 
   [ m-# ABC ]
    same as previous except fires after the mouse button # has been released.
 
 [ REGISTERS ]
 
-> errors  here  are  fatal  meaning  they will stop the execution of the current
-  branch.
+> excluding the v argument  results in a  fatal error for all assignments except
+  for set (=), append ("=), and prepend ('=)
 
 registers are odko's form of variables,  they are referred to with two capitals.
 they are always stored as strings but converted to integers when required.
 
+these all return the new value of the register.
+
   [ ## = v  ]
-   sets register ## to v.
+   sets register ## to v,  if no v provided then clears the register and returns
+   a nil value.
   [ ## "= v ]
    appends the string v to register ##.
   [ ## '= v ]
@@ -219,22 +224,22 @@ they are always stored as strings but converted to integers when required.
   [ ## += v ]
    appends v to register ##, if register and v are integers then adds.
   [ ## -= v ]
-   subtracts v from register ##, if either are not integers then errors.
+   subtracts v from register ##, if either are not integers then errors
   [ ## *= v ]
    v has to be an integer else errors. if register is integer then multiply else
    repeat string v times.
   [ ## /= v ]
-   divides register ## by v, if either are not integers then errors.
+   divides register ## by v, if either are not integers then returns errors
   [ ## %= v ]
    gets the  remainder of  register ##  divided by v,  if either aren't integers
-   then errors.
+   then errors
 
 [ KEYBOARD SHORTCUTS ]
 
 > ^ is short for  "ctrl + ..."  and  capital  letters imply shift being pressed,
-  slashes  delimitate  aliases  of  a  certain  function, and shortcuts that are
-  longer  than  one or two characters and begin with a capital represent special
-  keys on the keyboard
+  slashes  delimitate  aliases  of  a  certain  function, and 'special keys' are
+  written out  with  Title Case.   in the case of special keys requiring a shift
+  modifier then the shortcuts will be written out literally as "Shift + ..."
 > we  call  them keyboard shortcuts but there's no mouse control implemented yet
   so they are really the only kind of control you have right now
 
@@ -256,6 +261,8 @@ A) default mode
   c: connect block (enters connect mode)
   d: disconnect connection to the current block
   D: disconnect connections originating from current block
+  p: force reparse current blocks - might fix some issues
+  P: force reparse all blocks - might fix some issues
   e/Enter/F2: edit block (enters edit mode)
   Arrow Keys: change focus
 

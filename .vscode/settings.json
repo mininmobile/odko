@@ -1,6 +1,7 @@
 {
 	"svg.preview.background": "black",
 	"cSpell.ignoreWords": [
+		"abcdefghijklmnopqrstuvwxyz",
 		"fblock",
 		"fcol",
 		"myindex",
@@ -11,6 +12,7 @@
 		"SPACEMONO",
 		"odko",
 		"odko's",
+		"submode",
 		"titlebar",
 		"viewbox"
 	],

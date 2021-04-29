@@ -1,3 +1,9 @@
+/**
+ * @typedef {Object} Point
+ * @property {number} x
+ * @property {number} y
+ */
+
 const elements = {
 	em: document.getElementById("em"),
 	ch: document.getElementById("ch"),
@@ -17,26 +23,47 @@ let mode = 0; // default, edit, connecting, move, run
 // state: halted, running, paused, preserved
 // registers: variables object (AA, AB, etc.)
 // events: parsed events
-let run = { state: 0, registers: {}, events: [], queue: [], going: false };
+let run = { state: 0, registers: {}, queue: [], going: false };
 let debug = false;
 let editCursor = 0;
 let connectCursor = { x: 0, y: 0, right: false }
 /**
  * @typedef {Object} Row
  * @property {string} v
+ * @property {Array.<Token>} t
  * @property {Array.<number>} c
  */
-
 /** @type {Array.<Array.<Row>>} */
 let table = [[]];
+
+/**
+ * @typedef {Object} OdkoEvent
+ * @property {string} type
+ * @property {string} direction
+ * @property {string} button
+ * @property {Point} origin
+ * @property {Object} modifiers
+ * @property {boolean} modifiers.shift
+ * @property {boolean} modifiers.ctrl
+ * @property {boolean} modifiers.alt
+ * @property {Array.<number>} activates
+ */
+/** @type {Array.<OdkoEvent>} */
+let events = [];
+let eventsFiltered = {
+	keyboardDown: [],
+	keyboardUp: [],
+	mouseDown: [],
+	mouseUp: [],
+	run: [],
+}
+
 update();
 initConsole();
 
 addEventListener("keydown", e => {
-	e.preventDefault();
-
-	if (e.key == "r" && e.ctrlKey)
-		location.reload();
+	if (!(e.key == "I" && e.ctrlKey && e.shiftKey || e.key == "r" && e.ctrlKey))
+		e.preventDefault();
 
 	if (mode == 0) { // no mode
 		let _e;
@@ -75,12 +102,18 @@ addEventListener("keydown", e => {
 				}
 				// show console
 				elements.consoleWrapper.classList.remove("hidden");
+				// gather events
+				setTimeout(() => findEvents(), 16);
 			} break;
 
 			// test current block
 			case "t": if (_e) test(selected.x, selected.y); break;
 			// activate move mode
 			case "g": if (_e) mode = 3; break;
+			// force reparse current block
+			case "p": if (_e) table[selected.x][selected.y].t = parse(table[selected.x][selected.y].v); break;
+			// force reparse all blocks
+			case "P": reparseAll(); break;
 
 			case "a": { // add block
 				if (table.length == 0) {
@@ -89,7 +122,7 @@ addEventListener("keydown", e => {
 					update();
 				}
 
-				table[selected.x].splice(selected.y + 1, 0, { v: "", c: [] });
+				table[selected.x].splice(selected.y + 1, 0, { v: "", t: [], c: [] });
 				let row = document.createElement("div");
 					row.classList.add("row");
 					elements.columns.children[selected.x]
@@ -216,6 +249,7 @@ addEventListener("keydown", e => {
 		switch (e.key) {
 			case "Escape": case "Enter": { // exit edit mode
 				mode = 0;
+				table[selected.x][selected.y].t = parse(table[selected.x][selected.y].v);
 				getFocusedElement().classList.remove("editing");
 			} break;
 
@@ -275,7 +309,7 @@ addEventListener("keydown", e => {
 			case "Escape": case "c": { // exit connect mode and cancel connection
 				mode = 0;
 
-				// TODO when optimizing add this bad boy to the case below
+				// TODO also add this to the case below
 				elements.lines.lastChild.remove();
 			} break;
 
@@ -290,6 +324,7 @@ addEventListener("keydown", e => {
 						table[selected.x][selected.y].c.push(connectCursor.y);
 				}
 
+				// TODO stop using updateConnections so much
 				updateConnections();
 			} break;
 
@@ -302,7 +337,7 @@ addEventListener("keydown", e => {
 						table[selected.x][selected.y].c.filter(c => c != connectCursor.y);
 				}
 
-				// TODO i really use updateConnections() too much i have to optimize the fuck outta it or where i use it, cause then i wouldn't have to readd the <use> tag
+				// TODO stop using update connections too much
 				updateConnections();
 
 				// draw preview line on top
@@ -419,20 +454,8 @@ addEventListener("keydown", e => {
 				if (run.state == 0|| run.state == 3) {
 					run.state = 1;
 					conLog("=> start of execution");
-
-					// register events
-					table[0].forEach((r, i) => {
-						try {
-							run.events.push(parseEvent(r, i));
-						} catch (e) {
-							if (typeof e !== "string")
-								console.error(e);
-
-							conLog(e);
-						}
-					});
 					// run onRun events
-					findEvents(2).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+					eventsFiltered.run.forEach(executeEvent);
 				} else if (run.state == 2) {
 					// unpause lol
 					run.state = 1;
@@ -458,7 +481,7 @@ addEventListener("keydown", e => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1)
-				findEvents(0, e, false).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+				runEvent(e);
 		}
 	}
 
@@ -474,10 +497,10 @@ addEventListener("keyup", (e) => {
 
 			// only trigger onKey functions when running
 			default: if (run.state == 1)
-				findEvents(0, e, true).forEach(event => runFrom(0, event.origin, event.values, [event.origin]));
+				runEvent(e);
 		}
 	}
-})
+});
 
 function update() {
 	// reset columns element
@@ -702,68 +725,31 @@ function getFocusedColumn() {
 	return false;
 }
 
-// calculate connections from current block
-function getConnections(x, y) {
-	let connections = [];
-
-	(table[x + 1] || []).forEach((r, i) => {
-		if (r.c.includes(y))
-			connections.push(i);
-	});
-
-	return connections;
-}
-
-// insert into string
-function insert(string, text, index) {
-	return string.substring(0, index) + text + string.substring(index);
-}
-
-// remove from string
-function remove(string, index, amount = 1) {
-	return string.substring(0, index) + string.substring(index + amount);
-}
-
-// (try) to make number
-function tNum(string, toLen = false, radix) {
-	let number = parseInt(string, radix);
-	if (isNaN(number))
-		return toLen ? string.length : string;
-	else
-		return number;
-}
-
-// bool to num
-function btn(bool) {
-	return bool ? 1 : 0;
-}
-
-// num to bool
-function ntb(num) {
-	return num > 0 ? true : false;
-}
-
-// check capitalization
-function isUppercase(string) { return string === string.toUpperCase(); }
-function isLowercase(string) { return string === string.toLowerCase(); }
-
-// get css measurements
-function em(x) {
-	elements.em.style.width = x + "em";
-	return elements.em.clientWidth;
-}
-
-function ch(x) {
-	elements.ch.style.width = x + "ch";
-	return elements.ch.clientWidth;
-}
-
-// load program
+// save/load program
 function load(json) {
-	table = json;
+	if (Array.isArray(json))
+		table = json
+	else
+		table = JSON.parse(json);
+
+	reparseAll();
 	update();
 }
 
 function save() {
-	console.log(JSON.string(table));
+	let exportTable = [];
+
+	// go through every column
+	for (let x = 0; x < table.length; x++) {
+		// add new column to the export table
+		exportTable[x] = [];
+		// go through every row
+		for (let y = 0; y < table[x].length; y++) {
+			let block = table[x][y];
+			// add row to export table
+			exportTable[x][y] = { v: block.v, c: block.c }
+		}
+	}
+
+	console.log(JSON.stringify(exportTable));
 }

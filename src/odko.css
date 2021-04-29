@@ -119,6 +119,7 @@ svg {
 .cursor {
 	width: 1ch;
 	height: 1em;
+	-webkit-backdrop-filter: invert(100%);
 	backdrop-filter: invert(100%);
 	position: absolute;
 }
