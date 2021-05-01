@@ -525,7 +525,7 @@ function runFrom(_x, _y, inputs = null, overrideNext = null, callstack = 0) {
 	// if there is stuff to be done in the queue then do that before quitting the thread
 	if (run.queue.length > 0) {
 		let q = run.queue.shift();
-		runFrom(q.x, q.y, q.x == 1 ? values : {}, false, callstack + 1);
+		runFrom(q.x, q.y, inputs || {}, false, callstack + 1);
 	}
 
 	run.going = false;
