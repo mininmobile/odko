@@ -14,6 +14,7 @@
 	<script defer src="src/lib/console.js"></script>
 	<script defer src="src/lib/running.js"></script>
 	<script defer src="src/odko.js"></script>
+	<script defer src="src/lib/ui.js"></script>
 	<title>odko</title>
 </head>
 <body>
@@ -37,6 +38,14 @@
 	<div class="status">
 		<span id="status-left" class="left"></span>
 		<span id="status-right" class="right"></span>
+	</div>
+
+	<!-- sidebar -->
+	<div id="sidebar" class="sidebar">
+		<!-- manage current project -->
+		<div id="sidebar-project" class="section"></div>
+		<!-- manage branches/functions -->
+		<div id="sidebar-branches" class="section"></div>
 	</div>
 
 	<!-- columns -->

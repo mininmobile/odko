@@ -4,7 +4,7 @@
  * @property {number} y
  */
 
-const elements = {
+let elements = {
 	em: document.getElementById("em"),
 	ch: document.getElementById("ch"),
 	leftStatus: document.getElementById("status-left"),
@@ -613,7 +613,7 @@ function updateEditCursor() {
 		elements.cursor.classList.remove("hidden");
 
 		elements.cursor.style.left =
-			`calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 1px)`;
+			`calc((4rem + 7ch + 2px) * ${selected.x} + ${editCursor}ch + 2rem + 281px + 1px)`;
 		elements.cursor.style.top =
 			`calc((${4 + (debug ? 1.5 : 0)}rem + 2px) * ${selected.y} + 3.75rem + 1px)`;
 	} else {
@@ -672,7 +672,7 @@ function updateConnectCursor() {
 
 function getConnectionPosition(x, y, right = true) {
 	return {
-		x: (em(4) + ch(7) + 2) * x + em(2 + (right ? .5 : -.5)) + ch(right ? 7 : 0) + 1,
+		x: (em(4) + ch(7) + 2) * x + em(2 + (right ? .5 : -.5)) + ch(right ? 7 : 0) + 281 + 1,
 		y: (em(4 + (debug ? 1.5 : 0)) + 2) * y + em(2.875 + (debug ? .75 : 0)),
 	}
 }
@@ -723,33 +723,4 @@ function getFocusedColumn() {
 		return columns.children[selected.x];
 
 	return false;
-}
-
-// save/load program
-function load(json) {
-	if (Array.isArray(json))
-		table = json
-	else
-		table = JSON.parse(json);
-
-	reparseAll();
-	update();
-}
-
-function save() {
-	let exportTable = [];
-
-	// go through every column
-	for (let x = 0; x < table.length; x++) {
-		// add new column to the export table
-		exportTable[x] = [];
-		// go through every row
-		for (let y = 0; y < table[x].length; y++) {
-			let block = table[x][y];
-			// add row to export table
-			exportTable[x][y] = { v: block.v, c: block.c }
-		}
-	}
-
-	console.log(JSON.stringify(exportTable));
 }
