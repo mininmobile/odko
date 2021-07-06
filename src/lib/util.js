@@ -151,3 +151,8 @@ function ch(x) {
 	elements.ch.style.width = x + "ch";
 	return elements.ch.clientWidth;
 }
+
+// fuck document.getElementById()
+function getElement(id) {
+	return document.getElementById(id);
+}

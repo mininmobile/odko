@@ -52,16 +52,16 @@ svg {
 }
 
 .status .right {
-	padding-right: 0.175rem;
+	padding-right: .175rem;
 	font-variant-ligatures: none;
 }
 
 /* sidebar */
 
 .sidebar {
-	width: calc(280px - 2rem);
-	height: calc(100% - 1.5rem - 3rem);
-	padding: 1.5rem 1rem;
+	width: calc(280px - 1.5rem);
+	height: calc(100% - 1.5rem - 1.5rem);
+	padding: .75rem;
 	position: fixed;
 	left: 0;
 	bottom: 0;
@@ -71,18 +71,61 @@ svg {
 
 .sidebar .section {
 	border: 1px solid #dddddd;
-	padding: 1rem;
-	margin-bottom: 1rem;
-	line-height: 2.5rem;
-	text-align: justify;
-	text-align-last: justify;
-	-moz-text-align-last: justify;
+	padding: .75rem;
+	margin-bottom: .5rem;
+	padding-bottom: 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
 }
 
+.sidebar .section::before {
+	display: block;
+	width: 100%;
+	text-align: center;
+	text-transform: uppercase;
+	margin-bottom: .75rem;
+}
+.sidebar .section.project::before { content: "project"; }
+
 .sidebar .section a {
+	background: black;
+	color: #dddddd;
 	padding: 0 .5rem;
-	margin: 0 1ch;
-	border: 1px solid white;
+	flex: 1;
+	border: 1px solid #dddddd;
+	margin-bottom: .75rem;
+}
+
+.sidebar .section a:not(.shortcut):not(.branch):nth-child(3n+2) {
+	margin-left: .75rem;
+	margin-right: .75rem;
+}
+
+.sidebar .section a:hover:not(:active) {
+	background: #dddddd;
+	color: black;
+}
+
+.sidebar .section.branches::before { content: "branches"; }
+
+.sidebar .project a.shortcut,
+.sidebar .branches a.branch {
+	width: 100%;
+	flex: unset;
+	position: relative;
+}
+
+.sidebar .project a.shortcut[data-hotkey]::after,
+.sidebar .branches a.branch[data-index]::after {
+	content: attr(data-hotkey);
+	position: absolute;
+	right: .5rem;
+	opacity: .5;
+}
+
+.sidebar .branches a.branch[data-index]::after {
+	content: "Ctrl+" attr(data-index);
 }
 
 /* column */
@@ -94,7 +137,7 @@ svg {
 .column:empty::before {
 	content: "X";
 	margin: 1.5rem;
-	padding: 0.5rem;
+	padding: .5rem;
 	color: #777777;
 	border: 1px solid currentColor;
 	text-align: center;
@@ -110,7 +153,7 @@ svg {
 
 .row {
 	margin: 1.5rem;
-	padding: 0.5rem;
+	padding: .5rem;
 	height: 1.5rem;
 	background: #000000;
 	border: 1px solid currentColor;
@@ -218,7 +261,7 @@ svg {
 .console.titlebar {
 	height: 1.5rem;
 	width: 100%;
-	padding: 0 0.175rem;
+	padding: 0 .175rem;
 	background: #dddddd;
 	color: #000000;
 	white-space: pre;
