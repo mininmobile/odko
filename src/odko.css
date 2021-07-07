@@ -49,11 +49,12 @@ svg {
 
 .status .left {
 	flex: 1;
+	padding-left: .175rem;
 }
 
 .status .right {
-	padding-right: .175rem;
 	font-variant-ligatures: none;
+	padding-right: .175rem;
 }
 
 /* sidebar */

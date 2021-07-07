@@ -136,7 +136,7 @@ function updateConnections() {
 }
 
 function updateStatus() {
-	let status = `[x: ${selected.x}, y: ${selected.y}]   `;
+	let status = `[${currentTable}][x: ${selected.x}, y: ${selected.y}]   `;
 
 	switch (mode) {
 		case 0: status += "none"; break;
@@ -328,7 +328,7 @@ function getFocusedColumn() {
 	return false;
 }
 
-// rename a branch (no safety)
+// rename current branch (no safety)
 function renameBranch(newName) {
 	// move table
 	project[newName] = table;
@@ -338,11 +338,25 @@ function renameBranch(newName) {
 	// change to new table
 	currentTable = newName;
 
+	updateStatus();
 	updateSidebar();
 }
 
 
-// create a branch (no safety)
+// delete current branch (no safety)
+function deleteBranch() {
+	// save old table
+	project[currentTable] = undefined;
+	delete project[currentTable];
+	// create new table
+	currentTable = "main";
+	table = project[currentTable];
+
+	update();
+}
+
+
+// create current branch (no safety)
 function createBranch(newName) {
 	// save old table
 	project[currentTable] = table;
