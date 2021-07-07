@@ -78,16 +78,18 @@ function update() {
 	// reset columns element
 	columns.innerHTML = "";
 	// add columns
-	table.forEach(c => {
+	table.forEach((c, x) => {
 		let col = document.createElement("div");
 			col.classList.add("column");
+			col.addEventListener("click", (e) => _onColumnClick(e, x));
 			elements.columns.appendChild(col);
 
 		// add rows
-		c.forEach(r => {
+		c.forEach((r, y) => {
 			let row = document.createElement("div");
 				row.classList.add("row");
 				row.innerText = r.v;
+				row.addEventListener("click", (e) => _onElementClick(e, x, y));
 				col.appendChild(row);
 		});
 	});
@@ -342,7 +344,6 @@ function renameBranch(newName) {
 	updateSidebar();
 }
 
-
 // delete current branch (no safety)
 function deleteBranch() {
 	// save old table
@@ -354,7 +355,6 @@ function deleteBranch() {
 
 	update();
 }
-
 
 // create current branch (no safety)
 function createBranch(newName) {

@@ -66,7 +66,6 @@ function parse(expression = "") {
 					if (event == "m") { event = "mouse"; _continue = true; } else
 					if (event == "c") { event = "code"; _continue = true; }
 
-
 					// proper syntax reinforcement
 					if (event == "key" || event == "mouse")
 						if ((expression.charAt(3) || " ") != " ")

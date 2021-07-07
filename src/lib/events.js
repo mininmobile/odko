@@ -52,29 +52,16 @@ addEventListener("keydown", e => {
 			// force reparse all blocks
 			case "P": reparseAll(); break;
 
-			case "a": { // add block
-				if (table.length == 0) {
-					table[0] = [];
-					selected.x = selected.y = 0;
-					update();
-				}
-
-				table[selected.x].splice(selected.y + 1, 0, { v: "", t: [], c: [] });
-				let row = document.createElement("div");
-					row.classList.add("row");
-					elements.columns.children[selected.x]
-						.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
-
-				updateConnections();
-
-				selected.y++;
-			} break;
+			// add block
+			case "a": addBlock(); break;
 
 			case "A": { // add column
+				let _x = table.length == 0 ? 0 : selected.x + 1;
 				table.splice(selected.x + 1, 0, []);
 				let col = document.createElement("div");
 					col.classList.add("column");
-					elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
+					col.addEventListener("click", (e) => _onColumnClick(e, _x));
+				elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
 
 				updateConnections();
 
@@ -438,3 +425,78 @@ addEventListener("keyup", (e) => {
 		}
 	}
 });
+
+function _onElementClick(e, x, y) {
+	if (!(mode == 0 || mode == 2))
+		return;
+
+	let fc; // focused column
+	let fb; // focused block
+	// defocus old
+	if (fc = getFocusedColumn())
+		fc.classList.remove("focus");
+	if (fb = getFocusedElement())
+		fb.classList.remove("focus");
+	// focus new
+	selected.x = x;
+	selected.y = y;
+	if (fc = getFocusedColumn())
+		fc.classList.add("focus");
+	if (fb = getFocusedElement())
+		fb.classList.add("focus");
+}
+
+
+function _onColumnClick(e, x) {
+	let isCol = e.target.classList.contains("column");
+
+	if (selected.x == x && isCol) {
+		let fb;
+		if (fb = getFocusedElement())
+			getFocusedElement().classList.remove("focus");
+		addBlock();
+		getFocusedElement().classList.add("focus");
+		return;
+	}
+
+	if (!isCol || !(mode == 0 || mode == 2))
+		return;
+
+	let fc; // focused column
+	let fb; // focused block
+	// defocus old
+	if (fc = getFocusedColumn())
+		fc.classList.remove("focus");
+	if (fb = getFocusedElement())
+		fb.classList.remove("focus");
+	// focus new
+	selected.x = x;
+	if (fc = getFocusedColumn())
+		fc.classList.add("focus");
+}
+
+// add block at selected column
+function addBlock() {
+	if (table.length == 0) {
+		table[0] = [];
+		selected.x = selected.y = 0;
+		update();
+	}
+
+	let wasEmpty = table[selected.x].length == 0;
+
+	let _x = selected.x;
+	let _y = table[selected.x].length == 0 ? 0 : selected.y + 1;
+	table[selected.x].splice(selected.y + 1, 0, { v: "", t: [], c: [] });
+	let row = document.createElement("div");
+		row.classList.add("row");
+		row.addEventListener("click", (e) => _onElementClick(e, _x, _y));
+
+	elements.columns.children[selected.x]
+		.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
+
+	updateConnections();
+
+	if (!wasEmpty)
+		selected.y++;
+}
