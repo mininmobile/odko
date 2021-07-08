@@ -133,13 +133,15 @@ svg {
 
 .column {
 	min-width: calc(4rem + 7ch + 2px);
+	min-height: 50vh;
+	position: relative;
 }
 
 .column:empty::before {
 	content: "X";
 	margin: 1.5rem;
 	padding: .5rem;
-	color: #777777;
+	color: #777777; 
 	border: 1px solid currentColor;
 	text-align: center;
 	display: block;
@@ -148,6 +150,14 @@ svg {
 .column.focus:empty::before {
 	content: "+";
 	color: #dddddd;
+}
+
+.column.focus::after {
+	content: "^";
+	display: block;
+	position: absolute;
+	bottom: -.5rem;
+	left: calc(50% - .5ch);
 }
 
 /* row */
