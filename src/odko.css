@@ -114,11 +114,15 @@ svg {
 .sidebar .branches a.branch {
 	width: 100%;
 	flex: unset;
+}
+
+.sidebar a[data-hotkey],
+.sidebar a[data-index] {
 	position: relative;
 }
 
-.sidebar .project a.shortcut[data-hotkey]::after,
-.sidebar .branches a.branch[data-index]::after {
+.sidebar a[data-hotkey]::after,
+.sidebar a[data-index]::after {
 	content: attr(data-hotkey);
 	position: absolute;
 	right: .5rem;
@@ -127,6 +131,23 @@ svg {
 
 .sidebar .branches a.branch[data-index]::after {
 	content: "Ctrl+" attr(data-index);
+}
+
+.sidebar a[data-hotkey]:hover::after {
+	color: #000000;
+	background: #dddddd;
+	padding: 0 .5rem;
+	display: block;
+	border: 1px solid #dddddd;
+	right: calc(-1ch + -1.25rem + -1px);
+	top: -1px;
+	z-index: 999;
+	opacity: 1;
+}
+
+.sidebar a[data-index]:hover::after {
+	color: #000000;
+	opacity: 1;
 }
 
 /* column */
@@ -141,7 +162,7 @@ svg {
 	content: "X";
 	margin: 1.5rem;
 	padding: .5rem;
-	color: #777777; 
+	color: #777777;
 	border: 1px solid currentColor;
 	text-align: center;
 	display: block;
@@ -153,10 +174,10 @@ svg {
 }
 
 .column.focus::after {
-	content: "^";
+	content: ".";
 	display: block;
 	position: absolute;
-	bottom: -.5rem;
+	top: -.25rem;
 	left: calc(50% - .5ch);
 }
 
@@ -285,4 +306,13 @@ svg {
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+}
+
+/* context menu */
+
+.context.wrapper {
+	background: #000000;
+	color: #dddddd;
+	border: 1px solid #dddddd;
+	position: absolute;
 }

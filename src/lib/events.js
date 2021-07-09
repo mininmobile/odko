@@ -60,7 +60,7 @@ addEventListener("keydown", e => {
 				table.splice(selected.x + 1, 0, []);
 				let col = document.createElement("div");
 					col.classList.add("column");
-					col.addEventListener("click", (e) => _onColumnClick(e, _x));
+					col.addEventListener("mouseup", (e) => _onColumnClick(e, _x));
 				elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
 
 				updateConnections();
@@ -426,53 +426,71 @@ addEventListener("keyup", (e) => {
 	}
 });
 
+/** @param {MouseEvent} e */
 function _onElementClick(e, x, y) {
 	if (!(mode == 0 || mode == 2))
 		return;
 
-	let fc; // focused column
-	let fb; // focused block
-	// defocus old
-	if (fc = getFocusedColumn())
-		fc.classList.remove("focus");
-	if (fb = getFocusedElement())
-		fb.classList.remove("focus");
-	// focus new
-	selected.x = x;
-	selected.y = y;
-	if (fc = getFocusedColumn())
-		fc.classList.add("focus");
-	if (fb = getFocusedElement())
-		fb.classList.add("focus");
+	if (e.button == 0) {
+		let fc; // focused column
+		let fb; // focused block
+		// defocus old
+		if (fc = getFocusedColumn())
+			fc.classList.remove("focus");
+		if (fb = getFocusedElement())
+			fb.classList.remove("focus");
+		// focus new
+		selected.x = x;
+		selected.y = y;
+		if (fc = getFocusedColumn())
+			fc.classList.add("focus");
+		if (fb = getFocusedElement())
+			fb.classList.add("focus");
+		updateStatus();
+	} else if (e.button == 2) {
+		// spawn context menu
+	}
 }
 
-
+/** @param {MouseEvent} e */
 function _onColumnClick(e, x) {
-	let isCol = e.target.classList.contains("column");
-
-	if (selected.x == x && isCol) {
-		let fb;
-		if (fb = getFocusedElement())
-			getFocusedElement().classList.remove("focus");
-		addBlock();
-		getFocusedElement().classList.add("focus");
+	if (!(mode == 0 || mode == 2) || !e.target.classList.contains("column"))
 		return;
+
+	if (e.button == 0 && selected.x == x)
+		return addBlockUI();
+
+	if (selected.x != x) {
+		let fc; // focused column
+		let fb; // focused block
+		// defocus old
+		if (fc = getFocusedColumn())
+			fc.classList.remove("focus");
+		if (fb = getFocusedElement())
+			fb.classList.remove("focus");
+		// focus new
+		selected.x = x;
+		selected.y = Math.min(selected.y, table[selected.x].length - 1);
+		if (fc = getFocusedColumn())
+			fc.classList.add("focus");
+		updateStatus();
 	}
 
-	if (!isCol || !(mode == 0 || mode == 2))
+	if (e.button == 2) {
+		openContext(e.clientX, e.clientY, [
+			{ name: "add block", hotkey: "a", action: addBlockUI },
+		]);
 		return;
+	}
+}
 
-	let fc; // focused column
-	let fb; // focused block
-	// defocus old
-	if (fc = getFocusedColumn())
-		fc.classList.remove("focus");
+// add block at selected column, remove previous selected element class
+function addBlockUI() {
+	let fb;
 	if (fb = getFocusedElement())
 		fb.classList.remove("focus");
-	// focus new
-	selected.x = x;
-	if (fc = getFocusedColumn())
-		fc.classList.add("focus");
+	addBlock();
+	getFocusedElement().classList.add("focus");
 }
 
 // add block at selected column
@@ -490,13 +508,14 @@ function addBlock() {
 	table[selected.x].splice(selected.y + 1, 0, { v: "", t: [], c: [] });
 	let row = document.createElement("div");
 		row.classList.add("row");
-		row.addEventListener("click", (e) => _onElementClick(e, _x, _y));
+		row.addEventListener("mouseup", (e) => _onElementClick(e, _x, _y));
 
 	elements.columns.children[selected.x]
 		.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
 
-	updateConnections();
-
 	if (!wasEmpty)
 		selected.y++;
+
+	updateConnections();
+	updateStatus();
 }

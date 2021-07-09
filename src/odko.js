@@ -16,6 +16,7 @@ let elements = {
 	consoleWrapper: getElement("console-wrapper"),
 	consoleTitlebar: getElement("console-titlebar"),
 	consoleCanvas: getElement("console-canvas"),
+	contextWrapper: getElement("context-wrapper"),
 	ui: {
 		sidebar: getElement("sidebar"),
 		project: getElement("sidebar-project"),
@@ -81,7 +82,7 @@ function update() {
 	table.forEach((c, x) => {
 		let col = document.createElement("div");
 			col.classList.add("column");
-			col.addEventListener("click", (e) => _onColumnClick(e, x));
+			col.addEventListener("mouseup", (e) => _onColumnClick(e, x));
 			elements.columns.appendChild(col);
 
 		// add rows
@@ -89,7 +90,7 @@ function update() {
 			let row = document.createElement("div");
 				row.classList.add("row");
 				row.innerText = r.v;
-				row.addEventListener("click", (e) => _onElementClick(e, x, y));
+				row.addEventListener("mouseup", (e) => _onElementClick(e, x, y));
 				col.appendChild(row);
 		});
 	});

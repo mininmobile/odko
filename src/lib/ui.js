@@ -1,15 +1,9 @@
-// elements.ui = {
-// 	sidebar: getElement("sidebar"),
-// 	project: getElement("sidebar-project"),
-// 	branches: getElement("sidebar-branches"),
-// }
-
 { // generate sidebar content
 	let ui = elements.ui; // sanity
 
 	createButtons([ // create project buttons
 		// general project management
-		{ name: "new", action: () => {
+		{ name: "new", data: { hotkey: "^n" }, action: () => {
 			if (confirm("this will wipe the project")) {
 				project = { "main": [[]] };
 				currentTable = "main";
@@ -17,9 +11,9 @@
 				update();
 			}
 			} },
-		{ name: "save", action: () =>
+		{ name: "save", data: { hotkey: "^s" }, action: () =>
 			prompt("copy this json:", save()) },
-		{ name: "load", action: () =>
+		{ name: "load", data: { hotkey: "^o" }, action: () =>
 			load(prompt("enter  json:")) },
 		// branch management
 		{ name: "delete branch", data: { hotkey: "^X" }, class: "shortcut", action: () => deleteBranchUI(confirm("this will delete the current branch")) },
@@ -42,6 +36,63 @@
 					button.setAttribute("data-" + attr, btn.data[attr]));
 		});
 	}
+}
+
+// open the  context menu
+function openContext(x, y, items) {
+	let context = elements.contextWrapper;
+	// update items if items are specified
+	if (items !== undefined) {
+		context.innerHTML = "";
+		items.forEach((btn) => {
+			let button = document.createElement("a");
+			button.innerText = btn.name;
+			context.appendChild(button);
+
+			button.addEventListener("click", () => {
+				btn.action();
+				closeContext();
+			});
+
+			if (button.hotkey)
+				button.setAttribute("data-hotkey", btn.hotkey);
+		});
+	}
+	// move if position is specified
+	if (x !== undefined && y !== undefined) {
+		context.style.left = x + "px";
+		context.style.top = y + "px";
+	}
+	// show context menu
+	context.classList.remove("hidden");
+	// enable close events
+	document.onmouseup = (e) => {
+		if (e.clientX == x && e.clientY == y)
+			return;
+
+		e.preventDefault();
+		e.stopPropagation();
+		if (!context.isSameNode(e.target.parentNode))
+			closeContext();
+	}
+	document.onkeydown = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.key == "Escape")
+			closeContext();
+	}
+}
+
+// hide the context menu
+function closeContext(clear = false) {
+	// disable close events
+	document.onmouseup = undefined;
+	document.onkeydown = undefined;
+
+	let context = elements.contextWrapper;
+	if (clear)
+		context.innerHTML = "";
+	context.classList.add("hidden");
 }
 
 // rename the current branch (safety, to be used with ui code)
