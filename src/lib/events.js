@@ -523,8 +523,7 @@ function addBlock() {
 	row.addEventListener("mouseup", (e) => _onElementClick(e, col, row));
 	col.insertBefore(row, col.childNodes[selected.y + 1]);
 
-	if (!wasEmpty)
-		selected.y++;
+	selected.y = wasEmpty ? 0 : selected.y + 1;
 
 	updateConnections();
 	updateStatus();
