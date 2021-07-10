@@ -156,3 +156,8 @@ function ch(x) {
 function getElement(id) {
 	return document.getElementById(id);
 }
+
+// get the child index of a node
+function childIndexOf(node) {
+	return Array.prototype.indexOf.call(node.parentNode.children, node);
+}

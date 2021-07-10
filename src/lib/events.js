@@ -55,19 +55,8 @@ addEventListener("keydown", e => {
 			// add block
 			case "a": addBlock(); break;
 
-			case "A": { // add column
-				let _x = table.length == 0 ? 0 : selected.x + 1;
-				table.splice(selected.x + 1, 0, []);
-				let col = document.createElement("div");
-					col.classList.add("column");
-					col.addEventListener("mouseup", (e) => _onColumnClick(e, _x));
-				elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
-
-				updateConnections();
-
-				selected.x++;
-				selected.y = 0;
-			} break;
+			// add column
+			case "A": addColumn(); break;
 
 			case "x": { // delete block
 				if (table.length == 0) break;
@@ -88,6 +77,9 @@ addEventListener("keydown", e => {
 				updateConnections();
 			} break;
 
+			// delete column
+			case "Delete": deleteColumn(); break;
+
 			case "d": if (_e) { // disconnect left of block
 				table[selected.x][selected.y].c = [];
 				updateConnections();
@@ -96,19 +88,6 @@ addEventListener("keydown", e => {
 			case "D": if (table[selected.x + 1]) { // disconnect right of block
 				table[selected.x + 1]
 					.forEach(r => r.c = r.c.filter(c => c != selected.y));
-
-				updateConnections();
-			} break;
-
-			case "Delete": { // delete column
-				if (table.length == 0) break;
-
-				table.splice(selected.x, 1);
-				elements.columns.removeChild(elements.columns.childNodes[selected.x]);
-
-				// if this row connected to the one behind it, no
-				if (table[selected.x])
-					table[selected.x].forEach(r => r.c = []);
 
 				updateConnections();
 			} break;
@@ -426,10 +405,17 @@ addEventListener("keyup", (e) => {
 	}
 });
 
-/** @param {MouseEvent} e */
-function _onElementClick(e, x, y) {
-	if (!(mode == 0 || mode == 2))
+/**
+ * @param {MouseEvent} e
+ * @param {HTMLElement} col
+ * @param {HTMLElement} row
+*/
+function _onElementClick(e, col, row) {
+	if (!(mode == 0 || mode == 2) || isContextOpen())
 		return;
+
+	let x = childIndexOf(col);
+	let y = childIndexOf(row);
 
 	if (e.button == 0) {
 		let fc; // focused column
@@ -452,10 +438,15 @@ function _onElementClick(e, x, y) {
 	}
 }
 
-/** @param {MouseEvent} e */
-function _onColumnClick(e, x) {
-	if (!(mode == 0 || mode == 2) || !e.target.classList.contains("column"))
+/**
+ * @param {MouseEvent} e
+ * @param {HTMLElement} col
+*/
+function _onColumnClick(e, col) {
+	if (!(mode == 0 || mode == 2) || isContextOpen()|| !e.target.classList.contains("column"))
 		return;
+
+	let x = childIndexOf(col);
 
 	if (e.button == 0 && selected.x == x)
 		return addBlockUI();
@@ -479,6 +470,8 @@ function _onColumnClick(e, x) {
 	if (e.button == 2) {
 		openContext(e.clientX, e.clientY, [
 			{ name: "add block", hotkey: "a", action: addBlockUI },
+			{ name: "add column", hotkey: "A", action: addColumnUI },
+			{ name: "delete column", hotkey: "Del", action: deleteColumnUI },
 		]);
 		return;
 	}
@@ -493,6 +486,26 @@ function addBlockUI() {
 	getFocusedElement().classList.add("focus");
 }
 
+// add column after selected column, remove previous selected col class
+function addColumnUI() {
+	let fc;
+	let fb;
+	if (fc = getFocusedColumn())
+		fc.classList.remove("focus");
+	if (fb = getFocusedElement())
+		fb.classList.remove("focus");
+	addColumn();
+	getFocusedColumn().classList.add("focus");
+}
+
+// delete column, set new selected element class
+function deleteColumnUI() {
+	deleteColumn();
+	let fc;
+	if (fc = getFocusedColumn())
+		fc.classList.add("focus");
+}
+
 // add block at selected column
 function addBlock() {
 	if (table.length == 0) {
@@ -503,18 +516,44 @@ function addBlock() {
 
 	let wasEmpty = table[selected.x].length == 0;
 
-	let _x = selected.x;
-	let _y = table[selected.x].length == 0 ? 0 : selected.y + 1;
+	let col = elements.columns.children[selected.x];
 	table[selected.x].splice(selected.y + 1, 0, { v: "", t: [], c: [] });
 	let row = document.createElement("div");
-		row.classList.add("row");
-		row.addEventListener("mouseup", (e) => _onElementClick(e, _x, _y));
-
-	elements.columns.children[selected.x]
-		.insertBefore(row, elements.columns.children[selected.x].childNodes[selected.y + 1]);
+	row.classList.add("row");
+	row.addEventListener("mouseup", (e) => _onElementClick(e, col, row));
+	col.insertBefore(row, col.childNodes[selected.y + 1]);
 
 	if (!wasEmpty)
 		selected.y++;
+
+	updateConnections();
+	updateStatus();
+}
+
+function addColumn() {
+	table.splice(selected.x + 1, 0, []);
+	let col = document.createElement("div");
+	col.classList.add("column");
+	col.addEventListener("mouseup", (e) => _onColumnClick(e, col));
+	elements.columns.insertBefore(col, elements.columns.childNodes[selected.x + 1]);
+
+	selected.x++;
+	selected.y = 0;
+
+	updateConnections();
+	updateStatus();
+}
+
+function deleteColumn() {
+	if (table.length == 0)
+		return;
+
+	table.splice(selected.x, 1);
+	elements.columns.removeChild(elements.columns.childNodes[selected.x]);
+
+	// if this row connected to the one behind it, no
+	if (table[selected.x])
+		table[selected.x].forEach(r => r.c = []);
 
 	updateConnections();
 	updateStatus();

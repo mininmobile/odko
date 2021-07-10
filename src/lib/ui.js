@@ -38,24 +38,24 @@
 	}
 }
 
-// open the  context menu
+// open the context menu
 function openContext(x, y, items) {
 	let context = elements.contextWrapper;
 	// update items if items are specified
 	if (items !== undefined) {
 		context.innerHTML = "";
-		items.forEach((btn) => {
+		items.forEach((item) => {
 			let button = document.createElement("a");
-			button.innerText = btn.name;
+			button.innerText = item.name;
 			context.appendChild(button);
 
 			button.addEventListener("click", () => {
-				btn.action();
+				item.action();
 				closeContext();
 			});
 
-			if (button.hotkey)
-				button.setAttribute("data-hotkey", btn.hotkey);
+			if (item.hotkey)
+				button.setAttribute("data-hotkey", item.hotkey);
 		});
 	}
 	// move if position is specified

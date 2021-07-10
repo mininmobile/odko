@@ -79,18 +79,18 @@ function update() {
 	// reset columns element
 	columns.innerHTML = "";
 	// add columns
-	table.forEach((c, x) => {
+	table.forEach((c) => {
 		let col = document.createElement("div");
 			col.classList.add("column");
-			col.addEventListener("mouseup", (e) => _onColumnClick(e, x));
+			col.addEventListener("mouseup", (e) => _onColumnClick(e, col));
 			elements.columns.appendChild(col);
 
 		// add rows
-		c.forEach((r, y) => {
+		c.forEach((r) => {
 			let row = document.createElement("div");
 				row.classList.add("row");
 				row.innerText = r.v;
-				row.addEventListener("mouseup", (e) => _onElementClick(e, x, y));
+				row.addEventListener("mouseup", (e) => _onElementClick(e, col, row));
 				col.appendChild(row);
 		});
 	});
@@ -329,6 +329,11 @@ function getFocusedColumn() {
 		return columns.children[selected.x];
 
 	return false;
+}
+
+// check if context menu is open
+function isContextOpen() {
+	return !elements.contextWrapper.classList.contains("hidden");
 }
 
 // rename current branch (no safety)

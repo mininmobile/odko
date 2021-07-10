@@ -58,6 +58,7 @@ svg {
 }
 
 /* sidebar */
+/* TODO: make this more consise */
 
 .sidebar {
 	width: calc(280px - 1.5rem);
@@ -87,6 +88,9 @@ svg {
 	text-transform: uppercase;
 	margin-bottom: .75rem;
 }
+
+/* sidebar/ project */
+
 .sidebar .section.project::before { content: "project"; }
 
 .sidebar .section a {
@@ -107,6 +111,8 @@ svg {
 	background: #dddddd;
 	color: black;
 }
+
+/* sidebar/ branches */
 
 .sidebar .section.branches::before { content: "branches"; }
 
@@ -134,18 +140,24 @@ svg {
 }
 
 .sidebar a[data-hotkey]:hover::after {
-	color: #000000;
 	background: #dddddd;
+	color: #000000;
 	padding: 0 .5rem;
 	display: block;
 	border: 1px solid #dddddd;
+	border-left: none;
 	right: calc(-1ch + -1.25rem + -1px);
 	top: -1px;
 	z-index: 999;
 	opacity: 1;
 }
 
-.sidebar a[data-index]:hover::after {
+.sidebar a[data-hotkey]:hover:active::after {
+	background: #000000;
+	color: #dddddd;
+}
+
+.sidebar a[data-index]:hover:not(:active)::after {
 	color: #000000;
 	opacity: 1;
 }
@@ -311,8 +323,27 @@ svg {
 /* context menu */
 
 .context.wrapper {
+	width: 200px;
 	background: #000000;
 	color: #dddddd;
 	border: 1px solid #dddddd;
+	position: fixed;
+}
+
+.context.wrapper a {
+	padding: 0 .5rem;
+	display: block;
+	position: relative;
+}
+
+.context.wrapper a:hover:not(:active) {
+	background: #dddddd;
+	color: #000000;
+}
+
+.context.wrapper a[data-hotkey]::after {
+	content: attr(data-hotkey);
 	position: absolute;
+	right: .5rem;
+	opacity: .5;
 }
